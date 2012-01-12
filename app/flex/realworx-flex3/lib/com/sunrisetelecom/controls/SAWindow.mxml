@@ -1,0 +1,823 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="initapp()" implements="com.sunrisetelecom.controls.IMeasWindow">
+<mx:Style>
+	.customStyle {
+
+	  fontSize:12;
+	}
+</mx:Style>
+ <mx:Script>
+ 	<![CDATA[
+ 		import com.sunrisetelecom.events.BusyEvent;
+ 		import mx.formatters.NumberBase;
+     	import mx.styles.StyleManager;
+ 		import com.sunrisetelecom.avantron.SettingsObj;
+ 		import mx.core.Application;
+ 		public var xmargin:Number=30;
+ 		public var ymargin:Number=15;
+ 		public var settings:SettingsObj;
+ 		public var image_buffer:Array=[];
+ 		public var trace2:Array=[];
+ 		private var vscale_const:Number=0;
+ 		private var vscale_mul:Number=0;
+ 		private var hscale_mul:Number=0;
+
+ 		private var clipper:Shape = new Shape();
+ 		[Bindable] public var text_color:uint;
+ 		[Bindable] public var grid_color:uint;
+ 		[Bindable] public var trace_color:uint;
+ 		[Bindable] public var trace2_color:uint;
+ 		[Bindable] public var threshold_color:uint;
+ 		[Bindable] public var marker_color:uint;
+ 		[Bindable] public var graph_bkg_color:uint;
+ 		// Markers
+ 		private var vmark1_xpct:Number=0;
+ 		private var vmark2_xpct:Number=0;
+ 		private var hmark1_ypct:Number=0;
+ 		private var hmark2_ypct:Number=0;
+
+		public function initapp():void
+		{
+			update_colors();
+
+		}
+		  public function reset_display_values():void
+		  {
+		  	
+		  }
+		  public function update_settings(settings:SettingsObj):void
+		  {
+ 			sa_cen_freq.text=(settings["CENTER_FREQ"]/1000000.0).toString();
+ 			sa_span.text=(settings["SPAN"]/1000000.0).toString();
+ 			sa_att.selectedIndex=find_index(settings["ATT"],db_array);
+ 			ref_level.value=Number(settings["ATT"]);
+ 			this.settings=settings;
+                        zero_sel.selectedIndex=find_index(settings["ZERO_SPAN"],zero_array);
+                        resol_bwd_sel.selectedIndex=find_index(settings["RBW"],resol_bwd_array);
+                        sweep_bwd_sel.selectedIndex=find_index(settings["SWEEP"],sweep_bwd_array);
+                        trigger_type_sel.selectedIndex=find_index(settings["TRIGGER_TYPE"],trigger_type_array);
+                        vbw_sel.selectedIndex=find_index(settings["VBW"],vbw_array);
+
+ 			
+
+		  }
+		  public function generate_clipper():void
+		  {
+		  	clipper.graphics.beginFill(0xFFFFFF);
+		  	clipper.graphics.drawRect(xmargin,ymargin,traceImage.height-xmargin*2,traceImage.height-ymargin*2);
+		  	clipper.graphics.endFill();
+		  	traceCanvas.addChild(clipper);
+		  }
+		  private function find_index(dataval:String,data:ArrayCollection):int
+ 		  {
+ 			var index:int=-1;
+ 			for (index=0;index < data.length;index ++)
+ 			{
+ 				if (data[index].data == dataval)
+ 				{
+ 					return index;
+ 				}
+ 			}
+ 			return -1;
+ 		  }
+ 		  private function calc_vscale_mul():void
+ 		  {
+		    var display_height:Number=traceImage.height;
+		    var draw_height:Number=display_height-2*ymargin;
+
+ 		  	vscale_mul= draw_height/(7*Number(vert_scale_cmb.value));
+ 		  }
+ 		  private function calc_hscale_mul():void
+ 		  {
+ 		  	var draw_width:Number=traceImage.width-2*xmargin;
+ 		  	hscale_mul=draw_width/500.0;
+
+ 		  }
+ 		  private function calc_vscale_const():void
+ 		  {
+ 		  	vscale_const= (Number(ref_level.value)-Number(sa_att.value))+70;
+ 		  }
+ 		  private function v_scale_limit(val:uint):uint
+ 		  {
+		    var display_height:Number=traceImage.height;
+		    var draw_height:Number=display_height-ymargin; 		  	
+	//We bottom out the values when it goes over the edge.
+	       var result:Number=val;
+		   if (result < ymargin) {result=ymargin};
+		    if (result > draw_height) {result=draw_height};
+		    return result; 		  }
+ 		  private function v_scale(db:Number):int
+		  {
+
+		    var result:Number=ymargin+
+		      (vscale_const-db)* vscale_mul;
+		    return v_scale_limit(result);
+		        
+
+		  }
+		  private function h_scale(pos:Number):int
+		  {
+		    return (xmargin+pos*hscale_mul);
+		  }
+		  private function rev_h_scale(x:Number):void
+		  {
+		  	var display_width:Number=traceImage.width;
+		  	var draw_width:Number=display_width-2*xmargin;
+		  }
+		  private function move_marker(click:MouseEvent):void
+		  {
+		  	var x:Number=click.localX;
+		  	var y:Number=click.localY;
+		    if ( x<xmargin){x=xmargin}
+		    if ( y<ymargin) {y=ymargin}
+		    if ( x> traceImage.width-xmargin){x=traceImage.width-xmargin}
+		    if ( y> traceImage.height-ymargin){y=traceImage.width-ymargin}
+		    
+		    var draw_height:Number=traceImage.height-2*ymargin;
+		    var draw_width:Number=traceImage.width-2*xmargin;
+		    var adj_x:Number=(x-xmargin)/draw_width;
+		    var adj_y:Number=(y-ymargin)/draw_height;
+		    if (hmark1_sel.selected)
+		    {
+		       hmark1_ypct=adj_y;
+		    }
+		    if (hmark2_sel.selected)
+		    {
+		  	hmark2_ypct=adj_y;
+		    }
+		    if (vmark1_sel.selected)
+		    {
+		  	vmark1_xpct=adj_x;
+                        update_marker_freqs();
+		    }
+		    if (vmark2_sel.selected)
+		    {
+		  	vmark2_xpct=adj_x;
+                        update_marker_freqs();
+		    }		
+		  }
+		  public function draw_markers():void
+		  {
+		  	
+		    var draw_height:Number=traceImage.height-2*ymargin;
+		    var draw_width:Number=traceImage.width-2*xmargin;
+		  	var x:Number=0;
+		  	var y:Number=0;
+		  	var cenfreq:Number=Number(settings["CENTER_FREQ"])/1000000.0;
+		  	var span:Number=Number(settings["SPAN"])/1000000.0;
+		  	var startfreq:Number=cenfreq-span/2.0;	
+		  	traceImage.graphics.lineStyle(0,marker_color,1);
+		  	var calc_val:Number=0;
+		  	if (hmark1_vis.selected)
+		  	{
+		  		y=hmark1_ypct*draw_height+ymargin;
+		  		traceImage.graphics.moveTo(xmargin,y);
+		  		traceImage.graphics.lineTo(draw_width+xmargin,y);	
+		  	}
+		  	if (hmark2_vis.selected)
+		  	{
+		  		y=hmark2_ypct*draw_height+ymargin;
+		  		traceImage.graphics.moveTo(xmargin,y);
+		  		traceImage.graphics.lineTo(draw_width+xmargin,y);
+		  	}
+		  	if (vmark1_vis.selected)
+		  	{
+		  		x=vmark1_xpct*draw_width+xmargin;
+		  		traceImage.graphics.moveTo(x,ymargin);
+		  		traceImage.graphics.lineTo(x,draw_height+ymargin);
+
+		  	}
+		  	if (vmark2_vis.selected)
+		  	{
+		  		x=vmark2_xpct*draw_width+xmargin;
+		  		traceImage.graphics.moveTo(x,ymargin);
+		  		traceImage.graphics.lineTo(x,draw_height+ymargin);
+		  	}		
+	  	
+		  }
+		  private function freq_entry():void
+		  {
+                    var freq1:Number;
+                    var freq2:Number;
+		    var cenfreq:Number=Number(settings["CENTER_FREQ"]);
+		    var span:Number=Number(settings["SPAN"]);
+		    var startfreq:Number=cenfreq-span/2;
+		    var stopfreq:Number=cenfreq+span/2;
+                    freq1=Number(vmark1_freq.text)*1000000.0;
+                    freq2=Number(vmark2_freq.text)*1000000.0;
+                    if (startfreq > freq1)
+                    {
+                      vmark1_xpct=0;
+                    }
+                    else if (stopfreq < freq1)
+                    {
+                      vmark1_xpct=100;
+                    }
+                    else
+                    {
+                       vmark1_xpct=(freq1-startfreq)/span;
+                    }
+                    if (startfreq > freq2)
+                    {
+                      vmark2_xpct=0;
+                    }
+                    else if (stopfreq < freq2)
+                    {
+                      vmark2_xpct=100;
+                    }
+                    else
+                    {
+                       vmark2_xpct=(freq2-startfreq)/span;
+                    }
+                    update_marker_freqs();
+                     
+		  }
+                  private function update_marker_freqs_wrapper(event:Event):void
+                  {
+                     update_marker_freqs();
+                  }
+                  private function update_marker_freqs():void
+                  {
+                    var tmp:Number;
+                    var calc_val:Number;
+                    var pos:uint;           
+		    var cenfreq:Number=Number(settings["CENTER_FREQ"])/1000000.0;
+		    var span:Number=Number(settings["SPAN"])/1000000.0;
+		    var startfreq:Number=cenfreq-span/2.0;	
+                    if (vmark1_vis.selected)
+                    {
+                       tmp=span*vmark1_xpct;
+                       pos=uint(vmark1_xpct*500)
+                       calc_val=span*vmark1_xpct+startfreq;
+                       vmark1_freq.text=calc_val.toFixed(3);
+                    }
+                    else
+                    {
+                       vmark1_freq.text="";
+                    }
+                    if (vmark2_vis.selected)
+                    {
+                       tmp=span*vmark2_xpct;
+                       pos=uint(vmark2_xpct*500)
+                       calc_val=span*vmark2_xpct+startfreq;
+                       vmark2_freq.text=calc_val.toFixed(3);
+                    }
+                    else
+                    {
+                       vmark2_freq.text="";
+                    }
+ 
+                  }
+		  private function displayDb(db:Number):Number
+		  {
+		  	return Number((db-70+ref_level.value+ref_offset.value));
+		  }
+		  public function draw_grid(dataset:Object):void
+		  {
+		  	var draw_width:Number=traceImage.width-2*xmargin;
+		    var draw_height:Number=traceImage.height-2*ymargin;
+			traceImage.graphics.lineStyle(0,grid_color,1);
+		  	traceImage.graphics.drawRect(xmargin,ymargin,draw_width,draw_height);
+			var j:Number=xmargin;
+			var labels:Array=[lbl0,lbl1,lbl2,lbl3,lbl4,lbl5,lbl6,lbl7];
+			lbl0.text=(ref_level.value+ref_offset.value).toString();
+			lbl0.y=ymargin-lbl0.height/2;
+			lbl0.setStyle("color",text_color);
+			var freqlabels:Array=[freqlbl0,freqlbl1,freqlbl2,freqlbl3,freqlbl4,freqlbl5,freqlbl6,
+			   freqlbl7,freqlbl8,freqlbl9,freqlbl10];
+			lbl0.text=(ref_level.value+ref_offset.value).toString();
+			lbl0.y=traceImage.height-lbl0.height/2;
+			lbl0.setStyle("color",text_color);
+                        if (settings== null)
+                        {
+                           return;
+                        }
+		  	var cenfreq:Number=Number(settings["CENTER_FREQ"])/1000000.0;
+		  	var span:Number=Number(settings["SPAN"])/1000000.0;
+		  	var startfreq:Number=cenfreq-span/2.0;	
+		  	var calc_val:Number=0.0;
+			if (hmark1_vis.selected)
+			{
+
+		  		calc_val=-70*hmark1_ypct+ref_level.value+ref_offset.value;
+		  		hmark1_lvl.text=calc_val.toFixed(2);
+		 	}
+		 	else
+		 	{
+		 		hmark1_lvl.text="";
+
+		 	}
+			if (hmark2_vis.selected)
+			{
+
+		  		calc_val=-70*hmark2_ypct+ref_level.value+ref_offset.value;
+		  		hmark2_lvl.text=calc_val.toFixed(2);
+		 	}
+		 	else
+		 	{
+		 		hmark2_lvl.text="";
+
+		 	}	
+		 	var tmp:Number;
+		 	var pos:uint;		
+		 	if (vmark1_vis.selected)
+			{
+				tmp=span*vmark1_xpct;
+				pos=uint(vmark1_xpct*500)
+		  		vmark1_lvl.text=displayDb(dataset[pos]).toFixed(2);
+		  		if (trace2.length > 0)
+		  		{
+		  		  vmark1_peaklvl.text=displayDb(trace2[pos]).toFixed(2);
+		  		}
+		  		else
+		  		{
+		  		  vmark1_peaklvl.text="";
+		  		}
+		 	}
+		 	else
+		 	{
+		 		vmark1_lvl.text="";
+		 		vmark1_peaklvl.text="";
+		 	}
+			if (vmark2_vis.selected)
+			{
+				tmp=span*vmark2_xpct;
+				pos=uint(vmark2_xpct*500)
+		  		vmark2_lvl.text=displayDb(dataset[pos]).toFixed(2);
+		  		vmark2_peaklvl.text=displayDb(trace2[pos]).toFixed(2);
+		  		if (trace2.length > 0)
+		  		{
+			  		vmark2_peaklvl.text=displayDb(trace2[pos]).toFixed(2);
+		  		}
+		  		else
+		  		{
+		  			vmark2_peaklvl.text="";
+		  		}
+
+	
+		 	}
+		 	else
+		 	{
+		 		vmark2_freq.text="";
+		 		vmark2_lvl.text="";
+		 		vmark2_peaklvl.text="";
+		 	}
+		 	
+		  		if (vmark2_vis.selected && vmark1_vis.selected)//If both Vmarks are selected then calc diffs.
+		  		{
+		  			freq_diff.text=((Number(vmark1_freq.text)-Number(vmark2_freq.text))).toFixed(2);
+		  			lvl_diff.text=((Number(vmark1_lvl.text)-Number(vmark2_lvl.text))).toFixed(2);
+					if (trace2.length > 0)
+					{
+		  			  peak_diff.text=((Number(vmark1_peaklvl.text)-Number(vmark2_peaklvl.text))).toFixed(2);
+		  			}
+		  			else
+		  			{
+		  				peak_diff.text="";
+		  			}
+		  		}
+		  		else
+		  		{
+		  			freq_diff.text="";
+		  			lvl_diff.text="";
+		  			peak_diff.text="";
+		  		}
+		  		if (hmark1_vis.selected && hmark2_vis.selected)
+		  		{
+		  			hmark_diff.text=(Number(hmark1_lvl.text)-Number(hmark2_lvl.text)).toFixed(2);
+		  		}
+		  		else
+		  		{
+		  			hmark_diff.text="";
+		  		}
+		  	for (var i:Number=0;i<=7;i++)
+		  	{
+		  		traceImage.graphics.moveTo(xmargin,draw_height/7.0*i+ymargin);
+		  		traceImage.graphics.lineTo(xmargin+draw_width,draw_height/7.0*i+ymargin);
+		  		var dbval:Number=ref_level.value+ref_offset.value-i*Number(vert_scale_cmb.value);
+		  		labels[i].text=dbval.toString();
+		  		labels[i].y=draw_height/7.0*i+ymargin-labels[i].height/2;
+				//labels[i-1].color=text_color;
+				labels[i].setStyle("color",text_color);
+		  	}
+
+		  	var span_iter:Number=span/10.0
+		  	for (i=0;i<=10;i++)
+		  	{		
+		  		freqlabels[i].text=(startfreq+span_iter*i).toString();
+				freqlabels[i].x=xmargin+draw_width/10.0*i-freqlabels[i].width/2;
+				freqlabels[i].setStyle("color",text_color);
+				freqlabels[i].y=traceImage.height-ymargin+2;
+		  		traceImage.graphics.moveTo(xmargin+draw_width/10.0*i,ymargin);
+		  		traceImage.graphics.lineTo(xmargin+draw_width/10.0*i,draw_height+ymargin);
+		  		var freq:Number=(cenfreq+span_iter*Number(i-5));
+		  		freqlabels[i].text=freq.toFixed(3);
+		  	}
+		  }
+		  public function update_colors():void
+		  {
+		  	 var myDynStyle:CSSStyleDeclaration =
+      			StyleManager.getStyleDeclaration(".customStyle");
+
+		  	myDynStyle.setStyle('color', text_color);
+		  }
+
+		  public function display_trace(image_buffer:Object):void
+		  {
+		    var i:int;
+		    //myDynStyle = new CSSStyleDeclaration('customStyle');
+			//myDynStyle.setStyle('color', text_color);
+			this.image_buffer=image_buffer as Array;
+		    traceImage.graphics.clear();
+		    calc_vscale_const();
+		    calc_vscale_mul();
+		    calc_hscale_mul();
+		    draw_grid(image_buffer);
+		    draw_markers();
+		    traceImage.graphics.lineStyle(0,trace_color,1);
+			//dispatchEvent(new BusyEvent(BusyEvent.STOP_BUSY));
+		    if (image_buffer.length == 0)
+		    {
+		      return;
+		    }
+		    var x:Number=h_scale(0);
+		    var y:Number=v_scale(image_buffer[0]);
+		    if (peak_sel.selected || expsmooth_sel.selected)
+		    {
+		       var x2:Number=h_scale(0);
+		       var y2:Number=v_scale(image_buffer[0]);
+		    }
+		    traceImage.graphics.moveTo(x,y);
+		    for (i=0;i<500;i++)
+		    {
+		      traceImage.graphics.lineStyle(0,trace_color,1);
+		      traceImage.graphics.moveTo(x,y);
+		      x=h_scale(i);
+		      y=v_scale(image_buffer[i]);
+			  traceImage.graphics.lineTo(x,y);
+			  if (expsmooth_sel.selected || peak_sel.selected)
+			  {
+			  	
+			  	traceImage.graphics.moveTo(x2,y2)
+			    if (expsmooth_sel.selected)
+			    {
+			  		trace2[i]=Number(smooth_val.value) *trace2[i]+
+		      		   (1-Number(smooth_val.value))*image_buffer[i];
+			    }
+			    else
+			    {
+			  		trace2[i]=(image_buffer[i]>trace2[i]) ? image_buffer[i] : trace2[i];
+			    }
+			    x2=h_scale(i);
+			    y2=v_scale(trace2[i]);
+		        traceImage.graphics.lineStyle(0,trace2_color,1);
+			    traceImage.graphics.lineTo(x2,y2);
+			  }
+		    }
+
+
+		  }
+		  private function channel_chg():void
+		  {
+			var settings:SettingsObj=Application.application.settings;
+			var set_settings:Boolean=false;
+			reset_display_values();
+			submit_btn.enabled=false;
+			if (Number(sa_cen_freq.text)!= Number(settings["CENTER_FREQ"])/1000000.0)
+			{
+				Application.application.settings["CENTER_FREQ"]=Number(sa_cen_freq.text)*1000000;
+				set_settings=true;			
+			}
+			if (Number(sa_span.text)!= Number(settings["SPAN"])/1000000.0)
+			{
+				Application.application.settings["SPAN"]=Number(sa_span.text)*1000000;
+				set_settings=true;			
+			}
+			if (Number(sa_att.text)!= Number(settings["ATT"]))
+			{
+				Application.application.settings["ATT"]=Number(sa_att.selectedItem.data);
+				set_settings=true;			
+			}
+			if (Number(zero_sel.text)!= Number(settings["ZERO_SPAN"]))
+			{
+				Application.application.settings["ZERO_SPAN"]=Number(zero_sel.selectedItem.data);
+				set_settings=true;			
+			}
+			if (Number(resol_bwd_sel.text)!= Number(settings["RBW"]))
+			{
+				Application.application.settings["RBW"]=Number(resol_bwd_sel.selectedItem.data);
+				set_settings=true;			
+			}
+			if (Number(sweep_bwd_sel.text)!= Number(settings["SWEEP"]))
+			{
+				Application.application.settings["SWEEP"]=Number(sweep_bwd_sel.selectedItem.data);
+				set_settings=true;			
+			}
+			if (Number(vbw_sel.text)!= Number(settings["VBW"]))
+			{
+				Application.application.settings["VBW"]=Number(vbw_sel.selectedItem.data);
+				set_settings=true;			
+			}
+			if (Number(trigger_type_sel.text)!= Number(settings["TRIGGER_TYPE"]))
+			{
+				Application.application.settings["TRIGGER_TYPE"]=Number(trigger_type_sel.selectedItem.data);
+				set_settings=true;			
+			}
+			if (set_settings)
+			{
+				Application.application.set_settings(15,settings);
+				reset_display_values();
+				dispatchEvent(new BusyEvent(BusyEvent.START_BUSY,"Updating Settings on Analyzer"));
+			}
+			
+		  }
+ 	]]>
+ </mx:Script>
+     <mx:Metadata>
+        [Event(name="startBusy", type="BusyEvent")]
+    </mx:Metadata>
+    <mx:Metadata>
+        [Event(name="stopBusy", type="BusyEvent")]
+    </mx:Metadata>
+
+	      
+	      <mx:HBox width="100%">
+	        <mx:Button id="freq_btn" label="Freq" toggle="true"/>
+	        <mx:Button id="span_btn" label="Span" toggle="true"/>
+	        <mx:Button id="mark_btn" label="Mark" toggle="true"/>
+	        <mx:Button id="trace_btn" label="Trace" toggle="true"/>
+	      </mx:HBox>
+	      <mx:HBox visible="{freq_btn.selected}" height="{freq_btn.selected ? 25:0}" defaultButton="{submit_btn}">
+	       <mx:Label text="Freq"  styleName="customStyle"/>
+	      	<mx:TextInput id="sa_cen_freq" change="{submit_btn.enabled=true;}" text="Frequency" width="40" fontSize="8" />
+
+	       <mx:Label text="Atten." styleName="customStyle"/>
+	       <mx:ComboBox  id="sa_att" change="{channel_chg();}" width="60" fontSize="8" >
+	       <mx:ArrayCollection id="db_array">
+	       <mx:Object label="0dB" data="0"/>
+	       	<mx:Object label="5dB" data="5"/>
+	       	<mx:Object label="10dB" data="10"/>
+	       	<mx:Object label="15dB" data="15"/>
+	       	<mx:Object label="20dB" data="20"/>
+	       	<mx:Object label="25dB" data="25"/>
+	       	<mx:Object label="30dB" data="30"/>
+	       	<mx:Object label="35dB" data="35"/>
+	       	<mx:Object label="40dB" data="40"/>
+	       	<mx:Object label="45dB" data="45"/>
+	       	<mx:Object label="50dB" data="50"/>
+	       	<mx:Object label="55dB" data="55"/>
+	       	<mx:Object label="60dB" data="60"/>
+	       	<mx:Object label="65dB" data="65"/>
+	       </mx:ArrayCollection>
+	       </mx:ComboBox>
+	       <mx:Label text="Ref Level" styleName="customStyle"/>
+	       <mx:NumericStepper id="ref_level" change="{submit_btn.enabled=true;}" minimum="-10" maximum="75" width="40" fontSize="8"/>
+	       <mx:Label text="Vert Scale" styleName="customStyle"/>
+	       <mx:ComboBox id="vert_scale_cmb" change="{submit_btn.enabled=true;}" selectedIndex="2" width="85" fontSize="8">
+	       <mx:ArrayCollection>       	
+	       	<mx:Object label="2  dB/Div" data="2"/>
+	       	<mx:Object label="5  dB/Div" data="5"/>
+	       	<mx:Object label="10 dB/Div" data="10"/>
+	       </mx:ArrayCollection>
+	       </mx:ComboBox>
+	       <mx:Label text="Ref Offset" styleName="customStyle" />
+	       <mx:NumericStepper id="ref_offset" maximum="40" minimum="-40" change="{submit_btn.enabled=true;}" width="40" fontSize="8"/>
+	      <mx:Button fontSize="8" id="submit_btn" change="{submit_btn.enabled=true;}" enabled="false" label="Change Settings" click="channel_chg()"/>
+	      </mx:HBox>
+	      <mx:HBox visible="{span_btn.selected}" height="{span_btn.selected ? 25:0}" defaultButton="{submit_btn}">
+	       <mx:Label text="Span"  styleName="customStyle"/>
+	       <mx:TextInput id="sa_span" change="{submit_btn.enabled=true;}" text="Span" width="40" fontSize="8" />
+	       <mx:Label text="Zero Span" styleName="customStyle"/>
+	       <mx:ComboBox  id="zero_sel" change="{channel_chg();}" width="70" fontSize="8" >
+	       <mx:ArrayCollection id="zero_array">
+	       <mx:Object label="LOG" data="0"/>
+	       	<mx:Object label="AM" data="1"/>
+	       	<mx:Object label="FM" data="2"/>
+	       </mx:ArrayCollection>
+	       </mx:ComboBox>
+
+	       <mx:Label text="RBW" styleName="customStyle"/>
+	       <mx:ComboBox  id="resol_bwd_sel" change="{channel_chg();}" width="90" fontSize="8" >
+	       <mx:ArrayCollection id="resol_bwd_array">
+	        <mx:Object label="10 kHz"     data="10000.0"/>
+	       	<mx:Object label="30 kHz"     data="30000.0"/>
+	       	<mx:Object label="300 kHZ"   data="300000.0"/>
+	       	<mx:Object label="1000 kHZ" data="1000000.0"/>
+	       </mx:ArrayCollection>
+	       </mx:ComboBox>
+
+	       <mx:Label text="Sweep" styleName="customStyle"/>
+	       <mx:ComboBox  id="sweep_bwd_sel" change="{channel_chg();}" width="90" fontSize="8" >
+	       <mx:ArrayCollection id="sweep_bwd_array">
+	        <mx:Object label="2 ms"     data="2"/>
+	        <mx:Object label="4 ms"     data="4"/>
+	        <mx:Object label="10 ms"     data="10"/>
+	        <mx:Object label="20 ms"     data="20"/>
+	       	<mx:Object label="50 ms"     data="50"/>
+	       	<mx:Object label="100 ms"   data="100"/>
+	       	<mx:Object label="200 ms"  data="200"/>
+	       	<mx:Object label="500 ms"  data="500"/>
+	       	<mx:Object label="1000 ms" data="1000"/>
+	       	<mx:Object label="2000 ms" data="2000"/>
+	       	<mx:Object label="5000 ms" data="5000"/>
+	       </mx:ArrayCollection>
+	       </mx:ComboBox>
+
+	       <mx:Label text="VBW" styleName="customStyle"/>
+	       <mx:ComboBox  id="vbw_sel" change="{channel_chg();}" width="80" fontSize="8" >
+	       <mx:ArrayCollection id="vbw_array">
+	        <mx:Object label="10 KHz"     data="10000"/>
+	        <mx:Object label="100 KHz"     data="100000"/>
+	        <mx:Object label="1 MHz"    data="1000000"/>
+	       </mx:ArrayCollection>
+	       </mx:ComboBox>
+
+	       <mx:Label text="Trigger Type" styleName="customStyle"/>
+	       <mx:ComboBox  id="trigger_type_sel" change="{channel_chg();}" width="110" fontSize="8" >
+	       <mx:ArrayCollection id="trigger_type_array">
+	        <mx:Object label="Free Running"     data="0"/>
+	        <mx:Object label="Line Trigger"     data="1"/>
+	        <mx:Object label="Video Trigger"     data="2"/>
+	       </mx:ArrayCollection>
+	       </mx:ComboBox>
+
+	      </mx:HBox>
+	      <mx:HBox visible="{trace_btn.selected}" height="{trace_btn.selected ? 25:0}">
+	       <mx:Label text="Trace Type:"  styleName="customStyle"/>
+	       <mx:RadioButton id="none_sel" groupName="trace_type" selected="true"/>
+	       <mx:Label text="None" styleName="customStyle"/>
+	       <mx:RadioButton id="peak_sel" groupName="trace_type" click="trace2=image_buffer"/>
+	       <mx:Label text="Peak" styleName="customStyle"/>
+	       <mx:RadioButton id="expsmooth_sel" groupName="trace_type" click="trace2=image_buffer" />
+	       <mx:Label text="Smooth" styleName="customStyle" />
+			<mx:ComboBox id="smooth_val" enabled="{expsmooth_sel.selected}">
+				<mx:ArrayCollection>
+					<mx:Object label="10%" data="0.1"/>
+					<mx:Object label="15%" data="0.15"/>
+					<mx:Object label="20%" data="0.20"/>
+					<mx:Object label="25%" data="0.25"/>
+					<mx:Object label="30%" data="0.30"/>
+					<mx:Object label="35%" data="0.35"/>
+					<mx:Object label="40%" data="0.40"/>
+					<mx:Object label="45%" data="0.45"/>
+					<mx:Object label="50%" data="0.50"/>
+				</mx:ArrayCollection>
+			</mx:ComboBox>
+		  </mx:HBox>
+	      <mx:VDividedBox  height="100%"  width="100%" clipContent="true">
+
+	       <mx:Canvas id="traceCanvas" clipContent="true" backgroundColor="{graph_bkg_color}" height="50%" width="100%" click="move_marker(event)" verticalScrollPolicy="off">
+	          <mx:Image id="traceImage" x="0" y="0" height="100%" width="100%" scaleContent="true"/>
+              <mx:Label id="lbl0" text="" x="0" y="0"/>
+              <mx:Label id="lbl1" text="" x="0" y="20"/>
+              <mx:Label id="lbl2" text="" x="0" y="40"/>
+              <mx:Label id="lbl3" text="" x="0" y="60"/>
+              <mx:Label id="lbl4" text="" x="0" y="80"/>
+              <mx:Label id="lbl5" text="" x="0" y="100"/>
+              <mx:Label id="lbl6" text="" x="0" y="120"/>
+              <mx:Label id="lbl7" text="" x="0" y="140"/>
+              <mx:Label id="freqlbl0" text="" y="0" x="0"/>
+              <mx:Label id="freqlbl1" text="" y="0" x="20"/>
+              <mx:Label id="freqlbl2" text="" y="0" x="40"/>
+              <mx:Label id="freqlbl3" text="" y="0" x="60"/>
+              <mx:Label id="freqlbl4" text="" y="0" x="80"/>
+              <mx:Label id="freqlbl5" text="" y="0" x="100"/>
+              <mx:Label id="freqlbl6" text="" y="0" x="120"/>
+              <mx:Label id="freqlbl7" text="" y="0" x="140"/>
+              <mx:Label id="freqlbl8" text="" y="0" x="160"/>
+              <mx:Label id="freqlbl9" text="" y="0" x="180"/>
+              <mx:Label id="freqlbl10" text="" y="0" x="200"/>
+		</mx:Canvas>
+	      </mx:VDividedBox>
+<mx:Grid  height="{mark_btn.selected ? 100:0}"  width="100%" styleName="customStyle" verticalScrollPolicy="off" defaultButton="{marker_chg_btn}">
+  <mx:GridRow>
+  	<mx:GridItem styleName="customStyle">
+  		<!-- Blank Space-->
+  	</mx:GridItem>
+  	<mx:GridItem styleName="customStyle">
+  		<mx:Label text="Frequency" styleName="customStyle"/>
+  	</mx:GridItem>
+  	<mx:GridItem styleName="customStyle" width="55">
+  		<mx:Label text="Level" styleName="customStyle"/>
+  	</mx:GridItem>
+  	<mx:GridItem styleName="customStyle" width="55">
+  		<mx:Label text="Peak" styleName="customStyle"/>
+  	</mx:GridItem>
+  	<mx:GridItem styleName="customStyle">
+  		<!-- Blank Space -->
+  	</mx:GridItem>
+  	<mx:GridItem styleName="customStyle">
+  		<mx:Label text="Freq. Span" styleName="customStyle"/>
+  	</mx:GridItem>
+  </mx:GridRow>
+    <mx:GridRow>
+  	<mx:GridItem>
+  		<mx:HBox>
+  			<mx:CheckBox styleName="customStyle" id="vmark1_vis" buttonDown="update_marker_freqs_wrapper(event)"/>
+  			<mx:Label text="Vert. Mark1" styleName="customStyle"/>
+  			<mx:RadioButton styleName="customStyle" id="vmark1_sel" click="vmark1_vis.selected=true;update_marker_freqs_wrapper(event)" groupName="mark_selected"/>
+  		</mx:HBox>
+  	</mx:GridItem>
+  	<mx:GridItem>
+  		<mx:HBox>
+  			<mx:TextInput id="vmark1_freq" text=""  width="70" backgroundAlpha="0" borderThickness="0" borderStyle="none"
+                                           click="vmark1_vis.selected=true;vmark1_sel.selected=true;"/>
+  			<!--<mx:Label id="vmark1_freq" text="x" styleName="customStyle" width="70"/>-->
+  		</mx:HBox>
+  	</mx:GridItem>	
+  	<mx:GridItem>
+ 		<mx:HBox>
+  			<mx:Label id="vmark1_lvl" text="" styleName="customStyle" width="55"/>
+  		</mx:HBox>
+ 	</mx:GridItem>		
+  	<mx:GridItem>
+  		<mx:HBox>
+  			<mx:Label id="vmark1_peaklvl" text="x" styleName="customStyle" width="55"/>
+  		</mx:HBox>
+  	</mx:GridItem>		
+  	<mx:GridItem>
+ 		<mx:HBox>
+  			<mx:CheckBox styleName="customStyle" id="hmark1_vis"/>
+  			<mx:Label text="Horz. Mark1" styleName="customStyle" />
+  			<mx:RadioButton  styleName="customStyle" id="hmark1_sel" groupName="mark_selected" click="hmark1_vis.selected=true"/>
+  		</mx:HBox>
+  	</mx:GridItem>			
+  	<mx:GridItem>
+ 		<mx:HBox>
+  			<mx:Label id="hmark1_lvl" text="X" styleName="customStyle"/>
+  		</mx:HBox>
+  	</mx:GridItem>
+  	
+  </mx:GridRow>
+     <mx:GridRow>
+  	<mx:GridItem>
+  		<mx:HBox>
+  			<mx:CheckBox styleName="customStyle" id="vmark2_vis" click="update_marker_freqs_wrapper(event)"/>
+  			<mx:Label text="Vert. Mark2" styleName="customStyle"/>
+  			<mx:RadioButton styleName="customStyle" id="vmark2_sel" groupName="mark_selected" click="vmark2_vis.selected=true;update_marker_freqs_wrapper(event)"/>
+  		</mx:HBox>
+  	</mx:GridItem>
+  	<mx:GridItem>
+  		<mx:HBox>
+  			<mx:TextInput id="vmark2_freq" text=""  width="70"  backgroundAlpha="0" borderThickness="0" borderStyle="none"
+                                           click="vmark2_vis.selected=true;vmark2_sel.selected=true;"/>
+  			<!--<mx:Label id="vmark2_freq" text="x" styleName="customStyle" width="70"/>-->
+  		</mx:HBox>
+  	</mx:GridItem>	
+  	<mx:GridItem>
+ 		<mx:HBox>
+  			<mx:Label id="vmark2_lvl" text="x" styleName="customStyle" width="55"/>
+  		</mx:HBox>
+ 	</mx:GridItem>		
+  	<mx:GridItem>
+  		<mx:HBox>
+  			<mx:Label id="vmark2_peaklvl" text="" styleName="customStyle" width="55"/>
+  		</mx:HBox>
+  	</mx:GridItem>		
+  	<mx:GridItem>
+ 		<mx:HBox>
+  			<mx:CheckBox id="hmark2_vis"/>
+  			<mx:Label text="Horz. Mark2" styleName="customStyle" />
+  			<mx:RadioButton styleName="customStyle" id="hmark2_sel" groupName="mark_selected" click="hmark2_vis.selected=true"/>
+  		</mx:HBox>
+  	</mx:GridItem>			
+  	<mx:GridItem>
+ 		<mx:HBox>
+  			<mx:Label id="hmark2_lvl" text="X" styleName="customStyle"/>
+  		</mx:HBox>
+  	</mx:GridItem>
+
+  </mx:GridRow>
+   
+
+  <mx:GridRow>
+  	<mx:GridItem>
+	      <mx:Button fontSize="8" id="marker_chg_btn"  enabled="true" label="Change Settings" click="freq_entry()"/>
+  	</mx:GridItem>
+
+  	  	<mx:GridItem>
+  		<mx:Label id="freq_diff" text="A" styleName="customStyle"/>
+  	</mx:GridItem>
+  	  	<mx:GridItem>
+  		<mx:Label id="lvl_diff" text="b" styleName="customStyle"/>
+  		
+  	</mx:GridItem>
+  	  	<mx:GridItem>
+  		<mx:Label id="peak_diff" text="c" styleName="customStyle"/>
+  		
+  	</mx:GridItem>
+  	  	<mx:GridItem>
+   		<!-- Blank -->
+ 		
+  	</mx:GridItem>
+  	  	  	<mx:GridItem>
+  		<mx:Label id="hmark_diff" text="d" styleName="customStyle"/>
+ 		
+  	</mx:GridItem>
+  </mx:GridRow>
+</mx:Grid>
+
+
+	      
+
+</mx:VBox>

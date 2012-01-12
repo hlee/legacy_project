@@ -1,0 +1,15 @@
+<table width=100%>
+  <tr>
+    <td colspan="2">
+      <table class="datatable" width=100%>
+        <% form_tag :action => 'analyzer_create' do %>
+          <%= render :partial => 'analyzer_form' %>
+          <tr>
+            <td colspan="2"><%= submit_tag "Create" %></td>
+          </tr>
+        <% end %>
+      </table>
+    </td>
+  </tr>
+</table>
+

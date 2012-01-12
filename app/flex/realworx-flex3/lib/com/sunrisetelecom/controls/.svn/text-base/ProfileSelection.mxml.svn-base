@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" styleName="subtitleLabel" layout="vertical" width="400" title="Profile Selection">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import mx.managers.PopUpManager;
+            import mx.controls.TextInput;
+
+            [Bindable]
+            private var _profileList:Array;
+            
+            private var _profileName:String = null;
+            
+            public function get profileList():Array
+            {
+                return _profileList;
+            }
+            public function set profileList(list:Array):void
+            {
+                _profileList = list;
+            }
+            
+            public function get profileName():String
+            {
+                return _profileName;
+            }
+            public function set profileName(name:String):void
+            {
+                _profileName = name;
+            }
+
+            public function onCancelButton():void
+            {
+                PopUpManager.removePopUp(this);
+            }
+            
+            public function onOkButton():void
+            {
+                _profileName = _profileCombobox.value.toString();
+                PopUpManager.removePopUp(this);   
+            }
+        ]]>
+    </mx:Script>
+    <mx:Form width="100%">
+        <mx:FormItem styleName="subtitleLabel" label="Profile Name" width="100%">
+            <mx:ComboBox id="_profileCombobox" dataProvider="{_profileList}" width="100%" />
+        </mx:FormItem>
+        <mx:FormItem label="" width="100%">
+            <mx:HBox horizontalAlign="right" width="100%">
+                <mx:Button id="okButton" styleName="normalButton" width="80" label="OK" click="onOkButton()"/> 
+                <mx:Button styleName="normalButton" width="80" label="Cancel" click="onCancelButton()"/>
+            </mx:HBox>
+        </mx:FormItem>
+    </mx:Form>
+</mx:TitleWindow>

@@ -1,0 +1,7 @@
+<%= error_messages_for 'config_param' %>
+
+<!--[form:config_param]-->
+<p><label for="config_param_val">Val</label><br/>
+<%= text_field 'config_param', 'val'  %></p>
+<!--[eoform:config_param]-->
+

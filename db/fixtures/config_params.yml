@@ -1,0 +1,431 @@
+--- 
+config_params_001: 
+  name: Start Frequency
+  val: "5"
+  category: ANALYZER SETTING
+  descr: System Wide Start Frequency for ingress monitoring
+  size: "20000000"
+  data_type: "2"
+  ident: "1"
+  id: "23"
+  uom: Mhz
+config_params_002: 
+  name: Stop Frequency
+  val: "50"
+  category: ANALYZER SETTING
+  descr: System-Wide Stop Frequency for ingress monitoring
+  size: "200000000"
+  data_type: "2"
+  ident: "2"
+  id: "24"
+  uom: Mhz
+config_params_003: 
+  name: Company
+  val: Sunrise Telecom
+  category: CORPORATE
+  descr: Company Name
+  size: "100"
+  data_type: "3"
+  ident: "3"
+  id: "25"
+  uom: ""
+config_params_004: 
+  name: Dashboard Record Count
+  val: "50"
+  category: REPORT
+  descr: Number of rows returned by dashboard queries
+  size: "100"
+  data_type: "1"
+  ident: "4"
+  id: "26"
+  uom: ""
+config_params_005: 
+  name: Analyzer ID
+  val: "10"
+  category: NETWORK
+  descr: Unique numeric identifier of Spectrum Analyzer
+  size: "10"
+  data_type: "1"
+  ident: "5"
+  id: "27"
+  uom: ""
+config_params_006: 
+  name: HM ID
+  val: "1"
+  category: NETWORK
+  descr: Unique Numeric Identifier of HM
+  size: "10"
+  data_type: "1"
+  ident: "6"
+  id: "28"
+  uom: ""
+config_params_007: 
+  name: Timeout
+  val: "5000"
+  category: NETWORK
+  descr: Network timeout value in ms
+  size: "100"
+  data_type: "1"
+  ident: "7"
+  id: "29"
+  uom: milliseconds
+config_params_008: 
+  name: Retry Count
+  val: "3"
+  category: NETWORK
+  descr: Network retry count
+  size: "10"
+  data_type: "1"
+  ident: "8"
+  id: "30"
+  uom: ""
+config_params_009: 
+  name: Monitor Start Port
+  val: "4000"
+  category: INSTALL
+  descr: Starting port for monitoring daemons
+  size: "10"
+  data_type: "1"
+  ident: "9"
+  id: "31"
+  uom: ""
+config_params_010: 
+  name: Monitor Stop Port
+  val: "4100"
+  category: INSTALL
+  descr: Stoping port for monitoring daemons
+  size: "10"
+  data_type: "1"
+  ident: "10"
+  id: "32"
+  uom: ""
+config_params_011: 
+  name: Server Path
+  val: /home/tj/realworx-server/trunk
+  category: INSTALL
+  descr: Path where the Server will be located at
+  size: "100"
+  data_type: "3"
+  ident: "11"
+  id: "33"
+  uom: ""
+config_params_012: 
+  name: Iptables Start Port
+  val: "5000"
+  category: INSTALL
+  descr: Starting port for iptables port redirector
+  size: "5"
+  data_type: "1"
+  ident: "12"
+  id: "34"
+  uom: ""
+config_params_013: 
+  name: Iptables Stop Port
+  val: "5050"
+  category: INSTALL
+  descr: Stopping port for iptables port redirector
+  size: "5"
+  data_type: "1"
+  ident: "13"
+  id: "35"
+  uom: ""
+config_params_015: 
+  name: Email Address
+  val: postmaster@yourdomain.com
+  category: INSTALL
+  descr: Email address to provide in the footer page
+  size: "50"
+  data_type: "3"
+  ident: "15"
+  id: "37"
+  uom: ""
+config_params_017: 
+  name: SMTP Server
+  val: srmx.sunrisetelecom.com
+  category: SMTP
+  descr: SMTP Server Hostname
+  size: "50"
+  data_type: "3"
+  ident: "17"
+  id: "39"
+  uom: ""
+config_params_018: 
+  name: SMTP Port
+  val: 25
+  category: SMTP
+  descr: SMTP Port to connect to on SMTP Host
+  size: "5"
+  data_type: "1"
+  ident: "18"
+  id: "40"
+  uom: ""
+config_params_020: 
+  name: SMTP Username
+  val:
+  category: SMTP
+  descr: SMTP User to connect to smtp host with
+  size: "50"
+  data_type: "3"
+  ident: "20"
+  id: "42"
+  uom: ""
+config_params_021: 
+  name: SMTP Password
+  val: 
+  category: SMTP
+  descr: SMTP password to connect to smtp host with
+  size: "50"
+  data_type: "3"
+  ident: "21"
+  id: "43"
+  uom: ""
+config_params_022: 
+  name: Sender Address
+  val: root@locahost
+  category: SMTP
+  descr: Email address of email sender
+  size: "50"
+  data_type: "3"
+  ident: "22"
+  id: "44"
+  uom: ""
+config_params_023: 
+  name: Reply Address
+  val: root@localhost
+  category: SMTP
+  descr: Reply-to address for emails
+  size: "50"
+  data_type: "3"
+  ident: "23"
+  id: "45"
+  uom: ""
+config_params_024: 
+  name: Allow Anonymous
+  val: "no"
+  category: INSTALL
+  descr: Should anonymous users be allowed
+  size: "3"
+  data_type: "3"
+  ident: "24"
+  id: "46"
+  uom: ""
+config_params_025: 
+  name: SNMP Manager Address 1
+  val: ""
+  category: SNMP
+  descr: IP/Hostname of snmp server address
+  size: "40"
+  data_type: "3"
+  ident: "25"
+  id: "47"
+  uom: ""
+config_params_026: 
+  name: SNMP Manager Address 2
+  val: ""
+  category: SNMP
+  descr: IP/Hostname of snmp server address
+  size: "40"
+  data_type: "3"
+  ident: "26"
+  id: "48"
+  uom: ""
+config_params_027: 
+  name: SNMP Manager Address 3
+  val: ""
+  category: SNMP
+  descr: IP/Hostname of snmp server address
+  size: "40"
+  data_type: "3"
+  ident: "27"
+  id: "49"
+  uom: ""
+config_params_028: 
+  name: SNMP Manager Address 4
+  val: ""
+  category: SNMP
+  descr: IP/Hostname of snmp server address
+  size: "40"
+  data_type: "3"
+  ident: "28"
+  id: "50"
+  uom: ""
+config_params_029: 
+  name: SNMP Manager Address 5
+  val: ""
+  category: SNMP
+  descr: IP/Hostname of snmp server address
+  size: "40"
+  data_type: "3"
+  ident: "29"
+  id: "51"
+  uom: ""
+config_params_030: 
+  name: SNMP Manager Address 6
+  val: ""
+  category: SNMP
+  descr: IP/Hostname of snmp server address
+  size: "40"
+  data_type: "3"
+  ident: "30"
+  id: "52"
+  uom: ""
+config_params_031: 
+  name: SNMP Manager Address 7
+  val: ""
+  category: SNMP
+  descr: IP/Hostname of snmp server address
+  size: "40"
+  data_type: "3"
+  ident: "31"
+  id: "53"
+  uom: ""
+config_params_032: 
+  name: SNMP Manager Address 8
+  val: ""
+  category: SNMP
+  descr: IP/Hostname of snmp server address
+  size: "40"
+  data_type: "3"
+  ident: "32"
+  id: "54"
+  uom: ""
+config_params_033: 
+  name: SNMP Manager Address 9
+  val: ""
+  category: SNMP
+  descr: IP/Hostname of snmp server address
+  size: "40"
+  data_type: "3"
+  ident: "33"
+  id: "55"
+  uom: ""
+config_params_034: 
+  name: SNMP Manager Address 10
+  val: ""
+  category: SNMP
+  descr: IP/Hostname of snmp server address
+  size: "40"
+  data_type: "3"
+  ident: "34"
+  id: "56"
+  uom: ""
+config_params_035: 
+  name: SNMP Sequence Counter
+  val: ""
+  category: COUNTER
+  descr: SNMP Sequence Counter
+  size: "40"
+  data_type: "4"
+  ident: "35"
+  id: "57"
+  uom: ""
+config_params_036: 
+  name: Performance summary window (Days)
+  val: ""
+  category: INSTALL
+  descr: Age of measurements in days before it gets summarized
+  size: "5"
+  data_type: "1"
+  ident: "36"
+  id: "58"
+  uom: ""
+config_params_037: 
+  name: Ingress summary window (Days)
+  val: ""
+  category: INSTALL
+  descr: Age of ingress data in days before it gets summarized
+  size: "5"
+  data_type: "1"
+  ident: "37"
+  id: "59"
+  uom: ""
+config_params_038: 
+  name: Ingress Alarm deletion age (Days)
+  val: ""
+  category: INSTALL
+  descr: Age of ingress alarms in days before they are deleted
+  size: "5"
+  data_type: "1"
+  ident: "38"
+  id: "60"
+  uom: ""
+config_params_039: 
+  name: Performance Alarm deletion age (Days)
+  val: ""
+  category: INSTALL
+  descr: Age of downstream alarms in days before they are deleted
+  size: "5"
+  data_type: "1"
+  ident: "39"
+  id: "61"
+  uom: ""
+config_params_040: 
+  name: Laser Clipping Start Freq.
+  val: "5"
+  category: ANALYZER SETTING
+  descr: System Wide Start Frequency for ingress monitoring
+  size: "20000000"
+  data_type: "2"
+  ident: "40"
+  id: "62"
+  uom: Mhz
+config_params_041: 
+  name: Laser Clipping Stop Freq
+  val: "200"
+  category: ANALYZER SETTING
+  descr: System-Wide Stop Frequency for ingress monitoring
+  size: "200000000"
+  data_type: "2"
+  ident: "41"
+  id: "63"
+  uom: Mhz
+config_params_042: 
+  name: Threshold
+  val: "8"
+  category: ALARM FLOODING CONFIG
+  descr: Alarm Flooding Threshold
+  size: "5"
+  data_type: "1"
+  ident: "50"
+  id: "64"
+  uom: ""
+config_params_043: 
+  name: Cycle Limit
+  val: "80"
+  category: ALARM FLOODING CONFIG
+  descr: Alarm Flood Cycle Count
+  size: "5"
+  data_type: "1"
+  ident: "51"
+  id: "65"
+  uom: ""
+config_params_044: 
+  name: Restore Threshold
+  val: "400"
+  category: ALARM FLOODING CONFIG
+  descr: Alarm Flooding Restore Cycle
+  size: "5"
+  data_type: "1"
+  ident: "52"
+  id: "66"
+  uom: ""
+config_params_045: 
+  name: Unit Of Measure
+  val: "1"
+  category: ANALYZER SETTING
+  descr: The Unit of Level showing dBuV or dBmV
+  size: "5"
+  data_type: "1"
+  ident: "53"
+  id: "67"
+  uom: ""
+config_params_046: 
+  name: Log Limit
+  val: "1000"
+  category: ANALYZER SETTING
+  descr: The number of log that system will keep
+  size: "5"
+  data_type: "1"
+  ident: "54"
+  id: "68"
+  uom: ""  

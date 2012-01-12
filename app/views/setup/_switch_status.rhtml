@@ -1,0 +1,30 @@
+<%	if port_id >0 %>
+
+Switching test runing, current port is: <%=port_id%><%=image_tag('switching.gif')%>
+<%	elsif port_id == -99%>
+
+Switching test successfull.
+<%elsif port_id == -999%>
+
+<%elsif port_id == -8%>
+
+Current analyzer is not connected,prepare to connect.
+<%elsif port_id == -9%>
+
+<%=image_tag('spinner.gif')%>
+<br/>
+Connecting to analyzer, probably will cost minutes.
+<%elsif port_id == -10%>
+
+Fail to connect analyzer. Please check you analyzer online or not.
+<%elsif port_id == -11%>
+Switch Test Failed. Error msg as follow:<br>
+<%=error_msg%>
+
+<%elsif port_id == -12%>
+
+<%=image_tag('spinner.gif')%><br/>
+Analyzer is disconnecting.
+<%elsif !error_msg.nil?%>
+<%=error_msg%>
+<%end%>

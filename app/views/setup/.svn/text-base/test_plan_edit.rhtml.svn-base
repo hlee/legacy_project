@@ -1,0 +1,8 @@
+<h2>Editing <%= @test_plan["name"] %> test plan</h2>
+<%= link_to 'Return to list', :action => 'test_plan_list', :id => @test_plan["sf_system_file_id"] %>
+<p>
+<% form_tag :action => 'set_sf_test_plan_name', :id => params[:id] do %>
+  <p><label for="test_plan_name">Name</label><br/>
+  <%= text_field 'test_plan', 'name'  %></p>
+  <%= submit_tag 'Save' %>
+<% end %>

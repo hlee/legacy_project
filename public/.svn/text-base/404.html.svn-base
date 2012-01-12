@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <title>Realworx File Not Found</title>
+  </head>
+  <body>
+    <table width=100% border="0" cellpadding="15" cellspacing="0">
+      <tr valign=top>
+        <td>
+          <font face="verdana, arial, helvetica" size="2">
+          We're sorry, but the link you clicked, or the URL you typed into your browser, didn't work for some reason. Here are some possible reasons why:
+          <ol>
+          <li>We have a "bad" link floating out there and you were unlucky enough to click it.
+          <li>You may have typed the page address incorrectly.
+          <li>This web server is going nutty.
+          </ol>
+          <B>So now what?</B><p>
+          <ul>
+          <li>Try the main <a href="/">page</a>.
+          <li>View the Alarm <a href="/main">summary</a>.
+          </ul>
+          <br>
+          (By the way, this 404 has been recorded so that we can fix it.)
+          </font>
+        </td>
+      </tr>
+    </table>
+    <br>
+    <br>
+  </body>
+</html>
+

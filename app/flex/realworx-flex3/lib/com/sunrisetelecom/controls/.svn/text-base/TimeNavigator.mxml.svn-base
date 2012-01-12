@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:flexlib="http://code.google.com/p/flexlib/" horizontalAlign="right" width="100%" height="134" xmlns:controls="com.sunrisetelecom.controls.*">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import com.sunrisetelecom.utils.Utils;
+            import com.sunrisetelecom.utils.Unit;
+            import com.sunrisetelecom.events.TimeChangeEvent;
+            import mx.events.StateChangeEvent;
+            import mx.events.ItemClickEvent;
+            import mx.events.DividerEvent;
+            import mx.core.Application;
+            import mx.collections.*;
+            import mx.controls.Alert;
+
+            // minDate and maxDate are set by DatalogRange and are the maximum possible values to show
+            [Bindable]
+            public var _minDate:Date = new Date();
+            [Bindable]
+            public var _maxDate:Date = new Date();
+
+            //dispMinDate and dispMaxDate are set internally and are used to get data trace to draw
+            [Bindable]
+            public var dispMinDate:Date = new Date();
+            [Bindable]
+            public var dispMaxDate:Date = new Date();
+            
+            [Bindable]
+            private var _noiseFloor:Number = NaN;
+
+            [Bindable]
+            private var _uom:String = null;
+            
+            public function get uom():String
+            {
+                return _uom;
+            }
+            public function set uom(u:String):void
+            {
+                _uom = u;
+                
+                if(u == Unit.DBUV)
+                {
+                    _vAxis.maximum = 120;
+                    _vAxis.minimum = -10;
+                }
+            }
+
+            public function set noiseFloor(value:Number):void
+            {
+                value = Utils.convertToFixedNumber(value, 2);
+                
+                _noiseFloor = value;
+            }
+            
+            private function redraw():void
+            {
+                var eventObj:TimeChangeEvent = new TimeChangeEvent();
+                dispatchEvent(eventObj);
+            }
+            
+            //******************************
+            // Whenever site is changed this is called.
+            //******************************
+            public function init_time_range():void
+            {
+                _timeRangeSlider.values[1] = _maxDate.time;
+                _timeRangeSlider.values[0] = _minDate.time;
+            
+                _radiogroup.selection = radio_all;
+                redraw();
+                slider_shift();
+            }
+            
+            public function select_range(start:Date, stop:Date):void
+            {
+                if(_maxDate.time < stop.time)
+                {
+                    stop = _maxDate;
+                    //Alert.show("Alarm not within collected data range. Datalog storage may be up to 15 minutes behind the alarm occurance");
+                    //return;
+                }
+                if((_minDate.time > start.time) || (_maxDate.time < stop.time) || (start.time >= stop.time))
+                {
+                    //Alert.show("Time Range not correct.");
+                    return;
+                }
+                _timeRangeSlider.values[0] = start.time;
+                _timeRangeSlider.values[1] = stop.time;
+                var day_count:Number=(_maxDate.time - start.time) / 86400000.0;
+                
+                if(day_count <= 1)
+                {
+                    change_range("1");
+                }
+                else if(day_count <= 7)
+                {
+                    change_range("7");
+                }
+                else if(day_count <= 30)
+                {
+                    change_range("30");
+                }
+                else
+                {
+                    change_range("all");
+                }
+            }
+            
+            private function change_range(selectedValue:String):void
+            {
+                var newMinDate:Date = new Date();
+                if(selectedValue == "all")
+                {
+                    setDispMin(_minDate.time);
+                    setDispMax(_maxDate.time);
+                }
+                else if(selectedValue == "30")
+                {
+                    newMinDate.setTime(_maxDate.time - 2592000000);
+                    if(newMinDate.time > _minDate.time)
+                    {
+                        setDispMin(newMinDate.time);
+                    }
+                    else
+                    {
+                        setDispMin(_minDate.time);
+                    }
+                    
+                    setDispMax(_maxDate.time);
+                }
+                else if(selectedValue == "7")
+                {
+                    newMinDate.setTime(_maxDate.time - 604800000);
+                    if(newMinDate.time > _minDate.time)
+                    {
+                        setDispMin(newMinDate.time);
+                    }
+                    else
+                    {
+                        setDispMin(_minDate.time);
+                    }
+                    setDispMax(_maxDate.time);
+                }
+                else if(selectedValue == "1")
+                {
+                    newMinDate.setTime(_maxDate.time - 86400000);
+                    if(newMinDate.time > _minDate.time)
+                    {
+                        setDispMin(newMinDate.time);
+                    }
+                    else
+                    {
+                        setDispMin(_minDate.time);
+                    }
+                    setDispMax(_maxDate.time);
+                }
+                if(_timeRangeSlider.minimum > _timeRangeSlider.values[1])
+                {
+                    _timeRangeSlider.values[1] = _timeRangeSlider.minimum;
+                }
+                if(_timeRangeSlider.minimum > _timeRangeSlider.values[0])
+                {
+                    _timeRangeSlider.values[0] = _timeRangeSlider.minimum;
+                }
+                
+                var viewer:DataLogViewer = Application.application as DataLogViewer;
+                if(viewer)
+                {
+                    viewer.getOvertimeTrace(dispMinDate, dispMaxDate);
+                }
+
+                slider_shift();
+                _radiogroup.selectedValue = selectedValue;
+            }
+            
+            public function change_range_event(event:ItemClickEvent):void
+            {
+                change_range(event.currentTarget.selectedValue);
+            }
+            
+            public function reset_time_range():void
+            {
+                if (this._maxDate.time < _timeRangeSlider.values[1])
+                {
+                    _timeRangeSlider.values[1]=this._maxDate.time;
+                }
+                if (this._maxDate.time < _timeRangeSlider.values[0])
+                {
+                    _timeRangeSlider.values[0]=this._minDate.time;
+                }
+                if (this._minDate.time > _timeRangeSlider.values[1])
+                {
+                    _timeRangeSlider.values[1]=this._maxDate.time;
+                }
+                if (this._maxDate.time > _timeRangeSlider.values[0])
+                {
+                    _timeRangeSlider.values[0]=this._minDate.time;
+                }
+                redraw();
+            }
+            
+            public function setRange(start:Date, stop:Date):void
+            {
+                _minDate = start;
+                _maxDate = stop;
+                setDispMin(start.time);
+                setDispMax(stop.time);
+                _timeRangeSlider.values[0] = start.time;
+                _timeRangeSlider.values[1] = stop.time;
+                init_time_range();
+            }
+            
+            public function setDispMin(time:Number):void
+            {
+                dispMinDate.setTime(time);
+                _timeRangeSlider.minimum = dispMinDate.time;
+                _timeAxis.minimum = dispMinDate;
+            }
+            
+            public function setDispMax(time:Number):void
+            {
+                dispMaxDate.setTime(time);
+                _timeRangeSlider.maximum = dispMaxDate.time;
+                _timeAxis.maximum = dispMaxDate;
+            }
+            
+            public function startDate():Date
+            {
+                var dt:Date = new Date();
+                dt.time = _timeRangeSlider.values[0];
+                return dt;
+            }
+            
+            public function stopDate():Date
+            {
+                var dt:Date = new Date();
+                dt.time = _timeRangeSlider.values[1];
+                return dt;
+            }
+            
+            public function get_filter():Array
+            {
+                var startDate:Date = new Date();
+                var stopDate:Date = new Date();
+                startDate.time = _timeRangeSlider.values[0];
+                stopDate.time = _timeRangeSlider.values[1];
+                return [startDate, stopDate];
+            }
+            
+            public function set maximum(max:Date):void
+            {
+                _maxDate = max;
+
+                init_time_range();
+                slider_shift();
+            }
+            
+            public function set minimum(min:Date):void
+            {
+                this._minDate = min;
+
+                init_time_range();
+                slider_shift();
+            }
+            
+            public function set dataProvider(dp:ICollectionView):void
+            {
+                _miniTimeChart.dataProvider = dp;
+            }
+            
+            private function displayDate(value:Number):String
+            {
+                var dt:Date = new Date();
+                dt.setTime(value);
+                // Use their local time instead of UTC
+                //return dt.toString();
+                return dt.toLocaleString();
+            }
+            
+            private function slider_shift():void
+            {
+                var left_time:Number = _timeRangeSlider.values[0];
+                var right_time:Number = _timeRangeSlider.values[1];
+                var start_time:Number = dispMinDate.time;
+                var stop_time:Number = dispMaxDate.time;
+                var left_percent:Number = Number(left_time - start_time) / Number(stop_time - start_time);
+                var right_percent:Number = Number(stop_time - right_time) / Number(stop_time - start_time);
+                var graph_width:Number = leftBox.width + visibleBox.width + rightBox.width;
+                leftBox.width = left_percent * graph_width;
+                rightBox.width = right_percent * graph_width;
+                
+                redraw();
+            }
+            
+            private function divider_shift(event:DividerEvent):void
+            {
+                //var left_percent:Number=Math.abs(HDividedBox(event.target).getChildAt(0).width)/(event.target.width)
+                //var right_percent:Number=100-(Math.abs(HDividedBox(event.target).getChildAt(2).width)/(event.target.width))
+                //var v:Object=HDividedBox(event.target).getChildAt(2);
+                var start_time:Number= _minDate.time;
+                var stop_time:Number= _maxDate.time;
+                //startDate.time=(left_percent*(stop_time-start_time))+start_time;
+                //stopDate.time=(right_percent*(stop_time-start_time))+start_time;
+            }
+        ]]>
+    </mx:Script>
+    <mx:HBox width="100%" horizontalGap="10">
+        <mx:RadioButtonGroup id="_radiogroup" itemClick="change_range_event(event)"/>
+        <mx:Label styleName="subtitleLabel" text="Time Range:"/>
+        <mx:RadioButton id="radio_all" value="all" label="All" groupName="_radiogroup"/>
+        <mx:RadioButton id="radio_30" value="30" label="30 days" groupName="_radiogroup"/>
+        <mx:RadioButton id="radio_7" value="7" label="7 days" groupName="_radiogroup"/>
+        <mx:RadioButton id="radio_1" value="1" label="24 hours" groupName="_radiogroup"/>
+        <mx:HBox horizontalAlign="right" horizontalGap="0" width="100%">
+            <mx:Label visible="{!isNaN(_noiseFloor)}" styleName="subtitleLabel" text="Average Noise Floor:" />
+            <mx:Text visible="{!isNaN(_noiseFloor)}" styleName="normalText" text="{_noiseFloor + ' ' + _uom}" />
+        </mx:HBox>
+    </mx:HBox>
+    <mx:LineChart showDataTips="true" id="_miniTimeChart" width="100%" paddingLeft="5" paddingRight="5" height="83">
+        <mx:seriesFilters>
+            <mx:Array/>
+        </mx:seriesFilters>
+        <mx:horizontalAxis>
+            <mx:DateTimeAxis id="_timeAxis" displayLocalTime="true"/>
+        </mx:horizontalAxis>
+        <mx:verticalAxis>
+            <mx:LinearAxis id="_vAxis" title="{'Level (' + _uom + ')'}" minimum="-65" maximum="65" />
+        </mx:verticalAxis>
+        <mx:series>
+            <controls:ExtendedLineSeries filterData="false" yField="max" xField="time" displayName="Max" interpolateValues="false">
+                <controls:lineStroke>
+                    <mx:Stroke color="0x00F000" weight="1" alpha=".8"/>
+                </controls:lineStroke>
+            </controls:ExtendedLineSeries>
+            <controls:ExtendedLineSeries filterData="false" yField="avg" xField="time" displayName="Average" interpolateValues="false">
+                <controls:lineStroke>
+                    <mx:Stroke color="0x00C000" weight="1" alpha=".8"/>
+                </controls:lineStroke>
+            </controls:ExtendedLineSeries>
+            <controls:ExtendedLineSeries filterData="false" yField="min" xField="time" displayName="Min" interpolateValues="false">
+                <controls:lineStroke>
+                    <mx:Stroke color="0x008000" weight="1" alpha=".8"/>
+                </controls:lineStroke>
+            </controls:ExtendedLineSeries>
+            <controls:ExtendedLineSeries filterData="false" yField="noise_floor" xField="time" displayName="Noise Floor">
+                <controls:lineStroke>
+                    <mx:Stroke color="0xff8000" weight="1" alpha=".8"/>
+                </controls:lineStroke>
+            </controls:ExtendedLineSeries>
+        </mx:series>
+        <mx:annotationElements>
+            <mx:HBox id="overlayCanvas" width="100%" alpha="1" horizontalGap="0" verticalGap="0" horizontalScrollPolicy="off" >
+                <mx:Canvas id="leftBox" height="100%" width="40" 
+                    backgroundAlpha="0.2" backgroundColor="#000020" borderThickness="1" 
+                    borderColor="#999999" borderStyle="solid" />
+                <mx:Canvas id="visibleBox" width="100%" height="100%" buttonMode="true"/>
+                <mx:Canvas id="rightBox" height="100%" width="40"
+                    backgroundAlpha="0.2" backgroundColor="#000020" borderThickness="1" 
+                    borderColor="#999999" borderStyle="solid"/>
+            </mx:HBox>
+        </mx:annotationElements>
+    </mx:LineChart>
+    <mx:HBox horizontalGap="0" verticalGap="0" horizontalAlign="right" width="100%" paddingLeft="60" paddingRight="5">
+        <mx:HSlider change="slider_shift()" id="_timeRangeSlider" thumbCount="2" dataTipFormatFunction="displayDate" width="100%" height="10" enabled="true" showTrackHighlight="true" x="10"/>
+    </mx:HBox>
+</mx:VBox>

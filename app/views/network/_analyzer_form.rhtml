@@ -1,0 +1,272 @@
+<%= error_messages_for 'analyzer' %>
+<% if params[:action].eql?('analyzer_edit') %>
+  <script>addLoadEvent(function() {changeSwitch("load")});</script>
+<% end %>
+<!--[form:analyzer]-->
+  <tr>
+    <th class="datatable" colspan="2"><h2><%= params[:action].gsub!(/analyzer_/, '').capitalize %> Analyzer</h2></th>
+  </tr>
+  <tr>
+    <td><label for="analyzer_name">Name</label></td>
+    <td><%= text_field 'analyzer', 'name'  %></td>
+  </tr>
+  <tr>
+    <td><label for="analyzer_location">Location</label></td>
+    <td><%= text_field 'analyzer', 'location' %></td>
+  </tr>
+  <tr>
+    <td><label for="analyzer_region">Region</label></td>
+   <%  @region_list=Region.find(:all).collect{|x| [x.name,x.id]}
+      @region_list.unshift(['No Region', nil])%>
+<td><%=select('analyzer','region_id',@region_list,{:selected=>@analyzer.region_id})%>
+</td>
+  </tr>
+  <tr>
+    <td><label for="analyzer_ip">Ip</label></td>
+    <td><div id='region_ip'><%= text_field 'analyzer', 'ip'  %></div></td>
+  </tr>
+  <tr>
+    <td><label for="analyzer_auto_mode">AutoConnect Mode</label></td>
+    <td>
+    	<select name="analyzer[auto_mode]">
+          <%=options_for_select([
+			  ["Ingress", 1],
+			  ["Performance", 2],
+			  ["No auto connect", 3]], 
+			  @analyzer.auto_mode.to_i)
+     	  %>
+        </select>
+	</td>
+  </tr>
+  <tr>
+    <td><label for="datalog_port">Datalog Port</label></td>
+    <td><%= text_field 'analyzer', 'datalog_port'  %></td>
+  </tr>
+  <tr>
+    <td><label for="monitoring_port">Monitoring Port</label></td>
+    <td><%= text_field 'analyzer', 'monitoring_port'  %></td>
+  </tr>
+  <tr>
+    <td><label for="hmid">HM ID</label></td>
+    <td><%= text_field 'analyzer', 'hmid'  %></td>
+  </tr>
+  <tr>
+    <td><label for="analyzer_email">Email</label></td>
+    <td><%= text_field 'analyzer', 'email'  %></td>
+  <tr>
+    <td><label for="site">Default Site</label></td>
+    <td><%=text_field 'site','name' %></td>
+  </tr>
+  <tr>
+    <td><label for="site">Profile</label></td>
+   <%
+     @profile_list=Profile.find_active_profiles.collect{ |p| [p.name,p.id]}
+     @profile_list.unshift(['No Profile', nil])
+   %>
+    <td><%=select('analyzer','profile_id',@profile_list,{:selected=>@analyzer.profile_id}) %></td>
+  </tr>
+  <tr>
+    <td><label for="snmp">SNMP</label></td>
+    <td><%=select('analyzer','snmp_active',[['INACTIVE',false],['ACTIVE',true]],{:selected=>@analyzer.snmp_active  }) %></td>
+  </tr>
+  <tr>
+    <td><label for="snmp">Firmware Support Web API</label></td>
+    <td><%=select('analyzer','webapi',[['False',0],['True',1]],{:selected=>@analyzer[:webapi]  }) %></td>
+  </tr>
+    <tr>
+    <td><label for="webapi">Web API Url</label></td>
+    <td><%=text_field 'analyzer','api_url' %>(Reminder: start with the protocol)</td>
+  </tr>
+  <tr>
+    <th class="datatable" colspan="2"><h3>Analyzer Configuration</h3></th>
+  </tr>
+  <tr>
+    <td><label for="analyzer_bidirectional_flag">Use Switches</label></td>
+    <td>
+      <select id="analyzer_switch_network_flag" name="analyzer[switch_network]">
+        <%=options_for_select({"false"=>"false","true"=>"true"},@analyzer[:switch_network].to_s)%>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td><label for="attenuation">Attenuation</label></td>
+    <td><%= text_field 'analyzer','attenuator',{:size=>3}  %></td>
+  </tr>
+  <tr>
+    <td><label for="resol_bwd">Resolution Bandwidth</label></td>
+    <td>
+      <select name="analyzer[resol_bwd]">
+        <%=options_for_select([
+          ["10 kHz", 10000],
+          ["30 kHz", 30000],
+          ["300 kHz", 300000], 
+          ["1 mHz", 1000000]], 
+          @analyzer.resol_bwd.to_i)
+        %>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td><label for="video_bwd">Video  Bandwidth</label></td>
+    <td>
+      <select name="analyzer[video_bwd]">
+        <%=options_for_select([
+          ["10 kHz", 10000],
+          ["100 kHz", 100000], 
+          ["1 mHz", 1000000]], 
+          @analyzer.video_bwd.to_i)
+        %>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td><label for="sweep_time">Sweep Time</label></td>
+    <td>
+      <select name="analyzer[sweep_time]">
+        <%=options_for_select([
+          ["2 ms", 2], 
+          ["4 ms", 4], 
+          ["10 ms", 10], 
+          ["20 ms", 20], 
+          ["50 ms", 50],
+          ["100 ms", 100],
+          ["200 ms", 200],
+          ["500 ms", 500],
+          ["1000 ms", 1000],
+          ["2000 ms", 2000],
+          ["5000 ms", 5000],
+          ], 
+          @analyzer.sweep_time.to_i)
+        %>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td><label for="start_frequency">Start Freq.(mHz)</label></td>
+    <td><%= text_field 'analyzer', :start_freq_disp,{:size=>7}  %></td>
+  </tr>
+  <tr>
+    <td><label for="hmid">Stop Freq.(mHz)</label></td>
+    <td><%= text_field 'analyzer', :stop_freq_disp,{:size=>7}  %></td>
+  </tr>
+  <tr>
+    <td><label for="noise_floor_start_frequency">Noise Floor Start Freq.(mHz)</label></td>
+    <td><%= text_field 'analyzer', :noise_floor_start_freq_disp,{:size=>7}  %></td>
+  </tr>
+  <tr>
+    <td><label for="noise_floor_stop_frequency">Noise Floor Stop Freq.(mHz)</label></td>
+    <td><%= text_field 'analyzer', :noise_floor_stop_freq_disp,{:size=>7}  %></td>
+  </tr>
+  <tr>
+    <td><label for="noise_floor_low">Noise Floor Carrier Threshold Low.(dBmV)</label></td>
+    <td><%= text_field 'analyzer', :noise_floor_low_disp,{:size=>7}  %></td>
+  </tr>
+  <tr>
+    <td><label for="noise_floor_high">Noise Floor Carrier Threshold High.(dBmV)</label></td>
+    <td><%= text_field 'analyzer', :noise_floor_high_disp,{:size=>7}  %></td>
+  </tr>
+      
+  <tr>
+    <th class="datatable" colspan="2">
+      <h3>Switch Network Parameters</h3>
+    </th>
+  </tr>
+  <% if !@analyzer.status.nil? && @analyzer.status > 10 %>
+    <tr>
+      <td colspan="2">
+        <div class="warning">Switch changes disabled because Analyzer is in connected status</div>
+      </td>
+    </tr>
+  <% end %>
+  <tr>
+    <td><label for="analyzer_switch_type">Switch type</label></td>
+    <td>
+      <% if !@analyzer.status.nil? && @analyzer.status > 10 %> 
+        <%= case @analyzer[:switch_type] 
+          when 0: 'None'
+          when 1: 'Custom'
+          when 2: 'Sunrise'
+          when 3: 'Electroline'
+          when 4: 'Cheetah'
+          when 5: 'Quintech'
+          end
+        %>
+      <% else %>
+        <select id="analyzer_switch_type" 
+          name="analyzer[switch_type]" 
+          onchange="changeSwitch();"
+        >
+          <%=options_for_select([['None',0],['Custom',1],['Sunrise',2], ['Electroline',3], ['Cheetah',4],['Quintech',5]],@analyzer[:switch_type])%>
+        </select>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td><label for="analyzer_port_nbr">Port Nbr</label></td>
+    <td>
+      <% if !@analyzer.status.nil? && @analyzer.status > 10 %> 
+        <%= case @analyzer[:port_nbr] 
+          when 0: 'COM 1'
+          when 1: 'COM 2'
+          when 2: 'COM 3'
+          when 3: 'COM 4'
+          end
+        %>
+      <% else %>
+        <select id="analyzer_port_nbr"
+          name="analyzer[port_nbr]" 
+        >
+          <%= options_for_select([['COM 1',0],['COM 2',1],['COM 3',2],['COM 4',3]],@analyzer[:port_nbr]) %>
+        </select>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td><label for="switch_baud_rate">Baud rate</label></td>
+    <td>
+      <% if !@analyzer.status.nil? && @analyzer.status > 10 %> 
+        <%= case @analyzer[:baud_rate] 
+          when 0: 'b2400'
+          when 1: 'b9600'
+          when 2: 'b14400'
+          when 3: 'b19200'
+          when 4: 'b38400'
+          when 5: 'b57600'
+          when 6: 'b115200'
+          end
+        %>
+      <% else %>
+        <select id="analyzer_baud_rate" 
+          name="analyzer[baud_rate]" 
+          disabled=<%= !@analyzer.status.nil? && @analyzer.status > 10 %>
+        >
+        <%=options_for_select([
+  ['b115200',6],
+  ['b57600',5],
+  ['b38400',4],
+  ['b19200',3], 
+  ['b14400',2], 
+  ['b9600',1],
+  ['b2400',0]
+  ],@analyzer[:baud_rate])%>
+        </select>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td><label for="analyzer_bidirectional_flag">Bidirectional flag</label></td>
+    <td>
+      <% if !@analyzer.status.nil? && @analyzer.status > 10 %> 
+        <%= @analyzer[:bidirectional_flag].to_s %> 
+      <% else %>
+        <select id="analyzer_bidirectional_flag" 
+          name="analyzer[bidirectional_flag]" 
+          disabled=<% !@analyzer.status.nil? && @analyzer.status > 10 %>
+        >
+          <%=options_for_select({"false"=>"false","true"=>"true"},@analyzer[:bidirectional_flag].to_s)%>
+        </select>
+      <% end %>
+    </td>
+  </tr>
+<!--[eoform:analyzer]-->
+

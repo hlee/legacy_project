@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="100">
+	    <mx:Script>
+        <![CDATA[
+        [Bindable] public var msg:String="Changing Modes";
+        ]]>
+ </mx:Script>
+ 	<mx:ProgressBar x="10" y="10" indeterminate="true" width="360" label="{msg}"/>
+	
+</mx:TitleWindow>

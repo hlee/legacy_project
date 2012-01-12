@@ -1,0 +1,1015 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application implements="com.sunrisetelecom.utils.IViewer" styleName="mainForm" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onAppCreated()" initialize="initApp()" width="978" height="600" xmlns:utils="com.sunrisetelecom.utils.*" xmlns:controls="com.sunrisetelecom.controls.*">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import com.sunrisetelecom.utils.Unit;
+            import com.sunrisetelecom.utils.Utils;
+            import mx.managers.CursorManager;
+            import mx.utils.URLUtil;
+            import mx.events.CloseEvent;
+            import com.sunrisetelecom.events.SiteChangeEvent;
+            import mx.rpc.Fault;
+            import mx.rpc.events.FaultEvent;
+            import mx.rpc.events.ResultEvent;
+            import com.sunrisetelecom.utils.ExternalInterfaceUtil;
+            import com.sunrisetelecom.utils.CommAgent;
+            import mx.core.IFlexDisplayObject;
+            import mx.events.ItemClickEvent;
+            import mx.collections.ArrayCollection;
+            import mx.managers.PopUpManager;
+            import mx.controls.Alert;
+
+            [Bindable]
+            private var _defaultUom:String = Unit.DBMV;
+            
+            [Embed(source="./asset/fullScreen.png")]
+            [Bindable]
+            private var _fullScreenIco:Class;
+            
+            [Bindable]
+            public var _resetPeakFreqList:ArrayCollection = new ArrayCollection(
+            [ {label:"Manual", data:0},
+              {label:"10 secs", data:10},
+              {label:"30 secs", data:30}, 
+              {label:"1 min", data:60},
+              {label:"2 mins", data:120},
+              {label:"5 mins", data:300},
+              {label:"10 mins", data:600},
+              {label:"30 mins", data:1800},
+              {label:"1 hour", data:3600},
+              {label:"12 hours", data:43200},
+              {label:"24 hours", data:86400},
+            ]);
+
+            [Bindable]
+            private var image_buffer:Array = [];
+
+            private var _closingApp:Boolean = false;
+
+            private var _clockTimer:Timer = null;
+            private var _frameTimer:Timer = null;
+            private var _peakTimer:Timer = null;
+            
+            [Bindable]
+            private var _statusText:String = "";
+
+            [Bindable]
+            private var disp_height:int = 350;
+            [Bindable]
+            private var disp_width:int = 500;
+
+            [Bindable]
+            private var _clientList:ArrayCollection;
+            
+            private var _analyzerList:ArrayCollection = new ArrayCollection();
+            private var _portList:ArrayCollection = new ArrayCollection([{label:" ", data:-1}]);
+            private var _activeAnalyzer:Object;
+            private var _activePort:Object;            
+
+            private var _commAgent:CommAgent = null; 
+               
+            [Bindable]
+            private var _settings:ArrayCollection = new ArrayCollection([]);
+            
+            [Bindable]
+            private var _analyzerConnected:Boolean = false;
+
+            private var _defaultAnalyzerName:String = null;
+            private var _defaultPortNumber:int = -1;
+            private var _changingPortNumber:int = -1;
+            private var _initFinished:Boolean = false;
+            private var _gotSettings:Boolean = false;
+            
+            [Bindable]
+            private var _selectSiteId:int = -1;
+            [Bindable]
+            private var _siteList:Array = null;
+            [Bindable]
+            private var _liveSiteList:Array = null;
+            
+            public function setStatus(text:String):void
+            {
+                _statusText = text;
+            }
+
+            /*Initializes the application */
+            private function initApp():void
+            {
+                CursorManager.setBusyCursor();
+                
+                var str:String = this.parameters.clientIp;
+                if(str != null)
+                {
+                    var pattern:RegExp = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]).(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]).(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]).(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/; 
+
+                    if(pattern.test(str))
+                    {
+                        _clientIpBox.text = str;
+                    }
+                }
+                
+                flash.system.Security.allowDomain("*");
+                
+                messageService.get_uom.send();
+                messageService.get_sites.send({site_type: 3});
+            }
+            
+            private function onAppCreated():void
+            {
+                callLater(addFullScreenHandler);
+                
+                _clockTimer = new Timer(1);
+                _clockTimer.addEventListener(TimerEvent.TIMER, clockTimerHandler);
+                _clockTimer.start();
+            }
+            
+            private function addFullScreenHandler():void
+            {
+                stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenHandler);
+            }
+
+            private function onGetSites(event:ResultEvent):void
+            {
+                messageService.disconnect();
+                
+                if(event != null)
+                {
+                    _siteList = event.result as Array;
+                    if (_siteList == null || _siteList.length == 0)
+                    {
+                        Alert.show("There isn't any available analyzer.");
+                        return;
+                    }                    
+
+                    _siteBar.addEventListener(SiteChangeEvent.SITE_CHANGE, siteSelected);
+                    
+                    var str:String;         
+                    var i:int;
+                    
+                    //Get Site Name
+                    str = this.parameters.siteName;
+                    if(str != null && str.length > 0)
+                    {
+                        for(i = 0; i < _siteList.length; i++)
+                        {
+                            if(_siteList[i].name == str)
+                            {
+                                if(_siteList[i].analyzer_id != -1)
+                                {
+                                    _defaultAnalyzerName = _siteList[i].analyzer_name;
+                                }
+                                _defaultPortNumber = _siteList[i].port_id;
+                                break;
+                            }
+                        }
+                    }
+                    //Get Site Id
+                    if(_defaultAnalyzerName == null || _defaultPortNumber == -1)
+                    {
+                        str = this.parameters.siteId;
+                        if(str != null)
+                        {
+                            var id:int = parseInt(str);
+                            if(id > 0 || str == "0")
+                            {
+                                for(i = 0; i < _siteList.length; i++)
+                                {
+                                    if(_siteList[i].site_id == id)
+                                    {
+                                        if(_siteList[i].analyzer_id != -1)
+                                        {
+                                            _defaultAnalyzerName = _siteList[i].analyzer_name;
+                                        }
+                                        _defaultPortNumber = _siteList[i].port_id;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                _commAgent = new CommAgent(this, next_state);
+                if (_commAgent != null)
+                {
+                    _commAgent.start();
+                    
+                    try
+                    {
+                        ExternalInterfaceUtil.addExternalEventListener("window.onunload", unload, "unloadFlex");
+                    }
+                    catch(e:Error)
+                    {
+                        trace(e.message);
+                    }
+                }
+            }
+
+            //Receipt of web services error
+            public function onMessageFault(event:FaultEvent):void
+            {
+                var fault:Fault = event.fault;
+                var message:String = "An error occurred." + fault.message + "|" + fault.faultString;
+                trace(message);
+            }
+            
+            //Run when a port is selected
+            public function siteSelected(event:SiteChangeEvent):void
+            {
+                if(_selectSiteId == event.selectedSiteId) return;
+                
+                _selectSiteId = event.selectedSiteId;
+
+                if(_liveSiteList != null)
+                {
+	                for(var i:int = 0; i < _liveSiteList.length; i++)
+	                {
+	                    if(_liveSiteList[i].site_id == _selectSiteId)
+	                    {
+	                        for(var j:int = 0; j < _analyzerList.length; j++)
+	                        {
+	                            if(_liveSiteList[i].analyzer_name == _analyzerList[j].label)
+	                            {
+	                                _activeAnalyzer = _analyzerList[j];
+	                                break;
+	                            }
+	                        }
+
+	                        _changingPortNumber = _liveSiteList[i].port_id;
+	                        break;
+	                    }
+	                }
+                }
+                
+                attachToAnalyzer();
+                _traceBox.resetPeak();
+                _traceBox.peakFlag = false;
+            }
+   
+            public function logoff():void
+            {
+                if(!_analyzerConnected) return;
+                
+                if(_frameTimer != null)
+                {
+                    _frameTimer.stop();
+                    _frameTimer.removeEventListener(TimerEvent.TIMER, frameTimerHandler);
+                    _frameTimer = null;
+                }         
+                
+                _gotSettings = false;
+                _siteBar.enabled = false;
+                _traceBox.controlBarEnabled = false;
+                
+                if(_commAgent != null)
+                {
+                	try
+                	{
+                        //comm.trigger(1);
+                        _commAgent.logoff();
+                    }
+                    catch(e:Error)
+                    {
+                    	trace(e.message);
+                    }
+                }
+                
+                _analyzerConnected = false;
+            }
+    
+            /*Controls and defines the state machine */
+            /* connect -> listHM -> logon -> getServerInfo ->
+               availRPTPS -> listNodes -> getSettings -> trigger -> logoff -> close, 
+               getRPTP, 
+               selectRPTP -> getSettings -> trigger -> logoff -> close */
+            public function next_state(... args):void
+            {
+                var i:int;
+                var j:int;
+                var k:int;
+                
+                var curr_state:String = args[0];
+                var response_type:String = args[1];
+                if (curr_state == "connect")
+                {
+                    //Socket connection made.  Lets call listHM
+                    _commAgent.listHM();
+                }
+                else if (curr_state == "live_connections")
+                {
+                    var arrTemp:ArrayCollection = args[2];
+                    if(arrTemp != null && _analyzerList != null && _portList != null)
+                    {
+                        for(i = 0; i < arrTemp.length; i++)
+                        {
+                            for(j = 0; j < _analyzerList.length; j++)
+                            {
+                                if(_analyzerList[j].data == arrTemp[i].HMId)
+                                {
+                                    arrTemp[i].HMName = _analyzerList[j].label;
+                                }
+                            }
+                            
+                            for(j = 0; j < _portList.length; j++)
+                            {
+                                if(_portList[j].data == arrTemp[i].SwitchPosition)
+                                {
+                                    arrTemp[i].SwitchPositionName = _portList[j].label;
+                                }
+                            }
+                        }
+                    }
+                    _clientList = arrTemp;
+                }
+                else if (curr_state == "logon")
+                {
+                    if (response_type == "ack")
+                    {        
+                        _analyzerConnected = true;
+                        fps_change();//Resets the triggers.
+                        _commAgent.getServerInfo();
+                    }
+                    else if (response_type == "nak")
+                    {
+                      Alert.show("Failed to login " + response_type);
+                      logoff();
+                    }
+                }
+                else if (curr_state == "logoff")
+                {
+                    if (response_type == "ack")
+                    {
+                        if(_closingApp)
+                        {
+                            _commAgent.close();
+                        }
+                        else
+                        {
+                            //comm.getServerInfo();
+                        }
+                    }
+                    else if (response_type == "nak")
+                    {
+                        trace("Failed to logoff " + response_type);
+                        //Alert.show("Failed to logoff " + response_type);
+                    }
+                }
+                else if (curr_state == "getServerInfo")
+                {
+                    if (response_type == "ack")
+                    {
+                        //We should be getting some sort of response.
+                    }
+                    else if (response_type == "nak")
+                    {
+                        Alert.show("Failed to login " + response_type);
+                        //Dead End
+                        logoff();
+                    }
+                    else if (response_type == "response")
+                    {
+                        if (args[2] != "HEC")
+                        {
+                            Alert.show("Cannot connect to server of type: "+args[2]);
+                            logoff();
+                        }
+                        else
+                        {
+                            _commAgent.availRPTPS();
+                        }
+                    }
+                    else
+                    {
+                        Alert.show("got nothing for server info" + args[1]);
+                    }
+                }
+                else if (curr_state == "availRPTPS")
+                {
+                    //ignore acks
+                    if (response_type == "nak")
+                    {
+                        Alert.show("Failed to get list of ports");
+                        logoff();
+                    }
+                    else if (response_type == "response")
+                    {
+                        _portList.removeAll();
+                        var ports:ArrayCollection = new ArrayCollection(args[2]);
+                        
+                        for(i = 0; i < ports.length; i++)
+                        {
+                            _portList.addItem({label: ports[i].toString(), data:ports[i]});
+                            if(i == 0)
+                            {
+                                _activePort = null;
+                            }
+                        }
+
+                        _commAgent.listNodes(1);
+                    }
+                }
+                else if (curr_state == "listNodes")
+                {
+                    //ignore acks
+                    if (response_type == "nak")
+                    {
+                        Alert.show("Failed to get list of ports");
+                        logoff();
+                    }
+                    else if (response_type == "response")
+                    {
+                        var node_count:int = args[2].node_count;
+                        var node_start:int = args[2].start_node;
+                        var nodeNames:ArrayCollection = new ArrayCollection(args[2].node_list);
+                        if (node_count > 0)
+                        {
+                            for(i = 0; i < _portList.length; i++)
+                            {
+                                var idx:int = _portList[i].data;
+                                if (idx < nodeNames.length)
+                                {
+                                    if (nodeNames[idx] != null && nodeNames[idx] != "")
+                                    {
+                                        _portList[i].label = nodeNames[idx];
+                                    }
+                                }
+                            }
+
+                            _commAgent.listNodes(node_count + node_start);
+                        }
+                        else
+                        {
+                            _commAgent.getSettings();
+                        }
+                    }
+                }     
+                else if (curr_state == "getSettings")
+                {
+                    //ignore acks
+                    if (response_type == "nak")
+                    {
+                        Alert.show("Failed to get settings:"+args[2]);
+                        logoff();
+                    }
+                    else if (response_type == "response")
+                    {                       
+                        _settings.removeAll();
+
+                        var att:Number = args[2].att;
+                        if(_defaultUom == Unit.DBUV) att += 60;
+                        
+                        _traceBox.attenuation = att; 
+                        _traceBox.span = args[2].span;
+                        _traceBox.vertScale = args[2].vscale;
+                        _traceBox.startFreq = args[2].cfreq - _traceBox.span / 2.0;
+                        
+                        _traceBox.yGridCount = 7;
+                        
+                        _settings.addItem({name: "Attenuation", val:att + " " + _defaultUom});
+                        _settings.addItem({name: "Center Freq", val:args[2].cfreq + " MHz"});
+                        _settings.addItem({name: "RBW", val:args[2].rbw});
+                        _settings.addItem({name: "Span", val:args[2].span + " MHz"});
+                        _settings.addItem({name: "Sweep", val:args[2].sweep});
+                        _settings.addItem({name: "VBW", val:args[2].vbw});
+                        _settings.addItem({name: "Vert. Scale", val:args[2].vscale});
+
+                        var hasValidPort:Boolean = false;
+                        
+                        if(!_initFinished && _defaultPortNumber >= 0)
+                        {
+                            for(i = 0; i < _portList.length; i++)
+                            {
+                                if(_portList[i].data == _defaultPortNumber)
+                                {
+                                    hasValidPort = true;
+                                    _activePort = _portList[i];
+                                    _commAgent.selectRPTP(_defaultPortNumber);
+                                    //rptpChange(null);
+                                    break;
+                                }
+                            }
+                        }
+                        else if(_changingPortNumber >= 0)
+                        {
+                            for(i = 0; i < _portList.length; i++)
+                            {
+                                if(_portList[i].data == _changingPortNumber)
+                                {
+                                    hasValidPort = true;
+                                    _activePort = _portList[i];
+                                    _commAgent.selectRPTP(_changingPortNumber);
+                                    break;
+                                }
+                            }
+                        }
+
+                        if(!hasValidPort)
+                        {
+                            if(_portList.length > 0)
+                            {
+                                _activePort = _portList[0];
+                                _commAgent.selectRPTP(_portList[0].data);
+                            }
+                            else
+                            {
+                                trace("Select RPTP Error, on valid port");
+                            }
+                        }
+                        
+
+                        if(_changingPortNumber < 0)
+                        {                        
+                            if(_activeAnalyzer != null && _activePort != null)
+                            {
+                                var analyzerName:String = _activeAnalyzer.label;
+                                var portNumber:int = _activePort.data;
+                                if(_liveSiteList != null)
+                                {
+	                                for(j = 0; j < _liveSiteList.length; j++)
+	                                {
+	                                    var obj:Object = _liveSiteList[j];
+	                                    if(obj.analyzer_name == analyzerName && obj.port_id == portNumber)
+	                                    {
+	                                        _selectSiteId = obj.site_id;
+	                                        break;
+	                                    }
+	                                }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            _changingPortNumber = -1;
+                        }
+
+                        if (_frameTimer == null)
+                        {
+                            init_chart();
+                        }
+                        _frameTimer.start();
+                        
+                        _gotSettings = true;
+                    }
+                }
+                else if (curr_state == "getRPTP")
+                {
+                    if (response_type == "nak")
+                    {
+                        Alert.show("Failed to get the current Port")
+                        logoff();
+                    }
+                    else if (response_type == "response")
+                    {
+                        Alert.show("Get RPTP");
+                    }
+             
+                }
+                else if (curr_state == "selectRPTP")
+                {
+                    if (response_type == "nak")
+                    {
+                        Alert.show("Failed to get list of ports");
+                        logoff();
+                    }
+                    else if (response_type == "ack")
+                    {
+                        _commAgent.getSettings();
+                    }
+                }
+                else if (curr_state == "trigger")
+                {
+                    //ignore acks
+                    if (response_type == "nak")
+                    {
+                        Alert.show("Failed to get list of ports");
+                        logoff();
+                    }
+                    else if (response_type == "response")
+                    {
+                        if(!_siteBar.enabled && _gotSettings)
+                        {
+                            _siteBar.enabled = true;
+                            _traceBox.controlBarEnabled = true;
+                            updateCurrentUrl();
+                            
+                            CursorManager.removeAllCursors();
+                        }
+                        
+                        _initFinished = true;
+
+                        _statusText = "Receiving Traces.";
+                        if (image_buffer.length == 0)
+                        {
+                            image_buffer = args[2];
+                            //init_chart();
+                        }
+                        else
+                        {
+                            image_buffer = args[2];
+                            _traceBox.imageBuffer = image_buffer;
+                            _traceBox.displayImage();
+                        }
+                    }
+                }    
+                else if (curr_state == "listHM") // LIST NODES COMMAND
+                {
+                    if (response_type == "ack")
+                    {
+                        //We should be getting some sort of response.
+                    }
+                    else if (response_type == "nak")
+                    {
+                        Alert.show("Failed to listHM " + response_type);
+                        //Dead End
+                        logoff();
+                    }
+                    else if (response_type == "response")
+                    {
+                        _analyzerList = new ArrayCollection(args[2]);
+                        if (_analyzerList.length > 0)
+                        {
+                            if(!_initFinished)
+                            {
+                                var hasValidAnalyzer:Boolean = false;
+                                if(_defaultAnalyzerName != null)
+                                {
+                                    for(i = 0; i < _analyzerList.length; i++)
+                                    {
+                                        if(_analyzerList[i].label == _defaultAnalyzerName)
+                                        {
+                                            _activeAnalyzer = _analyzerList[i];
+                                            hasValidAnalyzer = true;
+                                            
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if(_siteList != null)
+                                {
+                                    _liveSiteList = new Array();
+                                    
+                                    for(i = 0, k = 0; i < _analyzerList.length; i++)
+                                    {
+                                        trace ("Analyzer:" + _analyzerList[i].label);
+                                        for(j = 0; j < _siteList.length; j++)
+                                        {
+                                            if(_siteList[j].purpose != null && _siteList[j].purpose != 1) continue;
+                                            
+                                            if(_siteList[j].analyzer_name == null) continue;
+                                            
+                                            var temp:String = _siteList[j].analyzer_name.substr(0, 19);
+                                            
+                                            if(temp == _analyzerList[i].label)
+                                            {
+                                                _liveSiteList[k] = _siteList[j];
+                                                k++;
+                                            }
+                                        }
+                                    }
+                                    
+                                    trace("Live site count:" + _liveSiteList.length);
+                                }
+                                
+                                if(_analyzerList != null && _analyzerList.length > 0)
+                                {
+                                    if(_initFinished && !hasValidAnalyzer)
+                                    {
+                                        _activeAnalyzer = _analyzerList[0];
+                                    }
+                                }
+                            }
+
+                            attachToAnalyzer();
+                        }
+                        else
+                        {
+                            trace("Analyzer count is 0!");
+                            this.setStatus("No avail Analyzer");
+                            
+                            Alert.show("No avail Analyzer.\nWould you like to see the details?", "Warning", 3, this, noAvailAnalyzerAlertHandler, null, 2);
+                                                     
+                            return;
+                        } 
+                    }
+                    else
+                    {
+                        Alert.show("got nothing for server info" + args[1]);
+                    }
+                }
+            }
+            
+            private function noAvailAnalyzerAlertHandler(event:CloseEvent):void
+            {
+                if(event.detail == Alert.YES)
+                {
+                    var url:String = Application.application.url;
+                    var connectHost:String = URLUtil.getServerName(url);
+                    var request:URLRequest = new URLRequest("http://"+connectHost+":8008/");
+                    navigateToURL(request, "_blank");
+                }
+            }
+
+            
+            /* Triggered when the user changes the fps setting */
+            private function fps_change():void
+            {
+                if (_frameTimer != null)
+                {  
+                    if (fps_step.value < 11)
+                    {
+                        _frameTimer.delay = 1000.0 / fps_step.value;
+                    }
+                    else
+                    {
+                        //when fps_step value is = 11 then we are going to request as many traces
+                        // as possib
+                        _frameTimer.delay = 5000;
+                        _commAgent.trigger(0);
+                    }
+                }
+            }
+            
+            private function unload():void
+            {
+                trace("OK, lets quit");
+                _closingApp = true;
+                logoff();
+            }
+            
+            private function init_chart():void    
+            {
+                _frameTimer = new Timer(1000.0 / fps_step.value, 0);
+                _frameTimer.addEventListener(TimerEvent.TIMER, frameTimerHandler);
+            }
+ 
+            public function frameTimerHandler(event:TimerEvent):void
+            {
+                if(fps_step.value == 11)
+                {
+                    //comm.trigger(0);
+                }
+                else
+                {
+                    _commAgent.trigger(1);
+                }    
+            }
+            
+            public function attachToAnalyzer():void
+            {
+                CursorManager.setBusyCursor();
+                
+                if(_analyzerList != null && _analyzerList.length > 0)
+                {
+                    if(_activeAnalyzer == null)
+                    {
+                        _activeAnalyzer = _analyzerList[0];
+                    }
+                }
+                
+                if(_activeAnalyzer == null)
+                {
+                    Alert.show("No Instruments to connect to. Try reloading page.");
+                    return;
+                }
+
+                logoff();
+                
+                var val:int = _activeAnalyzer.data;
+                var idStr:String;
+                if (val < 10)
+                {
+                    idStr = "0" + val.toString();
+                }
+                else
+                {
+                    idStr = val.toString();
+                }        
+
+                _commAgent.set_hmid(idStr);
+                _statusText = "Connecting to Analyzer";
+                _commAgent.logon();
+                _analyzerConnected = true;
+
+                _activePort = null;
+            }
+
+            private function updateCurrentUrl():void
+            {
+                var str:String = Application.application.url;
+                
+                try
+                {
+                    str = str.substring(0, str.indexOf('/', str.indexOf('//') + 2) + 1);
+                    str = str + "livetrace?siteid=" + this._selectSiteId;
+                    _urlBox.text = str;
+                }
+                catch(error:Error)
+                {
+                	trace("Url Error" + error.message);
+                }
+            }
+            
+            private function copyUrl():void
+            {
+            	if(_urlBox.text.length < 21) return;
+            	
+            	System.setClipboard(_urlBox.text);
+            }
+            
+            private function resetPeak():void
+            {
+                _traceBox.resetPeak();
+            }
+            
+            private function peakTimerHandler(event:TimerEvent):void
+            {
+                resetPeak();
+            }
+            
+            private function peakFreqChange(event:Event):void
+            {
+                var data:int = ComboBox(event.target).selectedItem.data;
+                if(data <= 0)
+                {
+                    if(_peakTimer != null)
+                    {
+                        _peakTimer.stop();
+                        _peakTimer.removeEventListener(TimerEvent.TIMER, peakTimerHandler);
+                        _peakTimer = null;
+                    }
+                }
+                else
+                {
+                    data = 1000 * data;
+                    
+                    if(_peakTimer == null)
+                    {
+                        _peakTimer = new Timer(data);
+                        _peakTimer.addEventListener(TimerEvent.TIMER, peakTimerHandler);
+                    }
+                    else if(_peakTimer.running)
+                    {
+                        _peakTimer.stop();
+                    }
+                    _peakTimer.delay = data;
+                    _peakTimer.start();
+                }
+            }
+            
+            private function clockTimerHandler(event:TimerEvent):void
+            {
+                if(_clockTimer.delay == 1)
+                {
+                    _clockTimer.delay = 1000;
+                }
+
+                var now:Date = new Date();
+   
+                _currentTime.text = Utils.getDateTimeString(now);
+            }
+         
+            private function onFullScreen():void
+            {
+                if(stage.displayState != StageDisplayState.FULL_SCREEN)
+                {
+                    stage.displayState = StageDisplayState.FULL_SCREEN;
+                }
+            }
+            
+            private function fullScreenHandler(event:FullScreenEvent):void
+            {
+                try
+                {
+                    if(event.fullScreen)
+                    {
+                        if(_traceBoxContainer.contains(_traceBox))
+                        {
+                            _traceBoxContainer.removeChild(_traceBox);
+                            this.width = stage.width;
+                            this.height = stage.height;
+                            _traceBox.x = 2;
+                            _traceBox.y = 2;
+                            _traceBox.width = stage.width - 4;
+                            _traceBox.height = stage.height - 4;
+    
+                            _traceBox.backColor = 0x040404;
+                            _traceBox.gridColor = 0x00ff00;
+                            _traceBox.traceColor = 0xffff00;
+                            //_traceBox.peakColor = 0xff8040;
+                            
+                            _mainContainer.addChild(_traceBox);
+                        }
+                    }
+                    else
+                    {
+                        if(_mainContainer.contains(_traceBox) && !_traceBoxContainer.contains(_traceBox))
+                        {
+                            _mainContainer.removeChild(_traceBox);
+                            this.width = 978;
+                            this.height = 600;
+                            _traceBox.x = 0;
+                            _traceBox.y = 0;
+                            _traceBox.width = 550;
+                            _traceBox.height = 520;
+                            
+                            _traceBox.backColor = 0xffffff;
+                            _traceBox.gridColor = 0x808080;
+                            _traceBox.traceColor = 0x000080;
+                            //_traceBox.peakColor = 0xff8040;
+                            
+                            _traceBoxContainer.addChild(_traceBox);
+                        }
+                    }
+                }
+                catch(error:Error)
+                {
+                    trace("Error on Full Screen: " + error.message);
+                }
+            }
+            
+            private function onGetUom(event:ResultEvent):void
+            {
+                var uom:int = event.result as int;
+                if(uom == 1)
+                {
+                    _defaultUom = Unit.DBUV;
+                }
+                else
+                {
+                    _defaultUom = Unit.DBMV;
+                }
+                
+                _traceBox.uom = _defaultUom;
+            }
+        ]]>
+    </mx:Script>
+    <mx:RemoteObject id="messageService" fault="onMessageFault(event)" source="AmfServicesController" destination="rubyamf">
+        <mx:method name="get_sites" result="onGetSites(event)" />
+        <mx:method name="get_uom" result="onGetUom(event)" />
+    </mx:RemoteObject>
+    <mx:Canvas id="_mainContainer" height="100%" width="100%">
+        <mx:VBox height="100%" width="100%">
+            <mx:HBox paddingTop="5" paddingLeft="5">
+                <mx:VBox>
+                    <controls:SiteBar id="_siteBar" selectedSiteId="{_selectSiteId}" siteList="{_liveSiteList}" enabled="false"/>
+                    <mx:VBox verticalGap="2" borderThickness="1" borderColor="#C0C0C0" borderStyle="solid">
+                        <mx:HBox horizontalGap="2">
+                            <mx:Button width="79" styleName="normalButton" label="{_traceBox.peakFlag ? 'Peak Off' : 'Peak Hold'}" click="_traceBox.peakFlag =! _traceBox.peakFlag; resetPeak()"/>
+                            <mx:Button width="79" styleName="normalButton" label="Reset" enabled="{_traceBox.peakFlag}" click="resetPeak()"/>
+                        </mx:HBox>
+                        <mx:HBox horizontalGap="2">
+                            <mx:Label width="79" styleName="subtitleLabel" text="Reset Time" enabled="{_traceBox.peakFlag}" />
+                            <mx:ComboBox close="peakFreqChange(event)" width="79" styleName="normalComboBox" dataProvider="{_resetPeakFreqList}" enabled="{_traceBox.peakFlag}" />
+                        </mx:HBox>                
+                    </mx:VBox>    
+                    <mx:HBox horizontalGap="2">
+                        <mx:Label styleName="subtitleLabel" text="Max FPS" width="60"/>
+                        <mx:NumericStepper styleName="normal" minimum="1" maximum="10" id="fps_step" change="fps_change()" value="5" width="55"/>
+                    </mx:HBox>
+                    <mx:DataGrid styleName="normal" height="278" width="160" dataProvider="{_settings}">
+                        <mx:columns>
+                            <mx:DataGridColumn headerText="Setting Name" width="90" dataField="name"/>
+                            <mx:DataGridColumn headerText="Value" dataField="val"/>
+                        </mx:columns>
+                    </mx:DataGrid>
+                    <!-- Remove the fullscreen function -->
+                    <mx:VBox visible="false" width="100%" horizontalAlign="center">
+                        <mx:Button icon="{_fullScreenIco}" width="40" height="40" toolTip="Full Screen" click="onFullScreen()" />
+                    </mx:VBox>
+                </mx:VBox>
+                <mx:VBox width="550">
+                    <mx:HBox width="100%" horizontalGap="2">
+                        <mx:Label styleName="subtitleLabel" text="Current Url" />
+                        <mx:TextInput text="" styleName="normal" toolTip="Double click to copy the url into system clipboard." doubleClickEnabled="true" doubleClick="copyUrl()" id="_urlBox" editable="false" width="100%"/>
+                        <mx:Button click="copyUrl()" styleName="normalButton" label="copy" width="54" enabled="{_urlBox.text.length >= 21}" />
+                    </mx:HBox>
+                    <mx:Box id="_traceBoxContainer">
+                        <controls:TraceBox width="550" height="520" id="_traceBox"/>
+                    </mx:Box>
+                </mx:VBox>
+                <mx:VBox>
+                    <mx:HBox horizontalGap="2">
+                        <mx:Label width="85" styleName="subtitleLabel" text="Client IP" />
+                        <mx:Text id="_clientIpBox" styleName="blueText" color="#0000ff" text="127.0.0.1" />
+                    </mx:HBox>
+                    <mx:HBox horizontalGap="2">
+                        <mx:Label width="85" styleName="subtitleLabel" text="Current Time" />
+                        <mx:Text id="_currentTime" styleName="blueText" color="#0000ff" text="" />
+                    </mx:HBox>
+                    <mx:DataGrid styleName="normal" width="241" height="495" dataProvider="{_clientList}">
+                        <mx:columns>
+                            <mx:DataGridColumn headerText="Client" dataField="user"/>
+                            <mx:DataGridColumn headerText="Analyzer" dataField="HMName"/>
+                            <mx:DataGridColumn headerText="Switch Port" dataField="SwitchPositionName"/>
+                        </mx:columns>
+                    </mx:DataGrid>
+                </mx:VBox>
+            </mx:HBox>
+            <mx:HBox>
+                <mx:Text paddingLeft="175" width="728" styleName="statusInfoText" text="{_statusText}" />  
+            </mx:HBox>
+        </mx:VBox>       
+    </mx:Canvas>     
+</mx:Application>

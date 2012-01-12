@@ -1,0 +1,99 @@
+tech:
+sysfileadm:
+  setup/system_file_list
+  setup/system_file_delete
+  setup/upload_system_file
+siteadm:
+  setup/site_form
+  setup/site_new
+  setup/site_delete
+  setup/site_list
+alarmadmin:
+  alarm/set_alarms_state
+useradmin:
+  roles/index
+  roles/list
+  roles/show
+  static_permissions/index
+  static_permissions/list
+  static_permissions/show
+  static_permissions/new
+  static_permissions/create
+  static_permissions/edit
+  static_permissions/update
+  static_permissions/destroy
+  users/index
+  users/list
+  users/show
+  users/new
+  users/create
+  users/edit
+  users/roles
+  users/permissions
+  users/update
+  users/destroy
+networkadm2:
+  network/switch_list
+  network/start_ingress
+  network/start_performance
+  network/stop_monitor
+  network/reset_monitor
+  network/syslog_list
+networkadmin:
+  network/set_scheduled_sources_switch_port_id
+  network/set_scheduled_sources_stat_trace_flag
+  network/init_schedule
+  network/delete_from_sched
+  network/add_to_schedule
+  network/schedule_edit
+  network/schedule_port
+  network/switch_new
+  network/switch_create
+  network/switch_edit
+  network/switch_update
+  network/switch_delete
+  network/analyzer_create
+  network/analyzer_edit
+  network/analyzer_new
+  network/analyzer_update
+  network/analyzer_delete
+  network/port_edit
+  network/port_update
+  setup/upload_firmware
+  setup/start_firmware_upload
+  setup/firmware_delete
+profileadmin:
+  profile/new
+  profile/edit
+  profile/delete
+installer:
+  config_params/index
+  config_params/list
+  config_params/show
+  config_params/edit
+  config_params/update
+development:
+  config_params/new
+  config_params/create
+  config_params/destroy
+  roles/new
+  roles/create
+  roles/edit
+  roles/update
+  roles/destroy
+remove:
+  demo/index
+  demo/redirect
+  g_reports/show
+  maintenance/index
+  network/debug
+  network/update_schedule_dtls
+  network/maintenance
+  profile_mgr/index
+  profile_mgr/list
+  profile_mgr/show
+  profile_mgr/new
+  profile_mgr/create
+  profile_mgr/edit
+  profile_mgr/update
+  profile_mgr/destroy

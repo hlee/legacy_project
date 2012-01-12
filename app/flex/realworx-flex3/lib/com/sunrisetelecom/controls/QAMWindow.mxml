@@ -1,0 +1,616 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="1024" height="506" show="reset_display_values()" creationComplete="initData()" implements="com.sunrisetelecom.controls.IMeasWindow" xmlns:controls="com.sunrisetelecom.controls.*">
+<mx:Style>
+	.qamStyle {
+
+	  fontSize:12;
+	}
+</mx:Style>
+ <mx:Script>
+ 	<![CDATA[
+ 		import com.sunrisetelecom.events.BusyEvent;
+ 		import com.sunrisetelecom.avantron.SettingsObj;
+ 		import mx.collections.ArrayCollection;
+ 		import mx.utils.ArrayUtil;
+ 		import mx.core.Application;
+ 		import mx.graphics.ImageSnapshot;
+ 		public var xmargin:Number=30;
+ 		public var ymargin:Number=15;
+ 		private var alpha_ratio:Number=0.3;
+ 		private var sample_count:Number=0;
+ 		private var display_values:Array;
+ 		private var mer_value:Number=0;
+ 		private var init_complete:Boolean=false;
+ 		private var reset_counter:int=0;
+ 		private var zoom_factor:uint=1;
+ 		private var point_count:Number=0;
+ 		private var point_summary:Number=10;
+ 		private var mer_smr:Number=0;
+ 		private var preber_smr:Number=0;
+ 		private var postbar_smr:Number=0;
+ 		private var start_dt:Date;
+ 		private var hilight_startx:Number=0;
+ 		private var hilight_starty:Number=0;
+ 		private var hilight_width:Number=0;
+ 		private var hilight_height:Number=0;
+ 		private var hilight_visible:Boolean=false;
+ 		private var zoom_visible:Boolean=false;
+ 		private var zoom_data:BitmapData;
+ 		[Bindable] private var summaryData:ArrayCollection=new ArrayCollection();
+ 		[Bindable] public var text_color:uint;
+ 		[Bindable] public var grid_color:uint;
+ 		[Bindable] public var trace_color:uint;
+ 		[Bindable] public var trace2_color:uint;
+ 		[Bindable] public var threshold_color:uint;
+ 		[Bindable] public var marker_color:uint;
+ 		[Bindable] private var graph_data:ArrayCollection=new ArrayCollection();
+ 		[Bindable] private var bitmap_data:BitmapData=new BitmapData(256,256);
+ 		[Bindable] private var bitmap:Bitmap=new Bitmap();
+ 		[Bindable] public var bkg_color:uint;
+
+ 		public function initData():void
+ 		{
+ 			trace("Init Data");
+ 			reset_display_values();
+ 			init_complete=true;
+ 			update_colors();
+
+ 		}
+ 		public function reset_constellation():void
+ 		{
+  			var i:int=0;
+ 			var j:int=0;
+ 			constellationImage.graphics.clear();
+  			display_values=new Array(256);
+ 			for (i=0;i<256;i++)
+ 			{
+ 				display_values[i]=new Array(256);
+ 				for (j=0;j<256;j++)
+ 				{
+ 					display_values[i][j]=0;
+ 				}
+ 			}	
+ 			draw_grid();		
+ 		}
+ 		public function reset_display_values():void
+ 		{
+ 			trace("Init Data");
+ 			
+ 			reset_constellation(); 			
+ 			summaryData = new ArrayCollection();
+ 			start_dt=new Date();
+ 			reset_counter=0;
+ 		
+ 		}
+ 		private function draw_grid():void
+ 		{
+ 			var multiplier:uint=16;
+ 			bitmap_data.lock();
+ 			multiplier = (Application.application.settings["MOD_TYPE"] == "3" ) ? 32 : 16;
+ 			for (var i:uint=0;i<256;i+= 1)
+ 			{
+ 				
+ 				for (var j:uint=0;j<256;j+=1)
+ 				{
+ 					if (i%multiplier == 0)
+ 					{
+ 						if ((i==128) || (i==0))
+ 						{
+					   		bitmap_data.setPixel(i,j, grid_color); 							
+ 						}
+ 						else if (j%4 < 2)
+ 						{
+					   		bitmap_data.setPixel(i,j, grid_color);
+					  	}
+					  	else
+					  	{
+					  		bitmap_data.setPixel(i,j,bkg_color);
+					  	}
+					}
+ 					else if (j%multiplier == 0)
+ 					{
+ 						if ((j==128) || (j==0) )
+ 						{
+					   		bitmap_data.setPixel(i,j, grid_color); 							
+ 						}
+ 						else if (i%4 < 2)
+ 						{
+					   		bitmap_data.setPixel(i,j, grid_color);
+					  	}
+					  	else
+					  	{
+					  		bitmap_data.setPixel(i,j,bkg_color);
+					  	}					}
+					else if ((i%multiplier ==multiplier/2) && (j%multiplier == multiplier/2))
+					{
+					   bitmap_data.setPixel(i,j, grid_color);
+						
+					}
+					else
+					{
+						bitmap_data.setPixel(i,j,bkg_color);
+					} 				
+				}
+ 			}
+ 			bitmap_data.unlock();
+ 		}
+ 		public function update_colors():void
+		  {
+		  	 var myDynStyle:CSSStyleDeclaration =
+      			StyleManager.getStyleDeclaration(".qamStyle");
+
+		  	myDynStyle.setStyle('color', text_color);
+		  	draw_grid();
+		  
+		  }
+ 		public function update_settings(settings:SettingsObj):void
+ 		{
+ 			chn_cfg_freq.text=(settings["CENTER_FREQ"]/1000000.0).toString();
+ 			chn_symbol_rate.text=settings["IDEAL_SYMB_RATE"].toString();
+ 			chn_att_cmb.selectedIndex=find_index(settings["ATT"].toString(),ArrayCollection(chn_att_cmb.dataProvider));
+ 			chn_modtype_cmb.selectedIndex=
+ 				find_index(settings["MOD_TYPE"].toString(),ArrayCollection(chn_modtype_cmb.dataProvider));
+			chn_stdtype_cmb.selectedIndex=
+				find_index(settings["ST_TYPE"].toString(),ArrayCollection(chn_stdtype_cmb.dataProvider));
+			chn_polarity_cmb.selectedIndex=
+				find_index(settings["POLARITY"].toString(),ArrayCollection(chn_polarity_cmb.dataProvider));
+			dispatchEvent(new BusyEvent(BusyEvent.STOP_BUSY));
+ 		}
+ 		private function find_index(dataval:String,data:ArrayCollection):int
+ 		{
+ 			var index:int=-1;
+ 			for (index=0;index < data.length;index ++)
+ 			{
+ 				if (data[index].data == dataval)
+ 				{
+ 					return index;
+ 				}
+ 			}
+ 			return -1;
+ 		}
+ 		private function v_scale(db:Number):int
+		{
+		    var display_height:Number=constellationImage.height;
+		    var draw_height:Number=display_height-ymargin;
+		    return (draw_height/2+db);
+	    }
+		private function h_scale(pos:Number):int
+		{
+		    var display_width:Number=constellationImage.width;
+		    var draw_width:Number=display_width-2*xmargin;
+		    return (draw_width/2+pos);
+		}
+		private function channel_chg():void
+		{
+			var settings:SettingsObj=Application.application.settings;
+			var set_settings:Boolean=false;
+			reset_display_values();
+			submit_btn.enabled=false;
+			if (Number(chn_cfg_freq.text)!= Number(settings["CENTER_FREQ"])/1000000.0)
+			{
+				Application.application.settings["CENTER_FREQ"]=Number(chn_cfg_freq.text)*1000000;
+				set_settings=true;			
+			}
+			if (int(chn_att_cmb.selectedItem.data) != Application.application.settings["ATT"])
+			{
+				Application.application.settings["ATT"]=chn_att_cmb.selectedItem.data.toString();
+				set_settings=true;
+			}
+			if (int(chn_stdtype_cmb.selectedItem.data) != Application.application.settings["ST_TYPE"])
+			{
+				Application.application.settings["ST_TYPE"]=chn_stdtype_cmb.selectedItem.data.toString();
+				set_settings=true;
+			}
+			if (int(chn_modtype_cmb.selectedItem.data) != Application.application.settings["MOD_TYPE"])
+			{
+				Application.application.settings["MOD_TYPE"]=chn_modtype_cmb.selectedItem.data.toString();
+				set_settings=true;
+			}
+			if (int(chn_polarity_cmb.selectedItem.data) != Application.application.settings["POLARITY"])
+			{
+				Application.application.settings["POLARITY"]=chn_polarity_cmb.selectedItem.data.toString();
+				set_settings=true;
+			}
+			if (parseInt(chn_symbol_rate.text) != Application.application.settings["IDEAL_SYMB_RATE"])
+			{
+				Application.application.settings["IDEAL_SYMB_RATE"]=parseInt(chn_symbol_rate.text);
+				set_settings=true;
+			}		
+			if (set_settings)
+			{
+				Application.application.set_settings(15,settings);
+				reset_display_values();
+				dispatchEvent(new BusyEvent(BusyEvent.START_BUSY,"Updating Settings on Analyzer"));
+				
+			}
+			
+		}
+		public function hilightMove(event:MouseEvent):void
+		{
+			hilight_width=event.localX-hilight_startx;
+			hilight_height=event.localY-hilight_starty;			
+		}
+		public function hilightDisable(event:MouseEvent):void
+		{
+			hilight_visible=false;
+		}
+		public function hilightStart(event:MouseEvent):void
+		{
+			hilight_visible=true;
+			hilight_startx=event.localX;
+			hilight_starty=event.localY;
+			hilight_width=0
+			hilight_height=0;
+			constellationCanvas.addEventListener(MouseEvent.MOUSE_MOVE,hilightMove);
+			constellationCanvas.addEventListener(MouseEvent.MOUSE_OUT,hilightDisable);
+		}
+		public function hilightStop(event:MouseEvent):void
+		{	
+			constellationCanvas.removeEventListener(MouseEvent.MOUSE_MOVE,hilightMove);
+			constellationCanvas.removeEventListener(MouseEvent.MOUSE_OUT, hilightDisable);
+			var rect:Rectangle=new Rectangle(hilight_startx,hilight_starty,hilight_width,hilight_height);
+			if (hilight_height < 0)
+			{
+				hilight_height=Math.abs(hilight_height);
+				hilight_starty=hilight_starty-hilight_height;
+			}
+			if (hilight_width < 0)
+			{
+				hilight_width=Math.abs(hilight_width);
+				hilight_startx=hilight_startx-hilight_width;
+			}
+			if (Math.abs(hilight_height) <Math.abs(hilight_width))
+			{
+				hilight_height=hilight_width;
+			}
+			else
+			{
+				hilight_width=hilight_height;
+			}
+			var zoom:Number=256/hilight_width;
+			var matrix:Matrix=new Matrix();
+			matrix.translate(hilight_startx*-1,hilight_starty*-1);
+			matrix.scale(zoom,zoom);
+			//matrix.createBox(zoom,zoom,0,hilight_startx,hilight_starty);
+			//zoom_data= ImageSnapshot.captureBitmapData(constellationCanvas,null,null,null,rect);
+			zoom_data= bitmap_data;
+			zoomImage.graphics.beginBitmapFill(zoom_data,matrix);
+			zoomImage.graphics.drawRect(zoom_data.rect.x,zoom_data.rect.y,zoom_data.rect.width+1,zoom_data.rect.height+1);
+			zoomImage.graphics.endFill();
+
+
+		}
+ 		public function display_trace(values:Object):void
+		{
+			var i:int=0;
+			var j:int=0;
+			var maxcount:int=1;
+			var image_buffer:Array=values["const_points"];
+			if (!init_complete)
+			{
+				return;
+			}
+
+
+			reset_counter++;
+			if ((reset_counter > int(cycle_entry.text)) && (cycle_mode.selectedItem.data == 1))
+			{
+				reset_constellation();
+				reset_counter=0;
+			}
+			constellationImage.graphics.clear();
+		    //constellationImage.graphics.lineStyle(0,0x000080,1);
+		    //constellationImage.graphics.moveTo(0,0);
+		    //constellationImage.graphics.lineTo(100,100);
+
+		    var tmpmerval:int=int(values["mer"]);
+		    var tmppreber:Number=values["ber_pre"];
+		    
+		    if (tmpmerval > 1000)
+		    {
+		    	MerLbl.text=">40";
+		    	tmpmerval=400;
+		    }
+		    else
+		    {
+		       MerLbl.text=String(tmpmerval/10.0);
+		    }
+		    if (point_count < point_summary)
+		    {
+		       mer_smr=mer_smr*(point_count/point_summary) + tmpmerval*((point_summary-point_count)/point_summary);
+		       point_count+=1;
+		    }
+		    else
+		    {
+		    	point_count=0;
+		    	var curr_dt:Date=new Date();
+		    	var secondsCount:uint=Number(curr_dt.valueOf()-start_dt.valueOf())/1000;
+		    	summaryData.source.push({dt: new Date(), mer: mer_smr/10.0,
+		    	   preber: Math.log(Number(values["ber_pre"]))/Math.log(10),
+		    	   postber: Math.log(Number(values["ber_post"]))/Math.log(10)});
+		    	measchart1.dataProvider=summaryData;
+		    	measchart1.invalidateDisplayList();
+		    	measchart1.invalidateProperties();
+		    	measchart1.invalidateSeriesStyles();
+		    	measchart1.invalidateSize();
+		    	measchart1.validateDisplayList();
+		    	
+		    	mer_smr=0;
+		    	point_count=0;
+		    }
+		    PreberLbl.text=values["ber_pre"].toExponential(2);
+		    PostberLbl.text=values["ber_post"].toExponential(2);
+		    var mer:Number=0;
+	
+		    if (values["mer"] > 410)
+		    { 
+		    	mer=40;
+		    }
+		    else
+		    {
+		    	mer=values["mer"]/10.0
+		    }
+		    var obj:Object={mer:mer,preber:Number(values["ber_pre"]),
+		       postber:Number(values["ber_post"])};
+		    graph_data.addItem(obj);
+		    
+		    EnmLbl.text=(Number(values["enm"])/10.0).toString();
+		    EvmLbl.text=(Number(values["evm"])/10.0).toString();
+		    SymbErrLockLbl.text=values["symb_lock"] ? "LOCK" : "UNLOCK";
+		    FwdErrLockLbl.text=values["fwd_err_lock"] ? "LOCK" : "UNLOCK";
+		    StreamLockLbl.text=values["stream_lock"] ? "LOCK" : "UNLOCK";
+		  
+			//var qam_range:uint=(chn_modtype_cmb.value == 3) ? 256 : 256
+			var qam_range:uint=256;
+			for (i=0;i<image_buffer.length;i++)
+			{
+				var inphase:Number=image_buffer[i][0];
+				var quad:Number=image_buffer[i][1];
+				if ((inphase >= -(qam_range/2)) && (quad >= -qam_range/2))
+				{
+				display_values[quad+qam_range/2][(inphase*-1)+qam_range/2]++;
+				}
+				//trace("XX"+(inphase+127)+",YY"+(quad+127));
+			}
+			bitmap_data.lock();
+			for (i=0;i<qam_range;i++)
+			{
+				for(j=0;j<qam_range;j++)
+				{
+					var val:int=display_values[i][j];
+					if (val > maxcount)
+					{
+						maxcount=val;
+					}
+					//bitmap_data.setPixel(i,j,val*(256/maxcount)+0x80000000);
+					if (val > 0 ) 
+					{
+					   bitmap_data.setPixel(i,j, trace_color);
+					}
+					
+					//constellationImage.graphics.drawCircle(i,j,zoom_factor);
+				//trace("XX:"+i+","+j+","+val);
+				//bitmap_data.setPixel(inphase+127,quad+127,val);
+				}
+			}
+
+			bitmap_data.unlock();
+			constellationImage.graphics.beginBitmapFill(bitmap_data)
+			constellationImage.graphics.drawRect(0,0,257,257);
+			constellationImage.graphics.endFill();
+			if (hilight_visible == true)
+			{
+				var drawrect:Rectangle=new Rectangle(hilight_startx,hilight_starty,hilight_width,hilight_height);
+				constellationImage.graphics.beginFill(marker_color,0.5);
+				constellationImage.graphics.drawRect(hilight_startx,hilight_starty,hilight_width, hilight_height);
+				constellationImage.graphics.endFill();
+
+				
+			}
+		
+			
+			//constellationImage.content=bitmap;
+			
+			//for (i=0;i<256;i++)
+			//{
+			//	for(j=0;j<256;j++)
+			//	{
+
+			//		constellationImage.graphics.lineStyle(1,0x000080,1);
+			//		constellationImage.graphics.moveTo(i,j);
+			//		constellationImage.graphics.lineTo(i+3,j+3);
+
+			//	}
+			//}
+
+		
+			
+		}
+ 	 	]]>
+ </mx:Script>
+     <mx:Metadata>
+        [Event(name="startBusy", type="com.sunrisetelecom.events.BusyEvent")]
+    </mx:Metadata>
+    <mx:Metadata>
+        [Event(name="stopBusy", type="com.sunrisetelecom.events.BusyEvent")]
+    </mx:Metadata>
+
+
+ 	      <mx:HBox backgroundAlpha="0" width="100%">
+	        <mx:Button id="chn_cfg_btn" label="Channel Cfg." change="{Application.application.get_settings()}" toggle="true"/>
+	        <mx:Button id="cycle_btn" label="Cycle" toggle="true"/>
+	        <mx:Button id="reset_btn" label="Reset" buttonDown="reset_display_values()"/>
+	      </mx:HBox>
+	      <mx:HBox backgroundAlpha="0" visible="{chn_cfg_btn.selected}" height="{chn_cfg_btn.selected ? 25:0}">
+		  <mx:Label text="Freq." styleName="qamStyle"/>
+	      <mx:TextInput fontSize="8" id="chn_cfg_freq" text="763.0" width="45" change="{submit_btn.enabled=true;}"/>
+		  <mx:Label text="Att." styleName="qamStyle" />
+		  <mx:ComboBox id="chn_att_cmb" fontSize="8" width="70" change="{submit_btn.enabled=true;}">
+	       <mx:ArrayCollection >
+	       <mx:Object label="0dB" data="0"/>
+	       	<mx:Object label="5dB" data="5"/>
+	       	<mx:Object label="10dB" data="10"/>
+	       	<mx:Object label="15dB" data="15"/>
+	       	<mx:Object label="20dB" data="20"/>
+	       	<mx:Object label="25dB" data="25"/>
+	       	<mx:Object label="30dB" data="30"/>
+	       	<mx:Object label="35dB" data="35"/>
+	       	<mx:Object label="40dB" data="40"/>
+	       	<mx:Object label="45dB" data="45"/>
+	       	<mx:Object label="50dB" data="50"/>
+	       	<mx:Object label="55dB" data="55"/>
+	       	<mx:Object label="60dB" data="60"/>
+	       	<mx:Object label="65dB" data="65"/>
+	       </mx:ArrayCollection>
+	       </mx:ComboBox>
+		  <mx:Label styleName="qamStyle" text="Std. Type"/><mx:ComboBox  fontSize="8" id="chn_stdtype_cmb" width="97" change="{submit_btn.enabled=true;}">
+	       <mx:ArrayCollection >
+	       	<mx:Object label="J83 Annex B" data="2"/>
+	       	<mx:Object label="J83 Annex C" data="3"/>
+	       	<mx:Object label="NO FEC 6MHZ" data="4"/>
+	       	<mx:Object label="NO FEC 8MHZ" data="5"/>
+	       </mx:ArrayCollection>
+	       </mx:ComboBox>
+	       <mx:Label styleName="qamStyle" text="Mod Type"/><mx:ComboBox  fontSize="8" id="chn_modtype_cmb" width="82" change="{submit_btn.enabled=true;}">
+	       <mx:ArrayCollection >
+	       	<mx:Object label="QAM 64" data="3"/>
+	       	<mx:Object label="QAM 256" data="5"/>
+	       </mx:ArrayCollection>
+	       </mx:ComboBox>
+	       <mx:Label styleName="qamStyle" text="Symb. Rate" />
+	      <mx:TextInput fontSize="8" id="chn_symbol_rate" text="{(chn_modtype_cmb.value == 5) ? 5360537 :5056941 }" width="45" change="{submit_btn.enabled=true;}"/>
+			
+	       <mx:Label styleName="qamStyle" text="Polarity"/><mx:ComboBox  fontSize="8" id="chn_polarity_cmb" width="80" change="{submit_btn.enabled=true;}">
+	       <mx:ArrayCollection >
+	       	<mx:Object label="Normal" data="0"/>
+	       	<mx:Object label="Inverse" data="1"/>
+	       	<mx:Object label="Auto" data="2"/>
+	       </mx:ArrayCollection>
+	       </mx:ComboBox>	     
+	       <mx:Button fontSize="8" id="submit_btn" enabled="false" label="Change Settings" click="channel_chg()"/> </mx:HBox>
+	       <mx:HBox visible="{cycle_btn.selected}" backgroundAlpha="0" height="{cycle_btn.selected ? 25:0}" >
+	       	       <mx:ComboBox id="cycle_mode">
+	       	       <mx:ArrayCollection>
+	       	       	<mx:Object label="Contionous" data="0"/>
+	       	       	<mx:Object label="Cycle" data="1"/>   	       	
+	       	       </mx:ArrayCollection>
+	       	       </mx:ComboBox>
+	       	       <mx:Label text="Cycle Count"/>
+	       	       <mx:TextInput id="cycle_entry" width="40" text="8192" enabled="{(cycle_mode.value == 1) ? true : false}"/>
+		   </mx:HBox>
+	<mx:HBox height="260" width="100%" backgroundColor="{bkg_color}">
+	<mx:Grid styleName="dataStyle" >
+		<mx:GridRow width="100%" height="100%">
+			<mx:GridItem width="100%" height="100%">
+				<mx:Label text="MER" styleName="qamStyle"/>
+			</mx:GridItem>
+			<mx:GridItem width="100%" height="100%">
+			    <mx:Label text="MER" id="MerLbl" styleName="qamStyle"/>
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow width="100%" height="100%">
+			<mx:GridItem width="100%" height="100%">
+				<mx:Label text="Pre-BER" styleName="qamStyle"/>
+			</mx:GridItem>
+			<mx:GridItem width="100%" height="100%">
+			    <mx:Label text="" id="PreberLbl" styleName="qamStyle"/>
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow width="100%" height="100%">
+			<mx:GridItem width="100%" height="100%">
+				<mx:Label text="Post-BER" styleName="qamStyle"/>
+			</mx:GridItem>
+			<mx:GridItem width="100%" height="100%">
+			    <mx:Label text="" id="PostberLbl" styleName="qamStyle"/>
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow width="100%" height="100%">
+			<mx:GridItem width="100%" height="100%">
+				<mx:Label text="ENM" styleName="qamStyle"/>
+			</mx:GridItem>
+			<mx:GridItem width="100%" height="100%">
+			    <mx:Label text="" id="EnmLbl" styleName="qamStyle"/>
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow width="100%" height="100%">
+			<mx:GridItem width="100%" height="100%">
+				<mx:Label text="EVM" styleName="qamStyle"/>
+			</mx:GridItem>
+			<mx:GridItem width="100%" height="100%">
+			    <mx:Label text="" id="EvmLbl" styleName="qamStyle"/>
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow width="100%" height="100%">
+			<mx:GridItem width="100%" height="100%">
+				<mx:Label text="Symbol ERR Lock" styleName="qamStyle"/>
+			</mx:GridItem>
+			<mx:GridItem width="100%" height="100%">
+			    <mx:Label text="" id="SymbErrLockLbl" styleName="qamStyle"/>
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow width="100%" height="100%">
+			<mx:GridItem width="100%" height="100%">
+				<mx:Label  styleName="qamStyle" text="FWD ERR LOCK"/>
+			</mx:GridItem>
+			<mx:GridItem width="100%" height="100%">
+			    <mx:Label  styleName="qamStyle" text="" id="FwdErrLockLbl" />
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow width="100%" height="100%">
+			<mx:GridItem width="100%" height="100%">
+				<mx:Label  styleName="qamStyle" text="STREAM LOCK"/>
+			</mx:GridItem>
+			<mx:GridItem width="100%" height="100%">
+			    <mx:Label  styleName="qamStyle" text="UNLOCK" id="StreamLockLbl" />
+			</mx:GridItem>
+		</mx:GridRow>
+	</mx:Grid>
+	       <mx:Canvas id="constellationCanvas" backgroundColor="0x002244" height="256" width="256" verticalScrollPolicy="off" mouseDown="hilightStart(event)" mouseUp="hilightStop(event)">
+	          <mx:Image id="constellationImage" x="0" y="0" height="256" width="256" scaleContent="true" />
+	       </mx:Canvas>
+	       <mx:Canvas id="zoomCanvas" x="400" y="0" backgroundColor="{bkg_color}" height="256" width="256" verticalScrollPolicy="off" >
+	          <mx:Image id="zoomImage" x="0" y="0" height="256" width="256" scaleContent="true" />
+	       </mx:Canvas>
+
+	</mx:HBox>
+		<mx:Stroke id="s1" color="yellow" weight="1"/>
+		<mx:Stroke id="s2" color="red" weight="1"/>
+		<mx:Stroke id="s3" color="green" weight="2" alpha="0.6"/>
+			<mx:Legend id="chartlegend" dataProvider="{measchart1}" direction="horizontal" styleName="qamStyle"/>
+		<mx:LineChart id="measchart1" height="120" width="80%" dataProvider="{summaryData}" styleName="qamStyle">
+        <mx:horizontalAxis>
+            <mx:DateTimeAxis dataUnits="seconds" displayLocalTime="true"/>
+        </mx:horizontalAxis>
+		<mx:series>
+            <controls:ExtendedLineSeries filterData="false" id="mer_series" displayName="MER" xField="dt" yField="mer" lineStroke="{s1}">
+                <controls:verticalAxis>
+                    <mx:LinearAxis id="v1" minimum="15" maximum="43"/>
+                </controls:verticalAxis>
+			</controls:ExtendedLineSeries>
+			<controls:ExtendedLineSeries filterData="false" id="preber_series" displayName="Pre-BER" xField="dt" yField="preber" lineStroke="{s2}">
+                <controls:verticalAxis>
+                    <mx:LinearAxis id="v2" minimum="-13" maximum="-5"/>
+                </controls:verticalAxis>
+			</controls:ExtendedLineSeries>
+
+			<controls:ExtendedLineSeries filterData="false" id="postber_series" displayName="Post-BER" xField="dt" yField="postber" lineStroke="{s3}"/>
+
+		</mx:series>
+			
+
+		<mx:verticalAxisRenderers>
+			
+			<mx:AxisRenderer placement="left" axis="{v1}"/>
+			<mx:AxisRenderer placement="right" axis="{v2}"/>
+		</mx:verticalAxisRenderers>
+	</mx:LineChart>
+
+	<!--<mx:LineChart id="qamchart" width="100%" height="91" dataProvider="{graph_data}">
+		<mx:series>
+			<mx:LineSeries displayName="Series 1" yField="mer"/>
+		</mx:series>
+	</mx:LineChart>
+	<mx:Legend dataProvider="{qamchart}"/>-->
+
+
+</mx:VBox>

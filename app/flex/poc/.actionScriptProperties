@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<actionScriptProperties version="3" mainApplicationPath="at2500w.mxml">
+  <compiler additionalCompilerArguments="-locale en_US" copyDependentFiles="true" generateAccessible="false" strict="true" warn="true" htmlGenerate="true" htmlPlayerVersionCheck="true" htmlPlayerVersion="9.0.28" htmlExpressInstall="true" htmlHistoryManagement="true" outputFolderPath="bin-debug" sourceFolderPath="src" useApolloConfig="false" verifyDigests="true" enableModuleDebug="true">
+    <compilerSourcePath/>
+    <libraryPath defaultLinkType="1">
+      <libraryPathEntry kind="4" path=""/>
+      <libraryPathEntry kind="1" path="libs" linkType="1"/>
+    </libraryPath>
+    <sourceAttachmentPath/>
+  </compiler>
+  <applications>
+    <application path="at2500w.mxml"/>
+  </applications>
+  <modules/>
+  <buildCSSFiles/>
+</actionScriptProperties>

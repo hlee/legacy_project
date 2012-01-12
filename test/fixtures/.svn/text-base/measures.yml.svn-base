@@ -1,0 +1,164 @@
+--- 
+measures_012: 
+  measure_name: measured_audio_freq
+  id: "12"
+  sf_meas_ident: "3102"
+  measure_label: Measured Audio Freq
+  divisor: 1e+06
+  dec_places: "5"
+  graph_flag: "0"
+measures_001: 
+  measure_name: ber_pre_256
+  id: "1"
+  sf_meas_ident: "1123"
+  measure_label: "256 QAM PRE BER "
+  divisor: "1"
+  dec_places: "14"
+  graph_flag: "1"
+  exp_flag: "1"
+  check_min_flag: false
+  check_max_flag: true
+measures_013: 
+  measure_name: varatio
+  id: "13"
+  sf_meas_ident: "1011"
+  measure_label: V/A Ratio
+  divisor: "10"
+  dec_places: "1"
+  graph_flag: "1"
+measures_002: 
+  measure_name: ber_post_256
+  id: "2"
+  sf_meas_ident: "1124"
+  measure_label: 256 QAM POST BER
+  divisor: "1"
+  dec_places: "14"
+  graph_flag: "1"
+  exp_flag: "1"
+  check_min_flag: false
+  check_max_flag: true
+measures_003: 
+  measure_name: mer_256
+  id: "3"
+  sf_meas_ident: "1125"
+  measure_label: 256 QAM MER
+  divisor: "10"
+  dec_places: "1"
+  graph_flag: "1"
+  check_min_flag: true
+  check_max_flag: false
+  sanity_max: 40
+measures_004: 
+  measure_name: ber_pre_64
+  id: "4"
+  sf_meas_ident: "1117"
+  measure_label: "64 QAM PRE BER "
+  divisor: "1"
+  dec_places: "14"
+  graph_flag: "1"
+  exp_flag: "1"
+  check_min_flag: false
+  check_max_flag: true
+  graph_flag: "1"
+measures_005: 
+  measure_name: ber_post_64
+  id: "5"
+  sf_meas_ident: "1118"
+  measure_label: 64 QAM POST BER
+  divisor: "1"
+  dec_places: "14"
+  graph_flag: "1"
+  exp_flag: "1"
+  check_min_flag: false
+  check_max_flag: true
+  graph_flag: "1"
+measures_006: 
+  measure_name: mer_64
+  id: "6"
+  sf_meas_ident: "1119"
+  measure_label: 64 QAM MER
+  divisor: "10"
+  dec_places: "1"
+  graph_flag: "1"
+  check_max_flag: false
+  check_min_flag: true
+  graph_flag: "1"
+  sanity_max: 40
+measures_007: 
+  measure_name: enm
+  id: "7"
+  sf_meas_ident: "3003"
+  measure_label: ENM
+  divisor: "10"
+  dec_places: "1"
+  graph_flag: "0"
+  check_min_flag: false
+  check_max_flag: false
+measures_008: 
+  measure_name: evm
+  id: "8"
+  sf_meas_ident: "3002"
+  measure_label: EVM
+  divisor: "1"
+  dec_places: "10"
+  graph_flag: "0"
+  check_min_flag: false
+  check_max_flag: false
+measures_009: 
+  measure_name: dcp
+  id: "9"
+  sf_meas_ident: "3001"
+  measure_label: DCP
+  divisor: "1"
+  dec_places: "1"
+  graph_flag: "1"
+measures_010: 
+  measure_name: measured_video_freq
+  id: "10"
+  sf_meas_ident: "3101"
+  measure_label: Measured Video Freq
+  divisor: 1e+06
+  dec_places: "5"
+  graph_flag: "0"
+  check_min_flag: false
+  check_max_flag: false
+measures_011: 
+  measure_name: video_lvl
+  id: "11"
+  sf_meas_ident: "1010"
+  measure_label: Video Level
+  divisor: "10"
+  dec_places: "1"
+  graph_flag: "1"
+  check_min_flag: false
+  check_max_flag: false
+measures_012: 
+  measure_name: symb_lock
+  id: "12"
+  sf_meas_ident: "3030"
+  measure_label: Symbolic Lock
+  divisor: "1"
+  dec_places: "1"
+  graph_flag: "1"
+  check_min_flag: false
+  check_max_flag: false
+measures_013: 
+  measure_name: fwd_err_lock
+  id: "13"
+  sf_meas_ident: "3031"
+  measure_label: FWD ERR Lock
+  divisor: "1"
+  dec_places: "1"
+  graph_flag: "1"
+  check_min_flag: false
+  check_max_flag: false
+measures_014: 
+  measure_name: stream_lock
+  id: "14"
+  sf_meas_ident: "3032"
+  measure_label: Stream Lock
+  divisor: "1"
+  dec_places: "1"
+  graph_flag: "1"
+  check_min_flag: false
+  check_max_flag: false

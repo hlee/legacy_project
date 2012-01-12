@@ -1,0 +1,110 @@
+Text.statusInfoText {
+    color: #0000ff;
+    fontWeight: bold;
+    fontSize: 12;
+    textAlign: left;
+    fontStyle: italic;
+}
+
+Text.normalText {
+    fontWeight: normal;
+    fontSize: 12;
+}
+
+Text.blueText {
+    fontWeight: normal;
+    fontSize: 12;
+    color: #0000ff;
+}
+
+
+
+Label.subtitleLabel {
+    fontWeight: bold;
+    fontSize: 12;
+}
+
+Label.tableHeader {
+    fontWeight: bold;
+    fontSize: 11;
+}
+
+Label.tableUnit {
+    fontWeight: normal;
+    fontSize: 9;
+    textAlign: right;
+}
+
+Label.xAxisLabel {
+    fontSize: 11;
+    fontWeight: normal;
+    textAlign: center;
+}
+
+Label.yAxisLabel {
+    fontSize: 11;
+    fontWeight: normal;
+    textAlign: right;
+}
+
+
+
+LinkButton.normalLinkButton {
+    textDecoration: underline;
+    textAlign: left;
+    color: #0000ff;
+    fontWeight: normal;
+    fontSize: 11;
+}
+
+Legend.normalLegend {
+    fontSize: 11;
+    fontWeight: bold;
+}
+
+Button.normalButton {
+    fontSize: 11;
+    fontWeight: bold;
+}
+
+ComboBox.normalComboBox {
+   fontSize: 11;
+   fontWeight: normal;
+}
+
+List.normalList {
+   fontSize: 10;
+   fontWeight: normal;   
+}
+
+PlotSeries.chartPlotSeries {
+	radius: 2;
+}
+
+TitleWindow.zoomWindow {
+	backgroundAlpha: 0.6;
+	backgroundColor: #A0A0A0;
+	borderColor: #9199A4;
+	borderAlpha: 0.8;
+	borderStyle: "none";
+	borderThickness: 0;
+	paddingBottom: 5;
+	paddingLeft: 5;
+	paddingRight: 5;
+	paddingTop: 5;
+	headerHeight: 12;
+}
+
+
+
+Application.mainForm {
+    backgroundGradientColors: #ffffff, #f0f0f0;
+    fontFamily: Arial;
+    fontSize: 12;
+}
+
+global.normal {
+    fontFamily: Arial;
+    fontSize: 11;
+    fontWeight: normal;
+}

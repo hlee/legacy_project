@@ -1,0 +1,8 @@
+<p>
+<h2>Site Create</h2>
+<%=error_messages_for :site%>
+<p>
+<%=form_tag({:action=>"site_save" , :id=>@site.id}) %>
+Site:  <%= text_field("site","name") %><p>
+<%=submit_tag %>
+</form>

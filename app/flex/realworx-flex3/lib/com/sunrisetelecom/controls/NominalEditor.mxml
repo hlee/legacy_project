@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="112" height="34" verticalAlign="middle" horizontalAlign="center" alpha="1.0" backgroundColor="#B7B4B4">
+<mx:Script>
+	<![CDATA[
+		import mx.events.FlexEvent;
+		public var field:String;
+		public function get setting():String
+		{
+			if (measure_active.selected)
+			{
+				return measure_nominal.text;
+			}
+			else
+			{
+				return null;
+			}
+		}
+		override public function set data(value:Object):void
+		{
+			if (value[field] == null)
+			{
+				measure_active.selected=false;
+				measure_nominal.text="";
+			}
+			else
+			{
+				measure_active.selected=true;
+				measure_nominal.text=value[field];
+			}
+			dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+		}
+
+	]]>
+</mx:Script>
+	<mx:CheckBox id="measure_active"/>
+	<mx:TextInput id="measure_nominal" width="66"/>
+	
+</mx:HBox>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" dataProvider="{_source}">
+    <mx:Script>
+    	<![CDATA[
+    		import mx.collections.ArrayCollection;
+    		
+    		[Bindable]
+            private var _source:ArrayCollection = new ArrayCollection([
+                {label: "1x10^-1", data: 1e-1},
+                {label: "1x10^-2", data: 1e-2},
+                {label: "1x10^-3", data: 1e-3},
+                {label: "1x10^-4", data: 1e-4},
+                {label: "1x10^-5", data: 1e-5},
+                {label: "1x10^-6", data: 1e-6},
+                {label: "1x10^-7", data: 1e-7},
+                {label: "1x10^-8", data: 1e-8},
+                {label: "1x10^-9", data: 1e-9},
+                {label: "1x10^-10", data: 1e-10},
+                {label: "1x10^-11", data: 1e-11},
+                {label: "1x10^-12", data: 1e-12}                
+            ]);
+    	
+        	override public function set data(value:Object):void
+        	{
+				for(var i:int = 0; i < dataProvider.length; i++)
+				{
+					var v:Number = Number(dataProvider[i].data);
+					if(v == Number(value.data))
+					{
+						selectedItem = dataProvider[i];
+						break;
+					}
+				}
+        	}
+        	
+        	override public function get data():Object
+        	{
+        		if(this.selectedItem == null)
+        		{
+        			return null;
+        		}
+        		else
+        		{
+        			//this.selectedItem.data.toExponential(0);
+        			
+        			return this.selectedItem.data;
+        		}
+        	}
+    	]]>
+    </mx:Script>
+</mx:ComboBox>

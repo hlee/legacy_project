@@ -1,0 +1,10 @@
+<%=form_tag({:action=>"link_save" , :id=>@link.id}) %>
+<%= error_messages_for 'link' %>
+<table class="datatable" width='90%'>
+<tr bgcolor='#BFBFD2'><td colspan='2' style="valign:middle;"><h2>Add Customers Link</h2></td></tr>
+<tr><td>link Name:</td><td><%= text_field("link","name") %></td></tr>
+<tr bgcolor='#FFFCDF'><td>link URL:</td><td><%= text_field("link","url")%>(Reminder: start with the protocol)</td></tr>
+<tr><td>link description:</td><td><%= text_field("link","description") %></td></tr>
+<tr><td colspan='2'><%=submit_tag %></td></tr>
+</table>
+</form>

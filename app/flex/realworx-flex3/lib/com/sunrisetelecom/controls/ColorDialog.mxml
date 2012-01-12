@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="254" height="308">
+    <mx:Script>
+     	<![CDATA[
+            import com.sunrisetelecom.events.DialogEntryEvent;
+            
+         	private var colors_obj:Object = {};
+        	private function reset_colors():void
+         	{
+         		graph_bkg_color.selectedColor=0x000000;
+         		grid_line_color.selectedColor=0xffffff;
+         		txt_color.selectedColor=0x0010f0;
+         		bkg_color.selectedColor=0x000080;
+         		trace1_color.selectedColor=0x00c0c0;
+         		marker_color.selectedColor=0xff0000;
+         		trace2_color.selectedColor=0x00ff00;
+         		thresh_color.selectedColor=0x000000;
+         	}
+         	
+        	private function bwset_colors():void
+         	{
+         		graph_bkg_color.selectedColor=0xffffff;
+         		grid_line_color.selectedColor=0x000000;
+         		txt_color.selectedColor=0x000000;
+         		bkg_color.selectedColor=0xffffff;
+         		trace1_color.selectedColor=0x000000;
+         		marker_color.selectedColor=0x000000;
+         		trace2_color.selectedColor=0x000000;
+         		thresh_color.selectedColor=0x000000;
+         	} 	
+         	
+         	public function store_colors():void
+         	{
+         		var mySo:SharedObject=SharedObject.getLocal("colors");
+         		mySo.setProperty("graph_bkg_color",graph_bkg_color.selectedColor);
+         		mySo.setProperty("grid_line_color",grid_line_color.selectedColor);
+         		mySo.setProperty("txt_color",txt_color.selectedColor);
+         		mySo.setProperty("bkg_color",bkg_color.selectedColor);
+         		mySo.setProperty("trace1_color",trace1_color.selectedColor);
+         		mySo.setProperty("marker_color",marker_color.selectedColor);
+         		mySo.setProperty("trace2_color",trace2_color.selectedColor);
+         		mySo.setProperty("thresh_color",thresh_color.selectedColor);
+         	}
+         	
+         	public function restore_colors():void
+         	{
+         		var mySo:SharedObject=SharedObject.getLocal("colors");
+         		graph_bkg_color.selectedColor = mySo.data.graph_bkg_color;
+         		grid_line_color.selectedColor = mySo.data.grid_line_color;
+         		txt_color.selectedColor =       mySo.data.txt_color;
+         		bkg_color.selectedColor =       mySo.data.bkg_color;
+         		trace1_color.selectedColor =    mySo.data.trace1_color;
+         		marker_color.selectedColor =    mySo.data.marker_color;
+         		trace2_color.selectedColor =    mySo.data.trace2_color;
+         		thresh_color.selectedColor =    mySo.data.thresh_color;	
+         	}
+        
+        	public function load(colors:Object):void
+         	{
+         		graph_bkg_color.selectedColor=colors.graph_bkg;
+         		grid_line_color.selectedColor=colors.grid_line;
+         		txt_color.selectedColor=colors.txt;
+         		bkg_color.selectedColor=colors.bkg;
+         		trace1_color.selectedColor=colors.trace1;
+         		marker_color.selectedColor=colors.marker;
+         		trace2_color.selectedColor=colors.trace2;
+         		thresh_color.selectedColor=colors.thresh;
+         	}
+         	
+         	public function save():void
+         	{
+         		var colors:Object={
+         			graph_bkg: graph_bkg_color.selectedColor,
+         			grid_line: grid_line_color.selectedColor,
+         			txt: txt_color.selectedColor,
+         			bkg: bkg_color.selectedColor,
+         			trace1: trace1_color.selectedColor,
+         			marker: marker_color.selectedColor,
+         			trace2: trace2_color.selectedColor,
+         			thresh: thresh_color.selectedColor
+         		}
+        
+         		dispatchEvent(new DialogEntryEvent("COLOR",colors));
+         	}
+         	
+         	public function cancel_click():void
+        	{
+        			
+        		dispatchEvent(new DialogEntryEvent("CANCEL",null));
+        	}
+        ]]>
+    </mx:Script>
+    <mx:Canvas height="264" y="0" width="232">
+        <mx:Button x="10" y="10" label="Defaults" click="reset_colors()"/>
+        <mx:Button x="10" y="40" label="Store" click="store_colors()"/>
+        <mx:Button x="133" y="10" label="Black-White" click="bwset_colors()"/>
+        <mx:Button x="133" y="40" label="Custom" click="restore_colors()"/>
+        <mx:Label x="10" y="98" text="Graph BKG"/>
+        <mx:Label x="10" y="124" text="Grid Lines"/>
+        <mx:Label x="10" y="150" text="Text"/>
+        <mx:Label x="10" y="188" text="Background"/>
+        <mx:ColorPicker id="graph_bkg_color" x="82" y="94"/>
+        <mx:ColorPicker id="grid_line_color" x="82" y="124"/>
+        <mx:ColorPicker id="txt_color" x="82" y="154"/>
+        <mx:ColorPicker id="bkg_color" x="82" y="184"/>
+        <mx:HRule x="10" y="70" width="208" height="16"/>
+        <mx:Label x="112" y="98" text="Trace"/>
+        <mx:Label x="112" y="124" text="Markers"/>
+        <mx:Label x="115" y="150" text="Trace 2"/>
+        <mx:Label x="116" y="188" text="Threshold"/>
+        <mx:ColorPicker id="trace1_color" x="184" y="94"/>
+        <mx:ColorPicker id="marker_color" x="184" y="124"/>
+        <mx:ColorPicker id="trace2_color" x="184" y="154"/>
+        <mx:ColorPicker id="thresh_color" x="184" y="184"/>
+        <mx:Button x="10" y="232" label="Cancel" click="cancel_click()"/>
+        <mx:Button x="110" y="232" label="Set Colors" click="save()"/>
+        <mx:HRule x="10" y="208" width="208" height="16"/>
+    </mx:Canvas>
+</mx:TitleWindow>

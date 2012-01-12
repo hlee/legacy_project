@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box show="onShow()" styleName="normal" horizontalScrollPolicy="off" verticalScrollPolicy="off" paddingLeft="1" paddingTop="1" paddingRight="1" paddingBottom="1" xmlns:mx="http://www.adobe.com/2006/mxml" width="160" horizontalGap="0">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import com.sunrisetelecom.events.SiteChangeEvent;
+        	import mx.managers.PopUpManager;
+        	
+            private var _searchDialog:SiteSearch = null;
+            private var _siteList:Array = null;
+            private var _selectedSiteId:int = -1;
+            
+            private function onShow():void
+            {
+                updateSwitchId();
+            }
+            
+            [Bindable]
+            public function set siteList(list:Array):void
+            {
+                if(_siteList == list) return;
+                
+            	_siteList = list;
+            	
+            	updateSwitchId();
+            	
+            	siteLookup(_selectedSiteId);
+            }
+            
+            private function updateSwitchId():void
+            {
+                if(!_siteList || _siteList.length == 0) return;
+                
+                if(_siteList[0].hasOwnProperty("switch_id")) return;
+
+                var count:int = _siteList.length;
+                
+                for(var i:int = 0; i < count; i++)
+                {
+                    var switchId:String = Math.floor((_siteList[i].port_id - 1) / 16 + 1).toString();
+                    
+                    if(switchId.length == 1)
+                    {
+                        switchId = "0" + switchId;
+                    }
+                    
+                    _siteList[i].switch_id = switchId;
+                }
+            }
+            
+            public function get siteList():Array
+            {
+                return _siteList;
+            }
+            
+            public function set selectedSiteId(id:int):void
+            {
+            	if(_selectedSiteId == id) return;
+            	
+            	_selectedSiteId = id;
+            	siteLookup(id);
+            }
+            
+            public function get selectedSiteId():int
+            {
+            	return _selectedSiteId;
+            }
+        
+            public function linkClick():void
+            {
+            	if(_siteList == null) return;
+            	if(this.parent == null) return;
+            	
+            	if(!_box.enabled) return;
+            	
+            	_box.enabled = false;
+            	
+            	_searchDialog = SiteSearch(PopUpManager.createPopUp(this.parent, SiteSearch));
+                _searchDialog["okButton"].addEventListener("click", siteSelected);
+                _searchDialog["cancelButton"].addEventListener("click", cancelSiteSelect);
+                
+                _searchDialog.load(_siteList, 1);
+                PopUpManager.centerPopUp(_searchDialog);
+            }
+            
+            private function cancelSiteSelect(e:Event):void
+            {
+                _box.enabled = true;
+            }
+            
+            private function siteSelected(e:Event):void
+            {
+                _box.enabled = true;
+                
+            	var selectedItem:Object = _searchDialog._datagrid.selectedItem;
+            	
+            	if(selectedItem == null) return;
+            	
+            	var event:SiteChangeEvent = new SiteChangeEvent();
+            	event.selectedSiteId = selectedItem["site_id"];
+                dispatchEvent(event);
+            }
+            
+            private function siteLookup(id:int):void
+            {
+                if(_siteList == null || _siteList.length == 0)
+                {
+                	_siteNameLink.label = "NONE";
+                	_analyzerNameLink.label = "NONE";
+                	_portNameLink.label = "NONE";
+                    return;
+                }
+                
+                var i:int;
+                for(i = 0; i < _siteList.length; i++)
+                {
+                    if(_siteList[i].site_id == id)
+                    {
+                    	_siteNameLink.label = _siteList[i].name;
+                        _analyzerNameLink.label = _siteList[i].analyzer_name;
+                        _portNameLink.label = _siteList[i].port_name;
+                        
+                        if(_siteNameLink.label.length == 0) _siteNameLink.label = " ";
+                        if(_analyzerNameLink.label.length == 0) _analyzerNameLink.label = " ";
+                        if(_portNameLink.label.length == 0) _portNameLink.label = " ";
+                         
+                        return;
+                    }
+                }
+                
+                _siteNameLink.label = "UNKNOWN";
+                _analyzerNameLink.label = "UNKNOWN";
+                _portNameLink.label = "UNKNOWN";
+            }
+        ]]>
+    </mx:Script>
+    <mx:VBox id="_box" width="100%" height="100%" verticalGap="0">
+        <mx:VBox width="100%" verticalGap="1" horizontalScrollPolicy="off">
+            <mx:Label styleName="subtitleLabel" paddingLeft="5" text="Site:"/>
+            <mx:LinkButton styleName="normalLinkButton" id="_siteNameLink" click="linkClick()" label="NONE" alpha="0.27" />
+        </mx:VBox>
+        <mx:VBox width="100%" verticalGap="1" horizontalScrollPolicy="off">
+            <mx:Label styleName="subtitleLabel" paddingLeft="5" text="Analyzer:"/>
+            <mx:LinkButton styleName="normalLinkButton" id="_analyzerNameLink" click="linkClick()" label="NONE" alpha="0.27" />
+        </mx:VBox>
+        <mx:VBox width="100%" verticalGap="1" horizontalScrollPolicy="off">
+            <mx:Label styleName="subtitleLabel" paddingLeft="5" text="Port:"/>
+            <mx:LinkButton styleName="normalLinkButton" id="_portNameLink" click="linkClick()" label="NONE" alpha="0.27" />
+        </mx:VBox>     
+    </mx:VBox>    
+</mx:Box>

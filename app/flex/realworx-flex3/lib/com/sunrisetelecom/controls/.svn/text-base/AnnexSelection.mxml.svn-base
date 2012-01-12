@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:Script>
+	<![CDATA[
+	import mx.controls.dataGridClasses.DataGridListData;
+ 
+           override public function set data(value:Object):void
+            {
+				var target:String=value as String
+				for (var i:int=0;i<dataProvider.length;i++)
+				{
+					var v:String=dataProvider[i].@name;
+					if (v == value.annex_name)
+					{
+						selectedItem=dataProvider[i]; 
+					}
+				}
+            }
+            
+
+		
+	]]>
+</mx:Script>         
+
+</mx:ComboBox>

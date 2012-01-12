@@ -1,0 +1,26 @@
+<h2>Region Name List</h2>
+<table class="datatable">
+<tr class="datatable" style="text-align:center;">
+  <td colspan='3' style="text-align:center;">
+    <%=button_to('Create New Region',:action=>'region_form',:controller=>'setup')%>
+  </td>
+</tr>
+<tr class="datatable">
+  <th class="datatable">Region Name</th>
+  <th class="datatable">Region IP</th>
+  <th class="datatable">Functions</th>
+</tr>
+<% @region_list.each { |region| %>
+  <tr class="datatable">
+    <td class="datatable">
+      <%=link_to region.name, {:action => 'region_form', :id => region.id}, {:title => region.name} %>
+    </td>
+    <td class="datatable">
+      <%=region.ip%>
+    </td>
+    <td class="datatable">
+      <%=button_to('Delete',:action=>'region_delete',:controller=>'setup',:id=>region.id)%>
+    </td>
+  </tr>
+<% } %>
+</table>

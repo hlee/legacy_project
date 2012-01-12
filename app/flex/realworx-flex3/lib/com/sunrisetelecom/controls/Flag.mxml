@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="42" verticalAlign="middle" horizontalAlign="center" fontWeight="bold" color="#198EF2">
+	<mx:Label text="OFF"/>
+	<mx:Script>
+		<![CDATA[
+		override public function set data(value:Object):void
+		{
+
+			dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+		}
+		]]>
+	</mx:Script>
+	
+</mx:HBox>

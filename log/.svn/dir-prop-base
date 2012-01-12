@@ -1,0 +1,15 @@
+K 10
+svn:ignore
+V 147
+*.out
+*.err
+mongrel.8005.log
+master.rb.log
+master.rb.pid
+master.rb_monitor.pid
+mongrel.8001.log
+mongrel.8002.log
+mongrel.8003.log
+mongrel.8004.log
+
+END

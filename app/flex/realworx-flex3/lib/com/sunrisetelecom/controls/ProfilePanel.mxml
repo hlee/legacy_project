@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox paddingLeft="5" paddingRight="5" xmlns:mx="http://www.adobe.com/2006/mxml" show="loadProfile()">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import com.sunrisetelecom.utils.Unit;
+            import com.sunrisetelecom.events.LinkLossEvent;
+            import com.sunrisetelecom.events.BooleanChangeEvent;
+            import mx.collections.ArrayCollection;
+            import mx.rpc.soap.WebService;
+            import mx.utils.URLUtil;
+            import mx.rpc.soap.LoadEvent;
+            import mx.rpc.events.FaultEvent;
+            import mx.rpc.Fault;
+            import mx.rpc.events.ResultEvent;
+            import mx.controls.Alert;
+            import mx.managers.PopUpManager;
+        
+            private var _profileData:ProfileMap;
+        
+            private var _defaultProfileId:int;
+            
+            private var _hasInitDialog:Boolean = false;
+            
+            private var _dialog:ProfileSelection = new ProfileSelection();
+            
+            private var _profiles:Array = null;
+        
+            [Bindable]
+            private var _profileList:Array;
+
+            private var _traceRef:ArrayCollection;
+            
+            private var _traceKey:String;
+            
+            private var _traceXKey:String;
+            
+            private var _lastSavedName:String = null;
+            
+            public static const PROFCHART_FLAG:int = DataLogViewer.PROFCHART_FLAG;
+
+            [Bindable]
+            private var _parent:DataLogViewer = null;
+            
+            public function get traceKey():String
+            {
+                return _traceKey;
+            }
+            public function set traceKey(key:String):void
+            {
+                _traceKey = key;
+            }
+            
+            public function get traceXKey():String
+            {
+                return _traceXKey;
+            }
+            public function set traceXKey(key:String):void
+            {
+                _traceXKey = key;   
+            }
+            
+            public function get traceRef():ArrayCollection
+            {
+                return _traceRef;
+            }
+            public function set traceRef(t:ArrayCollection):void
+            {
+                _traceRef = t;
+            }
+            
+            private function get _dataLogViewer():DataLogViewer
+            {
+                if(!_parent)
+                {
+                    _parent = parentApplication as DataLogViewer;
+                }
+                
+                return _parent;
+            }
+            
+            public function get defaultProfileId():int
+            {
+                return _defaultProfileId;
+            }
+            public function set defaultProfileId(id:int):void
+            {
+                _defaultProfileId = id;
+            }
+            
+            public function get profileData():ProfileMap
+            {
+                return _profileData;
+            }
+            public function set profileData(p:ProfileMap):void
+            {
+                _profileData = p;
+            }
+            
+            public function get profileName():String
+            {
+                return _profileName.text;
+            }
+            public function set profileName(name:String):void
+            {
+                _profileName.text = name;
+            }
+            
+            public function reload():void
+            {
+                messageService.get_profile_list();
+            }
+            
+            public function onServiceFault(event:FaultEvent):void
+            {
+                var fault:Fault = event.fault;
+                var message:String = "An error occurred." + fault.message + "|" + fault.faultString;
+                Alert.show(message);
+            }
+            
+            private function onGetProfileList(event:ResultEvent):void 
+            {
+                _profileList = [];
+
+                for(var i:int = 0; i < event.result.length; i++)
+                {
+                    var profile:Object = event.result[i];
+                    _profileList[i] = {label:profile.name, data:profile.name};
+                }    
+                _listButton.enabled = true;
+            }            
+            
+            public function onGetProfile(event:ResultEvent):void
+            {                
+                if(!event.result.hasOwnProperty("profile"))
+                {
+                    Alert.show("Profile not found.");
+                    
+                    _dataLogViewer.doneLoading(PROFCHART_FLAG);
+                    
+                    return;
+                }
+                
+                major_entry.text = event.result.major_offset.toFixed(1);
+                minor_entry.text = event.result.minor_offset.toFixed(1);
+                
+                var lossOffset:Number = event.result.loss_offset;
+                if(_parent != null && _parent.defaultUom == Unit.DBUV)
+                {
+                    lossOffset += 60;
+                }
+                
+                link_loss_entry.text = lossOffset.toFixed(1);
+
+                linkLossEntry();
+                link_loss_flag.selected = (event.result.link_loss == 1);
+                linkLossChange();
+  
+                _profiles = event.result.profile as Array;
+
+                if(_parent != null && _parent.defaultUom == Unit.DBUV)
+                {
+                    for(var i:int = 0; i < _profiles.length; i++)
+                    {
+                        if(_profiles[i].hasOwnProperty("val"))
+                        {
+                            _profiles[i].val += 60;
+                        }
+                    }
+                }
+                
+                loadProfileData();
+
+                _dataLogViewer.profileCreator.invalidateDisplayList();
+                _dataLogViewer.doneLoading(PROFCHART_FLAG);
+            }
+            
+            private function onSaveComplete(event:ResultEvent):void
+            {
+                if(event.result.saved == true)
+                {
+                    var e:LinkLossEvent = new LinkLossEvent(LinkLossEvent.LINKLOSS_SAVE);
+                    e.Value = Number(link_loss_entry.text);
+                    e.profileName = _lastSavedName;
+                    
+                    this.dispatchEvent(e);
+                    
+                    _listButton.enabled = false;
+                    reload();
+                }
+                else
+                {
+                    Alert.show("Error:" + event.result.error);
+                }
+                _dataLogViewer.doneLoading(PROFCHART_FLAG);
+            }
+            
+            public function listProfile():void
+            {
+                _dialog.profileList = _profileList;
+                _dialog.profileName = _profileName.text;
+                PopUpManager.addPopUp(_dialog, _dataLogViewer, true);
+                PopUpManager.centerPopUp(_dialog);
+
+                if(!_hasInitDialog)
+                {
+                    _dialog.okButton.addEventListener("click", changeProfileName);
+                    _hasInitDialog = true;
+                }
+            }
+            
+            private function changeProfileName(event:MouseEvent):void
+            {
+                if(_profileName.text != _dialog.profileName)
+                {
+                    _profileName.text = _dialog.profileName;
+                    checkEntry();
+                }
+            }
+            
+            public function loadProfile():void
+            {                
+                if(_profileName.text != "")
+                {
+                    messageService.get_profile(_profileName.text);
+                    _dataLogViewer.startLoading(PROFCHART_FLAG);
+                }
+                else
+                {
+                    Alert.show("No Profile Selected");
+                }
+            }
+            
+            public function saveProfile():void
+            {
+                var vals:Array = [];
+                var freqs:Array = [];
+                
+                if(_profileName.text != "")
+                {
+                    _lastSavedName = _profileName.text;
+                    
+                    _profiles = new Array();
+                    
+                    for(var i:int = 0; i < _profileData.length; i++)
+                    {
+                        freqs[i] = _profileData[i].dataX;
+                        vals[i] = _profileData[i].dataY;
+                        
+                        if(_parent != null && _parent.defaultUom == Unit.DBUV)
+                        {
+                            vals[i] -= 60;
+                        }
+                        
+                        var obj:Object = new Object();
+                        
+                        obj.freq = freqs[i];
+                        obj.val = vals[i];
+                        
+                        _profiles.push(obj);
+                    }
+                    var major:Number = Number(major_entry.text);
+                    var minor:Number = Number(minor_entry.text);
+                    var loss:Number = Number(link_loss_entry.text);
+                    
+                    if(_parent != null && _parent.defaultUom == Unit.DBUV)
+                    {
+                        loss -= 60;
+                    }
+                    
+                    _dataLogViewer.startLoading(PROFCHART_FLAG);
+                    messageService.set_profile(_profileName.text, vals, freqs, major, minor, loss, link_loss_flag.selected);
+                }
+                else
+                {
+                    Alert.show("To Save Profile you must specify a name.");
+                }
+                reload();
+            }
+        
+            public function checkEntry():void
+            {
+                if(_profileName.text == "")
+                {
+                    _saveButton.enabled = false;
+                    _loadButton.enabled = false;
+                }
+                else
+                {
+                    _saveButton.enabled = true;
+                    _loadButton.enabled = true;
+                }
+            }
+            
+            private function majorEntry():void
+            {
+                if(Number(major_entry.text) < Number(minor_entry.text))
+                {
+                    major_entry.text = minor_entry.text;
+                }
+                
+                var temp:Number = Number(major_entry.text);
+
+                if(temp == 0 || isNaN(temp))
+                {
+                    major_entry.text = "0";  
+                }
+                else
+                {
+                    major_entry.text = temp.toFixed(1);
+                }
+                _dataLogViewer.profileCreator.invalidateDisplayList();
+            }
+            
+            private function minorEntry():void
+            {
+                if(Number(major_entry.text) < Number(minor_entry.text))
+                {
+                    major_entry.text = minor_entry.text;
+                }
+                
+                var temp:Number = Number(minor_entry.text);
+
+                if(temp == 0 || isNaN(temp))
+                {
+                    minor_entry.text = "0";  
+                }
+                else
+                {
+                    minor_entry.text = temp.toFixed(1);
+                }
+  
+                _dataLogViewer.profileCreator.invalidateDisplayList();
+            }
+            
+            private function linkLossEntry():void
+            {
+                var temp:Number = Number(link_loss_entry.text);
+                
+                if(temp == 0 || isNaN(temp))
+                {
+                    link_loss_entry.text = "0"; 
+                }
+                else
+                {
+                    link_loss_entry.text = temp.toFixed(1);
+                }
+                
+                var event:LinkLossEvent = new LinkLossEvent(LinkLossEvent.LINKLOSS_CHANGE);
+                event.Value = temp;
+                
+                this.dispatchEvent(event);
+            }
+            
+            private function linkLossChange():void
+            {
+                var event:BooleanChangeEvent = new BooleanChangeEvent();
+                event.Value = link_loss_flag.selected;
+                
+                this.dispatchEvent(event);
+            }
+            
+            private function copyMax():void
+            {
+                _copyMaxButton.enabled = false;
+                if(_traceRef != null)
+                {
+                    _profileData.removeAll();
+
+                    for(var i:int = 0; i < _traceRef.length; i++)
+                    {
+                        _profileData.addItem({dataX:_traceRef[i][_traceXKey], dataY:_traceRef[i][_traceKey]});
+                    }
+                }
+                _copyMaxButton.enabled = true;
+                _dataLogViewer.profileCreator.invalidateDisplayList();
+            }
+            
+            private function loadProfileData():void
+            {
+                if(_profiles != null)
+                {
+                    _profileData.removeAll();
+                    
+                    for(var i:int = 0; i < _profiles.length; i++)
+                    {
+                        var item:Object = {dataX:_profiles[i].freq, dataY:_profiles[i].val};
+                        _profileData.addItem(item);
+                    }
+                }
+            }        
+        ]]> 
+    </mx:Script>
+    <mx:RemoteObject id="messageService" fault="onServiceFault(event)" source="AmfServicesController" destination="rubyamf">
+        <mx:method name="get_profile_list" result="onGetProfileList(event)" />
+        <mx:method name="set_profile" result="onSaveComplete(event)" />
+        <mx:method name="get_profile" result="onGetProfile(event)" />
+    </mx:RemoteObject>
+    <mx:HBox width="100%" horizontalGap="0">
+        <mx:Label width="100%" styleName="subtitleLabel" text="Profile Name"/>
+        <mx:Button width="60" styleName="normalButton" enabled="false" id="_listButton" label="List" click="listProfile()"/>
+    </mx:HBox>
+    <mx:TextInput maxChars="9" width="100%" editable="true" id="_profileName" change="checkEntry()"/>
+    <mx:HBox width="100%" horizontalGap="5">
+        <mx:Button width="60" styleName="normalButton" id="_saveButton" label="Save" click="saveProfile()" enabled="true"/>
+        <mx:Button width="60" styleName="normalButton" id="_loadButton" label="Load" click="loadProfile()" enabled="true"/>
+    </mx:HBox>
+    <mx:HRule width="100%"/>
+    <mx:Label styleName="subtitleLabel" width="100%" text="Profile Properties"/>
+    <mx:HBox width="100%" horizontalGap="0">
+        <mx:Label width="90" text="{'Major (' + Unit.DB + ')'}"/>
+        <mx:TextInput width="100%" id="major_entry" focusOut="majorEntry()"/>
+    </mx:HBox>
+    <mx:HBox width="100%" horizontalGap="0">
+        <mx:Label width="90" text="{'Minor (' + Unit.DB + ')'}"/>
+        <mx:TextInput width="100%" id="minor_entry" focusOut="minorEntry()"/>
+    </mx:HBox>
+    <mx:HBox width="100%" horizontalGap="0">
+        <mx:Label width="90" text="{'Link Loss' + (_parent ? (' (' + _parent.defaultUom + ')') : '')}"/>
+        <mx:TextInput width="100%" id="link_loss_entry" focusOut="linkLossEntry()"/>
+    </mx:HBox>
+    <mx:CheckBox label="Link Loss" id="link_loss_flag" click="linkLossChange()"/>
+    <mx:Button styleName="normalButton" width="108" id="_copyMaxButton" label="Copy Max" click="copyMax()"/>
+</mx:VBox>

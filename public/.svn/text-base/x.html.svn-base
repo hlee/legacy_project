@@ -1,0 +1,34 @@
+<html>
+   <head>
+  <meta http-equiv="content-type"
+ content="application/xhtml+xml; charset=UTF-8">
+  <meta name="author" content="haran">
+  <meta name="generator" content="author">
+  <!-- Navigational metadata for large websites (an accessibility feature): -->
+   <link rel="stylesheet" type="text/css" href="/stylesheets/sinorca-screen.css" media="screen" >
+   <!--media="screen" title="Sinorca">-->
+  <link rel="stylesheet alternative" type="text/css" href="/stylesheets/tabpane.css" media="screen" title="Tab Pane">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/sinorca-print.css" media="print">
+  <title>TST</title>
+  <script type="text/javascript" src="/javascripts/tabpane.js"></script>
+   </head>
+   <body>
+
+<div class="dynamic-tab-pane-control tab-pane" id="tabPanel1">
+   <div class="tab-row">
+      <h2 class="tab"><a href="#">General</a></h2>
+      <h2 class="tab selected"><a href="#">Content</a></h2>
+   </div>
+  <script type="text/javascript"> tp1= new WebFXTabPane(document.getElementById("tabPanel1")); </script>
+  <div class="tab-page" id="tabpg1">
+    <script type="text/javascript">tp1.addTabPage(document.getElementById("tabpg1"));</script>
+    ABAC
+  </div>
+  <div class="tab-page" id="tabpg2">
+    <script type="text/javascript">tp1.addTabPage(document.getElementById("tabpg2"));</script>
+    Schedule
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+    <mx:Script>
+        <![CDATA[
+            import mx.charts.LineChart;
+            import mx.charts.LinearAxis;
+    
+            public var start_freq:Number=0;
+            public var stop_freq:Number=0;
+            public var upstream_freq:Number=0;
+            public var channel_width:Number=0;
+            public function blankme():void
+            {
+                visible=false;
+            }
+            public function set_frequency(freq:Number,chwidth:Number,chart:LineChart):void
+            {
+                if (freq == -999)
+                {
+                    visible=false;
+                    return
+                }
+                visible=true;
+                start_freq=LinearAxis(chart.horizontalAxis).minimum;
+                stop_freq=LinearAxis(chart.horizontalAxis).maximum;
+                var freq_width:Number=Number(stop_freq-start_freq)/100000;
+                var points:Array=new Array(6);
+
+                trace(LinearAxis(chart.horizontalAxis).maximum.toString());
+                trace(LinearAxis(chart.horizontalAxis).minimum.toString());
+                var pix_per_hz:Number=Number(width)/Number(stop_freq - start_freq);
+                points[0]=(freq-chwidth/2.0 - start_freq)*pix_per_hz;
+                trace(pix_per_hz.toString());
+                trace ("Container Width " +width.toString());
+                points[1]=((freq+chwidth/2.0) - start_freq)*pix_per_hz;
+                points[2]=((freq*2-chwidth/2.0) - start_freq) * pix_per_hz;
+                points[3]=((freq*2)+chwidth/2.0 - start_freq) * pix_per_hz;
+                points[4]=((freq*3)-chwidth/2.0 - start_freq) * pix_per_hz;
+                points[5]=((freq*3)+chwidth/2.0 - start_freq) * pix_per_hz;
+                upstream_channel_width.x=points[0];
+                upstream_channel_width.width=points[1]-points[0];
+                second_harmonic_width.x=points[2];
+                second_harmonic_width.width=points[3]-points[2];        
+                third_harmonic_width.x=points[4];
+                third_harmonic_width.width=points[5]-points[4];
+            }
+        ]]>
+    </mx:Script>
+    <mx:Canvas id="upstream_channel_width" height="100%" width="5"
+        backgroundAlpha="0.2" backgroundColor="#800000" borderThickness="0" 
+        borderColor="#999999" borderStyle="solid"/> 
+    <mx:Canvas id="second_harmonic_width" height="100%" width="0"
+        backgroundAlpha="0.2" backgroundColor="#000020" borderThickness="0" 
+        borderColor="#999999" borderStyle="solid"/>
+    <mx:Canvas id="third_harmonic_width" height="100%" width="50"
+        backgroundAlpha="0.2" backgroundColor="#000020" borderThickness="0" 
+        borderColor="#999999" borderStyle="solid"/>
+    <mx:Canvas id="filler" width="100%"/>
+</mx:Canvas>

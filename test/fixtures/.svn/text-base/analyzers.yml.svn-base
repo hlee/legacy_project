@@ -1,0 +1,52 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+first:
+  id: 1
+  name: analyzer1
+  ip: 10.0.0.31
+  port_count: 16
+  site_id: 101
+  profile_id: 5000
+  hmid: 10
+  start_freq: 5_000_000
+  stop_freq: 50_000_000
+second:
+  id: 2
+  name: analyzer2
+  site_id: 102
+  ip: 10.0.0.32
+  port_count: 16
+  hmid: 10
+third:
+  id: 3
+  name: analyzer3
+  ip: 10.0.0.33
+  port_count: 16
+  site_id: 103
+  hmid: 10
+fourth:
+  id: 4
+  name: analyzer4
+  ip: 10.0.0.34
+  site_id: 104
+  port_count: 16
+  hmid: 10
+fifth:
+  id: 5
+  site_id: 105
+  name: analyzer5
+  ip: 10.0.0.35
+  port_count: 16
+  hmid: 10
+sixth:
+  id: 6
+  site_id: 106
+  name: analyzer6
+  ip: 10.0.0.36
+  port_count: 16
+  hmid: 10  
+  nf_low: 3000000
+  nf_high: 15000000
+  nf_start_freq: 15000000
+  nf_stop_freq: 38000000
+  stop_freq: 50000000
+  start_freq: 5000000

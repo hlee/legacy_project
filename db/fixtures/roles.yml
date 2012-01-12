@@ -1,0 +1,85 @@
+--- 
+roles_004: 
+  updated_at: 2007-09-21 07:07:19
+  id: "4"
+  display_name: Alarm Admin
+  identifier: alarmadmin
+  description: User is allowed to flag alarms as acknowledged or unacknowledged.
+  created_at: 2007-09-21 07:07:19
+roles_005: 
+  updated_at: 2007-09-21 07:07:19
+  id: "5"
+  display_name: System File Admin
+  identifier: sysfileadm
+  description: Uploads and modifies system files that define test and channel plans.
+  created_at: 2007-09-21 07:07:19
+roles_006: 
+  updated_at: 2007-09-21 07:07:20
+  id: "6"
+  display_name: User Admin
+  identifier: useradmin
+  description: User is allowed to add and remove users.<BR>User is allowed to modify roles for existing users.
+  created_at: 2007-09-21 07:07:19
+roles_007: 
+  updated_at: 2007-09-21 07:07:20
+  id: "7"
+  display_name: Development
+  identifier: development
+  description: Development group.
+  created_at: 2007-09-21 07:07:20
+roles_008: 
+  updated_at: 2007-09-21 07:07:20
+  id: "8"
+  display_name: Site Admin
+  identifier: siteadm
+  description: User is allowed to create, edit and delete Sites.
+  created_at: 2007-09-21 07:07:20
+roles_009: 
+  updated_at: 2007-09-21 07:07:20
+  id: "9"
+  display_name: Remove Me
+  identifier: remove
+  description: Should be removed.
+  created_at: 2007-09-21 07:07:20
+roles_010: 
+  updated_at: 2007-09-21 07:07:20
+  id: "10"
+  display_name: Installer
+  identifier: installer
+  description: Allows the user to edit configuration parameters for the RealWorx Application.
+  created_at: 2007-09-21 07:07:20
+roles_011: 
+  updated_at: 2007-09-21 07:07:20
+  id: "11"
+  display_name: Profile Admin
+  identifier: profileadmin
+  description: User is allowed to modify the profiles for Ingress monitoring.
+  created_at: 2007-09-21 07:07:20
+roles_001: 
+  updated_at: 2007-09-21 07:52:28
+  id: "1"
+  display_name: Network Admin 2
+  identifier: networkadm2
+  description: User is allowed to change analyzer monitoring mode, also allowed to put analyzers into maintenance mode.
+  created_at: 2007-09-21 07:07:19
+roles_002: 
+  updated_at: 2007-09-21 07:07:19
+  id: "2"
+  display_name: Tech
+  identifier: tech
+  description: Unknown.
+  created_at: 2007-09-21 07:07:19
+roles_003: 
+  updated_at: 2007-09-21 07:07:19
+  id: "3"
+  display_name: Network Admin
+  identifier: networkadmin
+  description: User is allowed to add and remove analyzers and switches.
+  created_at: 2007-09-21 07:07:19
+roles_012: 
+  updated_at: 2009-01-09 07:07:20
+  id: "12"
+  display_name: MaintainDB Admin
+  identifier: maintainadmin
+  description: User is allowed to maintain the database table.
+  created_at: 2009-01-09 07:07:20

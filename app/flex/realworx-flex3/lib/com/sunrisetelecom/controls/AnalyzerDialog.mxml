@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" styleName="subtitleLabel" layout="vertical" width="400" title="Analyzer Selection" >
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+        	import mx.collections.ArrayCollection;
+        	import mx.managers.PopUpManager;
+        
+        	[Bindable]
+        	public var cancel_enabled:Boolean = true;
+
+
+            public function loadData(data:Array):void
+            {
+                _analyzerList.dataProvider = data;
+            }
+            
+            public function get selectedAnalyzer():Object
+            {
+                return _analyzerList.selectedItem;
+            }
+            
+            private function cancelMe():void
+            {
+                PopUpManager.removePopUp(this);
+            }
+            
+            private function okMe():void
+            {
+                PopUpManager.removePopUp(this);
+            }
+        ]]>
+    </mx:Script>
+	<mx:Form width="100%">
+		<mx:FormItem styleName="subtitleLabel" label="Analyzer" width="100%">
+			<mx:ComboBox styleName="normalComboBox" labelField="analyzer_name" id="_analyzerList" width="100%"/>
+		</mx:FormItem>
+		<mx:HBox horizontalAlign="right" width="100%">
+            <mx:Button id="okButton" styleName="normalButton" width="80" label="OK" click="okMe()"/> 
+            <mx:Button id="cancelButton" styleName="normalButton" width="80" label="Cancel" click="cancelMe()" enabled="{cancel_enabled}"/>
+		</mx:HBox>
+	</mx:Form>
+</mx:TitleWindow>

@@ -1,0 +1,71 @@
+<tr class="analyzer">
+  <td width="115">
+    <%= analyzer.name %>
+  </td>
+  <% 
+    if analyzer.status.nil? || analyzer.status==10
+      style_class = "analyzer_disconnected"
+    elsif analyzer.status==12 || analyzer.status==13
+      style_class="monitored"
+    else
+      style_class = ""
+    end
+  %>
+  <td <%= style_class.eql?("") ? "" : "class=#{style_class}" %> colspan="16" width="600">
+    <%= Analyzer.status_to_str(analyzer.status) %>
+    <% 
+      alarm_ports = 0
+      total_ports = 0
+      if analyzer.switches.length != 0
+        analyzer.switches.each do |sw|
+          if sw.switch_ports.length != 0
+            sw.switch_ports.each do |port|
+              alarm_ports += 1 if port.has_alarm?
+              total_ports += 1
+            end
+          end
+        end
+      end
+    %>
+    <BR><div class="tiny"><%= alarm_ports %> of <%= total_ports %> ports have active alarms</div>
+  </td>
+  <td <%= style_class.eql?("") ? "" : "class=#{style_class}" %> width="35">
+    <%= link_to_function image_tag("/images/zoom_in.png", :border => 0, :width => 30), "toggleClass('analyzer_#{analyzer.id}')", :class => "analyzer_#{analyzer.id}" %>
+  </td>
+</tr>
+<% if analyzer.switches.length == 0 %>
+  <tr class="analyzer_<%= analyzer.id %> switch" style="display: none;">
+    <td> NO SWITCH </td>
+    <% if !analyzer.status.nil? && (analyzer.status == 12 || analyzer.status==13) %>
+      <td class="<%=site_active_alarm(analyzer.site_id)%>" colspan="16">
+        <%= port_link(analyzer.site_id,analyzer.status,image_tag("port.png", :border => 0))%>
+      </td>
+    <% else %>
+      <td class="blank" colspan="16">
+        <%= port_link(analyzer.site_id,analyzer.status,image_tag("port.png", :border => 0))%>
+      </td>
+      <% end %>
+  </tr>
+<% else %>
+  <tr class="analyzer_<%= analyzer.id %> switch" style="display: none;">
+    <td></td>
+    <% 1.upto(16) do |num| %>
+      <td align=center><%= num %></td>
+    <% end %>
+  </tr>
+  <% analyzer.switches.each do |sw| %>
+    <tr class="analyzer_<%= analyzer.id %> switch" style="display: none;">
+      <td>Switch:<%= sw.switch_name %></td>
+      <% if sw.switch_ports.length == 0 %>
+        <td colspan="16">Combiner</td>
+      <% else %>
+        <% sw.switch_ports.each do |port| %>
+          <td width="6.25%" align="center" class="<%= port_class(port) %>">
+          <%@aname=show_analyzer(port.id)%>
+          <%= port_link(port.site_id, analyzer.status,image_tag("port.png", :border => 0,:alt => "Port name: #{port.name}\nAnalyzer Name: #{@aname}" ),port.purpose,"Port name: #{port.name} \n Analyzer Name: #{@aname}") %>
+          </td>
+        <% end %>
+      <% end %>
+    </tr>
+  <% end %>
+<% end %>

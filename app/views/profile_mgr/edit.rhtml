@@ -1,0 +1,8 @@
+<h1>Editing profile</h1>
+
+<% form_tag :action => 'update', :id => @profile do %>
+  <%= render :partial => 'form' %>
+  <%= submit_tag 'Save' %>
+<% end %>
+
+<%= link_to 'Back', :action => 'list' %>

@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-AU">
+	<head>
+	  <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+	  <meta name="author" content="sunrise">
+	  <meta name="generator" content="sunrise">
+	 	<%= stylesheet_link_tag 'sinorca-screen' %>
+	 	<%= stylesheet_link_tag 'sinorca-print', :media => 'print' %>
+	 	<link href="/igoogle/css/inettuts.css" rel="stylesheet" type="text/css" />
+ 		<title><%= @page_title = "RealWORX"%> <%= @page_subtitle = "Dashboard" %></title>
+	</head>
+	<body>
+		<script type="text/javascript" src="/igoogle/javascripts/jquery-1.2.6.min.js"></script>
+		<script type="text/javascript" src="/igoogle/javascripts/jquery-ui-personalized-1.6rc2.min.js"></script>
+		<script type="text/javascript" src="/igoogle/javascripts/inettuts.js"></script>
+		<script type="text/javascript" src="/igoogle/javascripts/widgets.js"></script>
+	<% @sel=0%>
+	<%= render "shared/header" %>
+<div id="center">
+<!-- ##### Side Bar ##### -->
+<div id="side-bar">
+  <p class="sideBarTitle">Dashboard Key</p>
+  <hr>
+<table class="dashboard">
+<tr><th colspan="2">KEY</th></tr>
+<tr>
+<td>Not currently monitored</td>
+<td class="blank" align="center"><%= image_tag("port.png", :border => 0) %></td>
+</tr>
+<tr>
+<td>Monitored with no active alarms</td>
+<td class="monitored" align="center"><%= image_tag("port.png", :border => 0) %></td>
+</tr>
+<tr>
+<td>Monitored with active alarms</td>
+<td class="alarm_active" align="center"><%= image_tag("port.png", :border => 0) %></td>
+</tr>
+<tr class="analyzer">
+<td colspan="2" class="analyzer_disconnected">Analyzer (Disconnected)</td>
+</tr>
+<tr class="analyzer">
+<td colspan="2" >Analyzer (Connected)</td>
+</tr>
+<tr class="analyzer">
+<td colspan="2" class="monitored">Analyzer (Monitoring)</td>
+</tr>
+<tr class="switch">
+<td colspan="2" >Switch</td>
+</tr>
+</table>
+  <hr>
+</div>
+<!-- ##### Main Copy ##### -->
+<div id="main-copy">
+	<p style="color: green"><%= flash[:notice] %></p>
+	<p style="color: red"><%= flash[:error] %></p>
+   <%= @content_for_layout %>
+</div>
+</div>
+	<%= render "shared/footer" %>
+</body>
+</html>

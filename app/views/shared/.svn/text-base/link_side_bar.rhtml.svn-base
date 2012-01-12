@@ -1,0 +1,16 @@
+<div>
+  <p class="sideBarTitle">Dash board Filter</p>
+</div>
+<ul>
+  <% if has_license? %>
+    <% if has_ingress? %>
+    <li>
+      <%=link_to 'Analyzer Links',{:controller=>'Link', :action=>'index'}%>
+    </li>
+
+    <li>
+    <%=link_to 'Customer Links',{:controller=>'link', :action=>'customer'}%>
+    </li>
+    <% end %>
+  <% end %>
+</ul>

@@ -1,0 +1,71 @@
+<%
+  def site_active_alarm(site_id)
+      if DownAlarm.find(:first,:conditions => ["site_id=? and active=1",site_id])
+        return "alarm_active"
+      else
+        return "monitored"
+      end
+  end
+  def port_class(switch_port)
+    anl=switch_port.switch.analyzer
+    if anl.status.nil? || anl.status < 12
+      return "blank"
+    end
+    if switch_port.purpose == SwitchPort::RETURN_PATH && anl.status == Analyzer::INGRESS
+      if Alarm.find(:first,:conditions => ["site_id=? and active=1",switch_port.site_id])
+        return "alarm_active"
+      else
+        return "monitored"
+      end
+    end
+    if switch_port.purpose == SwitchPort::FORWARD_PATH && anl.status == Analyzer::DOWNSTREAM
+      if DownAlarm.find(:first,:conditions => ["site_id=? and active=1",switch_port.site_id])
+        return "alarm_active"
+      else
+        return "monitored"
+      end
+    end
+    return "blank"
+  end
+%>
+
+<table class="dashboard">
+ <% @analyzer_list.each { |anl| %>
+  <tr class="analyzer">
+   <td>
+   <%=anl.name %>
+   </td>
+   <% if anl.status.nil? || anl.status==10 %>
+     <td class="analyzer_disconnected" colspan=16>
+   <% else %>
+     <td colspan=16>
+   <% end %>
+   <%=Analyzer.status_to_str(anl.status) %>
+   </td>
+  </tr>
+
+  <% if anl.switches.length == 0 %>
+    <tr class="switch">
+    <td> NO SWITCH </td>
+      <% if !anl.status.nil? && (anl.status == 12 || anl.status==13) %>
+      <td class="<%=site_active_alarm(anl.site_id)%>">*</td>
+      <td colspan="15" class="blank"></td>
+      <% else %>
+      <td>*</td>
+      <td colspan="15" class="blank"></td>
+      <% end %>
+    </tr>
+  <%else %>
+    <% anl.switches.each { |sw| %>
+      <tr class="switch">
+        <td>Switch:<%=sw.switch_name%></td>
+        <% sw.switch_ports.each { |port| %>
+        <td class= "<%=port_class(port)%>">*</td>
+        <% } %>
+      </tr>
+    <% } %>
+  <%end %>
+
+
+ <% } %>
+</table>

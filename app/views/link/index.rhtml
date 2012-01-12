@@ -1,0 +1,8 @@
+<h1>Analyzer Links</h1>
+<ul>
+<% @analyzers.each { |ana| %>
+<%if ana[:webapi]==1%>
+<li><%=link_to ana.name,:controller=>"link",:action=>"conn_analyzer",:id=>ana.id%></li>
+<%end%>
+<% } %>
+</ul>

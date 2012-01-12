@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" initialize="initApp()">
+           <mx:Script>
+        <![CDATA[ 
+       import mx.collections.ArrayCollection;
+       import mx.controls.Alert;
+       import flash.net.FileReference;
+       import com.sunrisetelecom.utils.SystemFile;
+       [Bindable] private var channel_data:ArrayCollection=new ArrayCollection();
+       public function initApp():void
+       {
+       }
+       public function loadSfFile():void
+       {
+         Alert.show("Loading file");
+         var loader:URLLoader = new URLLoader();
+	 loader.dataFormat=URLLoaderDataFormat.BINARY;
+         configureListeners(loader); 
+         var request:URLRequest = new URLRequest("NTSC_USA.bin"); 
+         try { 
+           loader.load(request); 
+         } catch (error:Error) { 
+           Alert.show("Unable to load requested document." + error.message); 
+         }
+       }
+       private function configureListeners(dispatcher:IEventDispatcher):void { 
+              dispatcher.addEventListener(Event.COMPLETE, completeHandler); 
+              dispatcher.addEventListener(Event.OPEN, openHandler); 
+              dispatcher.addEventListener(ProgressEvent.PROGRESS, progressHandler); 
+              dispatcher.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler); 
+              dispatcher.addEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler); 
+              dispatcher.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler); 
+       }
+
+        private function completeHandler(event:Event):void { 
+              var loader:URLLoader = URLLoader(event.target); 
+              //Alert.show("completeHandler: " + loader.data); 
+              if (loader.dataFormat == URLLoaderDataFormat.BINARY)
+              { 
+                     var data:ByteArray=ByteArray(loader.data);
+		     var sf:SystemFile=new SystemFile(data);
+                     channel_data=new ArrayCollection(sf.channel_plan)
+		     //Alert.show("SF Loaded" + sf.magic_nbr.toString());
+              }
+	      else
+	      {
+                //Alert.show("Not a binary:"+loader.dataFormat); 
+	      }
+     
+       }
+
+        private function openHandler(event:Event):void { 
+              //Alert.show("openHandler: " + event); 
+       }
+
+        private function progressHandler(event:ProgressEvent):void { 
+              //Alert.show("progressHandler loaded:" + event.bytesLoaded + " total: " + event.bytesTotal); 
+       }
+
+        private function securityErrorHandler(event:SecurityErrorEvent):void { 
+              Alert.show("securityErrorHandler: " + event); 
+       }
+
+        private function httpStatusHandler(event:HTTPStatusEvent):void { 
+              //Alert.show("httpStatusHandler: " + event); 
+       }
+
+        private function ioErrorHandler(event:IOErrorEvent):void { 
+              Alert.show("ioErrorHandler: " + event); 
+       }
+        ]]>
+    </mx:Script>
+
+           <mx:Button id="connect_button" x="0" y="0" label="Load File" click="loadSfFile()"/>
+           <mx:DataGrid x="0" y="20" height="253" width="500" dataProvider="{channel_data}">
+                      <mx:columns>
+                                 <mx:DataGridColumn headerText="Channel" dataField="channel" width="75"/>
+                                 <mx:DataGridColumn headerText="Name" dataField="name" width="100"/>
+                                 <mx:DataGridColumn headerText="Type" dataField="type" width="30"/>
+                                 <mx:DataGridColumn headerText="Freq" dataField="freq"/>
+                      </mx:columns>
+           </mx:DataGrid>
+</mx:Application>

@@ -1,0 +1,18 @@
+<p>
+  <b>Name:</b>
+  <%=h @upstream_channel.name %>
+</p>
+
+<p>
+  <b>Freq:</b>
+  <%=h @upstream_channel.freq %>
+</p>
+
+<p>
+  <b>Bandwidth:</b>
+  <%=h @upstream_channel.bandwidth %>
+</p>
+
+
+<%= link_to 'Edit', edit_upstream_channel_path(@upstream_channel) %> |
+<%= link_to 'Back', upstream_channels_path %>

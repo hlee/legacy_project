@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:AdvancedDataGrid xmlns:mx="http://www.adobe.com/2006/mxml" lockedColumnCount="1" editable="true" horizontalScrollPolicy="auto" verticalScrollPolicy="auto" focusEnabled="false" xmlns:controls="com.sunrisetelecom.controls.*">
+	<mx:Script>
+		<![CDATA[
+		    import mx.controls.Label;
+		    import mx.controls.Text;
+		    import mx.controls.dataGridClasses.DataGridItemRenderer;
+		    import com.sunrisetelecom.utils.Utils;
+    		import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
+    		import mx.core.Application;
+    		import mx.controls.advancedDataGridClasses.AdvancedDataGridColumnGroup;
+    		import mx.collections.ArrayCollection;
+    		import mx.events.FlexEvent;
+    		import mx.managers.PopUpManager;
+    		
+    		private var measures:Array = new Array();
+    		private var copied_row:Object = null;
+    		
+    		[Bindable]
+    		private var _channelList:ArrayCollection;
+    		private var _portList:ArrayCollection;
+    
+    		public function get_measures():Array
+    		{
+    			return measures;
+    		}
+    
+    		public function set ports(arr:ArrayCollection):void
+    		{
+    			_portList = new ArrayCollection();
+    			for(var i:int = 0; i < arr.length; i++)
+    			{
+    				_portList.addItem(arr[i]);
+    			}
+    		}
+    		
+    		public function set channels(arr:ArrayCollection):void 
+    		{
+    			_channelList = arr;
+    		}
+    		
+    		public function updateNow():void
+    		{
+    			validateNow();
+    			//groupedColumns[0].width=50;
+    		}
+    
+    		public function view_mode(analog_visible:Boolean,digital_visible:Boolean):void
+    		{
+    			var i:int = 0;
+    			var currMeas:Object;
+    
+    			for(i = 0;i < measures.length; i++)
+    			{
+    				currMeas = measures[i];
+    				if(analog_visible && currMeas.ANALOG)
+    				{
+    					groupedColumns[currMeas.POSITION].visible = true;
+    				}
+    				else if(digital_visible && !currMeas.ANALOG)
+    				{
+    					groupedColumns[currMeas.POSITION].visible = true;
+    				}
+    				else
+    				{
+    					groupedColumns[currMeas.POSITION].visible = false;
+    				}
+    			}
+    		}
+    		
+    		public function addMeasure(meas:String, label:String, lower:Boolean, upper:Boolean, analog:Boolean):void
+    		{
+    		    var meas_minor:String = meas + "_MINOR";
+    		    var meas_major:String = meas + "_MAJOR";
+    		    var enable_flag:String = meas + "_ENABLE_FLAG";
+    			var cols:Array = groupedColumns;
+    			var pos:int = cols.length;
+    			cols.push(buildMeasure(label, lower, upper, meas, meas_minor, meas_major, enable_flag, analog));
+    			this.groupedColumns = cols;
+    			measures.push({MEAS:meas, MEAS_MINOR:meas_minor, MEAS_MAJOR:meas_major, ENABLE_FLAG:enable_flag, LABEL:label, LOWER:lower, UPPER:upper, ANALOG:analog, POSITION:pos, ENABLE_FLAG:enable_flag});
+    		}
+    
+    		public function loadPorts(event:FlexEvent):void
+    		{
+    			event.target.dataProvider = _portList;
+    		}
+    		public function loadChannels(event:FlexEvent):void
+    		{
+    			event.target.dataProvider = _channelList;
+    		}
+    		
+    		private function digital_only(item:Object, column:AdvancedDataGridColumn):String
+    		{
+    		    var ch:DVChannel = item.channel as DVChannel;
+    		    
+    			if(!ch || ch.is_analog)
+    			{
+    				return "N/A";
+    			}
+    			else
+    			{
+    				return item[column.dataField];
+    			}
+    		}
+    		
+    		private function analog_only(item:Object, column:AdvancedDataGridColumn):String
+    		{
+    		    var ch:DVChannel = item.channel as DVChannel;
+    
+    			if(ch && ch.is_analog)
+    			{
+    				return item[column.dataField];
+    			}
+    			else
+    			{
+    				return "N/A";
+    			}
+    		}
+    		
+    		private function buildMeasure(label:String, lower:Boolean,upper:Boolean,nominal_data:String,minor_data:String,major_data:String,enable_flag:String,analog:Boolean):AdvancedDataGridColumnGroup
+    		{
+    			var adgg:AdvancedDataGridColumnGroup = new AdvancedDataGridColumnGroup();
+    			var measure:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+    			var enable_test:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+    			var minor:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+    			var major:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+    			
+    			measure.sortable = false;
+    			enable_test.sortable = false;
+    			minor.sortable = false;
+    			major.sortable = false;
+    			
+    			//--- class factory for enable_test field
+    			enable_test.editorDataField = "activated";
+    			var enabledRenderFactory:ClassFactory;
+    			enabledRenderFactory = new ClassFactory(TstCheckbox);
+    			if(analog)
+    			{
+    				enabledRenderFactory.properties = {analog_test:true};
+    			}
+    			else
+    			{
+    				enabledRenderFactory.properties = {analog_test:false};
+    			}
+    			enable_test.itemRenderer = enabledRenderFactory;
+    			enable_test.rendererIsEditor = true;
+    			//--- End the item editor & renderer for enable_test
+    			
+    			//-- class Factory for BER Measurements
+    			
+    			if (label.match(/BER/))
+    			{
+    				var berEditorFactory:ClassFactory = new ClassFactory(ExpEditor);
+    				berEditorFactory.properties = {labelField:"label"};
+    				
+    				minor.itemEditor = berEditorFactory;
+    				major.itemEditor = berEditorFactory;
+    				//minor.dataField = "PRE_BER_MINOR";
+    				//major.dataField = "PRE_BER_MAJOR";
+    				minor.editorDataField = "data";
+    				major.editorDataField = "data";
+    			}
+    			else
+    			{
+    				var editorFactory:ClassFactory = new ClassFactory(mx.controls.TextInput);
+    				editorFactory.properties = {restrict: "0-9."};
+    				
+    				var nomEditorFactory:ClassFactory = new ClassFactory(mx.controls.TextInput);
+    				editorFactory.properties = {restrict: "\\-0-9."};
+    
+    				major.itemEditor = editorFactory;
+    				minor.itemEditor = editorFactory;
+    				measure.itemEditor = nomEditorFactory; 
+    			}
+    			//--- End 
+    
+    			if(analog)
+    			{
+    				enable_test.labelFunction = analog_only;
+    				measure.labelFunction = analog_only;
+    				minor.labelFunction = analog_only;
+    				major.labelFunction = analog_only;
+    			}
+    			else
+    			{
+    				enable_test.labelFunction = digital_only;
+    				measure.labelFunction = digital_only;
+    				minor.labelFunction = digital_only;
+    				major.labelFunction = digital_only;
+    			}
+    			adgg.headerText = label;
+    			enable_test.dataField = enable_flag;
+    			enable_test.headerText = " ";
+    			enable_test.width = 24;
+    			measure.dataField = nominal_data;
+    			measure.headerText = "Nominal";
+    			adgg.children.push(enable_test);
+    			if(lower || upper)
+    			{
+    				adgg.children.push(measure);
+    			}
+    			if(lower && upper) // Has both lower and upper bounds
+    			{
+    				minor.headerText = String.fromCharCode(0xb1) + "Minor";
+    				major.headerText = String.fromCharCode(0xb1) + "Major";
+    
+    			}
+    			else if(lower)
+    			{
+    				minor.headerText = "-Minor";
+    				major.headerText = "-Major";
+    			}
+    			else if(upper)
+    			{
+    				minor.headerText = "+Minor";
+    				major.headerText = "+Major";
+    			}
+    			else
+    			{
+    				major.headerText = "Major";
+    				minor.headerText = "Minor";
+    			}
+    			
+    			minor.dataField = minor_data;
+    			major.dataField = major_data;
+    			adgg.children.push(minor);
+    			adgg.children.push(major);
+    			return adgg;
+    		}
+    		
+    		private function editable_style(data:Object, column:AdvancedDataGridColumn):Object
+    		{
+    			return {fontWeight:"bold"};
+    		}
+    		
+    		private function port_labels(item:Object, col:AdvancedDataGridColumn):String
+    		{
+    			var port:AnalyzerPort = AnalyzerPort(item.port);
+    			if(port == null)
+    			{
+    				return "NONE";
+    			}
+    			if(col.headerText == "Port")
+    			{
+    				return port.port_name;
+    			} 
+    			if(col.headerText == "Site")
+    			{
+    				return port.site;
+    			}
+    			return "UNRECOGNIZED";
+    		}
+    		
+    		private function channel_labels(item:Object, col:AdvancedDataGridColumn):String
+    		{
+    		    var dv:DVChannel = DVChannel(item.channel);
+                if(dv == null)
+                {
+                    return "NONE";
+                }
+                else if(col.headerText == "Channel")
+                {
+                    return dv.system_file + ":" + dv.name;
+                } 
+                else if(col.headerText == "Frequency")
+                { 
+                    return dv.freq_str;
+                }
+                else if(col.headerText == "Modulation")
+                {
+                    return dv.modulation_name;
+                }
+    
+    			return "UNRECOGNIZED";
+    		}
+    		
+    		private function channelComparator(obj1:Object, obj2:Object):int
+    		{
+    		    var tp1:TestPlanItem = obj1 as TestPlanItem;
+    		    var tp2:TestPlanItem = obj2 as TestPlanItem;
+    		    
+    		    if(tp1 == null || tp2 == null)
+                {
+                    trace("Error in compare channel");
+                    return 0;
+                }
+    		    
+    		    var ch1:DVChannel = tp1.channel;
+    		    var ch2:DVChannel = tp2.channel;
+    		    
+    		    var s1:String = ch1.system_file + ":" + ch1.name;
+    		    var s2:String = ch2.system_file + ":" + ch2.name;
+    
+    		    return Utils.floatComparator(s1, s2);
+    		}
+    		
+    		private function portComparator(obj1:Object, obj2:Object):int
+    		{
+    		    var tp1:TestPlanItem = obj1 as TestPlanItem;
+                var tp2:TestPlanItem = obj2 as TestPlanItem;
+                
+                if(tp1 == null || tp2 == null)
+                {
+                    trace("Error in compare channel");
+                    return 0;
+                }
+                
+                var s1:String = tp1.port_name;
+                var s2:String = tp2.port_name;
+                
+                return Utils.floatComparator(s1, s2);
+    		}
+    		
+    		private function freqComparator(obj1:Object, obj2:Object):int
+    		{
+    		    var tp1:TestPlanItem = obj1 as TestPlanItem;
+                var tp2:TestPlanItem = obj2 as TestPlanItem;
+                
+                if(tp1 == null || tp2 == null)
+                {
+                    trace("Error in compare channel");
+                    return 0;
+                }
+                
+                var ch1:DVChannel = tp1.channel;
+                var ch2:DVChannel = tp2.channel;
+                
+                var s1:String = ch1.freq_str;
+                var s2:String = ch2.freq_str;
+                
+                return Utils.floatComparator(s1, s2);
+    		}
+		
+		    private function siteNameComparator(obj1:Object, obj2:Object):int
+		    {
+		        var s1:String = obj1.site_name as String;
+                var s2:String = obj2.site_name as String;
+                
+                var p1:int = s1.indexOf("//");
+                var p2:int = s2.indexOf("//");
+                
+                if(p1 != -1 && p2 != -1 && p1 == p2)
+                {
+                    var t1:String = s1.substring(0, p1);
+                    var t2:String = s2.substring(0, p2);
+                    
+                    if(t1 == t2)
+                    {
+                        t1 = s1.substring(p1 + 2);
+                        t2 = s2.substring(p2 + 2);
+                        
+                        return Utils.floatComparator(t1, t2);
+                    }
+                }
+                
+                return Utils.floatComparator(s1, s2);
+		    }
+		]]>
+	</mx:Script>
+    <mx:groupedColumns>
+        <mx:AdvancedDataGridColumn sortCompareFunction="channelComparator" labelFunction="channel_labels" editorDataField="selected_channel" dataField="channel" headerText="Channel" editable="true" styleFunction="editable_style" width="160">
+            <mx:itemEditor>
+                <mx:Component>
+                    <controls:DVChannelItemEditor initialize="outerDocument.loadChannels(event)" labelField="label" />
+                </mx:Component>
+            </mx:itemEditor>
+        </mx:AdvancedDataGridColumn>
+        <mx:AdvancedDataGridColumn labelFunction="channel_labels" dataField="modulation_name" editable="false" headerText="Modulation" />
+        <mx:AdvancedDataGridColumn sortCompareFunction="freqComparator" labelFunction="channel_labels" dataField="frequency_str" editable="false" headerText="Frequency" />
+        <mx:AdvancedDataGridColumn sortCompareFunction="portComparator" labelFunction="port_labels" editorDataField="selected_port" dataField="port" editable="true" headerText="Port" styleFunction="editable_style">
+		      <mx:itemEditor>
+                <mx:Component>
+                    <controls:PortItemEditor initialize="outerDocument.loadPorts(event)" labelField="port_name" />
+                </mx:Component>
+            </mx:itemEditor>
+        </mx:AdvancedDataGridColumn>	
+        <mx:AdvancedDataGridColumn sortCompareFunction="siteNameComparator" labelFunction="port_labels" dataField="site_name" editable="false" headerText="Site" />
+    </mx:groupedColumns>	
+</mx:AdvancedDataGrid>

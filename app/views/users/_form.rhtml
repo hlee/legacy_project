@@ -1,0 +1,19 @@
+<%= error_messages_for 'user' %>
+
+<table>
+<tr>
+<!--[form:user]-->
+  <td><label for="user_email">Email/Login</label></td>
+  <td><%= text_field 'user', 'email'  %></td>
+</tr>
+<tr>
+  <td><label for="user_password">Password</label></td>
+  <td><%= password_field 'user', 'password'  %></td>
+</tr>
+<tr>
+  <td><label for="user_password_confirmation">Password Confirmation</label></td>
+  <td><%= password_field 'user', 'password_confirmation' %></td>
+</tr>
+<!--[eoform:user]-->
+</table>
+

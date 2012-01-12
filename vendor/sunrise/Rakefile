@@ -1,0 +1,25 @@
+require 'rake/rdoctask'
+require 'rake/testtask'
+$:.push('lib')
+
+task  :default => [:test]
+
+task  :custom => [:test]
+
+Rake::TestTask.new('test') do |t|
+   ENV['RAILS_ENV']='test'
+   puts "Running Rails ENV: #{ENV['RAILS_ENV']}"
+   t.pattern='**/test/test*.rb'
+   t.libs=['monitor']
+   puts t.inspect()
+end
+Rake::RDocTask.new('rdoc') { |t|
+   t.rdoc_files.include('README','**/*.rb');
+   t.main = 'README'
+   t.title = "MyLib API documentation"
+}
+
+htmldir='/var/www/realworx/rdoc'
+task 'publish-docs' => ['rdoc'] do
+   sh "cp -r html/* #{htmldir}"
+end

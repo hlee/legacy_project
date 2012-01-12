@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-AU">
+<head>
+  <meta http-equiv="content-type"
+ content="application/xhtml+xml; charset=UTF-8">
+  <meta name="author" content="sunrise">
+  <meta name="generator" content="sunrise">
+<!-- Navigational metadata for large websites (an accessibility feature): -->
+  <%= stylesheet_link_tag 'sinorca-screen' %>
+  <%= stylesheet_link_tag 'sinorca-print', :media => 'print' %>
+ <title><%= @page_title = "RealWORX"%> <%= @page_subtitle = "Maintenance" %></title>
+</head>
+<body>
+   <%= render "shared/header" %>
+<div id="center">
+<!-- ##### Side Bar ##### -->
+<div id="side-bar">
+<div>
+<p class="sideBarTitle"></p>
+<ul>
+   <li><%= link_to "› Schedule" , {:controller=>'admin/schedule'} %></li>
+   <li><%= link_to "› Signal Sources" , {:controller=>'admin/source'} %></li>
+   <li><%= link_to "› Analyzers" , {:controller=>'admin/analyzer'} %></li>
+   <li><%= link_to "› Switches" , {:controller=>'admin/switch'} %></li>
+</ul>
+</div>
+</div>
+<!-- ##### Main Copy ##### -->
+<div id="main-copy">
+   <%= @content_for_layout %>
+</div>
+</div>
+	<%= render "shared/footer" %>
+</body>
+</html>

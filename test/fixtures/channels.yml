@@ -1,0 +1,25 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+one:
+  id: 1
+  channel: 2
+  channel_name: two
+  channel_freq: 55250000.0
+  site_id: 101
+two:
+  id: 2
+  channel: 3
+  channel_name: three
+  channel_freq: 61250000.0
+  site_id: 101
+three:
+  id: 3
+  channel: 4
+  channel_name: four
+  channel_freq: 67250000.0
+  site_id: 101
+fourth:
+  id: 4
+  channel: 5
+  channel_name: five
+  channel_freq: 75250000.0
+  site_id: 101

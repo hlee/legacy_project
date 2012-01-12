@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" change="onSelectionChange(event)">
+    <mx:Script>
+        <![CDATA[
+            import mx.events.ListEvent;
+            import mx.controls.dataGridClasses.DataGridListData;
+            import mx.collections.XMLListCollection;
+            
+            public var selected_channel:DVChannel;
+            
+            override public function set data(value:Object):void
+            {
+                if(value){
+                    
+                    
+                    
+                    var col:DataGridListData = DataGridListData(listData);
+
+                    var cname:String = value.channel_name;
+                    var cvalue:DVChannel = DVChannel(value.channel);
+                    
+
+                    selectedItem = cvalue;
+                    selected_channel=cvalue;
+                }
+            }
+            
+            override public function get data():Object
+            {
+                return selected_channel;
+            }
+            
+
+            
+            private function onSelectionChange(e:ListEvent):void
+            {
+                if(selectedItem && selected_channel){
+                    
+                    var col:DataGridListData = DataGridListData(listData);
+                    var cname:String = selectedItem.name;
+                    var cvalue:DVChannel = DVChannel(selectedItem);
+                    
+
+                    selected_channel=cvalue;
+                }
+            }
+            
+            
+
+            
+
+
+        ]]>
+    </mx:Script>    
+</mx:ComboBox>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="508" title="User Entry Required">
+<mx:Metadata>
+	[Event(name="userReaction", type="com.sunrisetelecom.utils.DisplayEntryEvent")]
+</mx:Metadata>
+	    <mx:Script>
+        <![CDATA[
+        	import com.sunrisetelecom.avantron.SettingsObj;
+        import com.sunrisetelecom.utils.DialogEntryEvent;
+        import mx.managers.PopUpManager
+        [Bindable] private var m_labels:Array=[];
+        private var obj:SettingsObj;
+        public function okClicked():void
+        {   var i:int;
+            var dataobj:Object=new Object;
+            PopUpManager.removePopUp(this);
+            for (i=0;i<m_labels.length;i++)
+            {
+               dataobj[m_labels[i]]=entries[i].text
+            }
+            this.dispatchEvent(new DialogEntryEvent("userReaction", dataobj));
+        }
+        public function setLabels(txt:Array):void
+        {
+        	m_labels=txt;
+        }
+        public function setValues(obj:SettingsObj):void
+        {
+        	for(var i:int=0;i<m_labels.length;i++)
+        	{
+        		entries[i].text=obj[m_labels[i]];
+        	}
+        }
+                ]]>
+    </mx:Script>
+    <mx:VBox>
+    	
+
+<mx:Repeater id="rp" dataProvider="{m_labels}">
+	
+<mx:HBox>
+
+	<mx:Text x="10" y="19" text="{rp.currentItem}" id="entry_label"/>
+	<mx:TextInput x="48" y="17" id="entries"/>
+	</mx:HBox>
+</mx:Repeater>
+</mx:VBox>
+	<mx:Button x="286" y="0" label="OK" click="okClicked()"/>
+	
+</mx:TitleWindow>

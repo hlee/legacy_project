@@ -1,0 +1,26 @@
+<%= error_messages_for 'profile' %>
+
+<!--[form:profile]-->
+<p><label for="profile_name">Name</label><br/>
+<%= text_field 'profile', 'name'  %></p>
+
+<p><label for="profile_comment">Comment</label><br/>
+<%= text_field 'profile', 'comment'  %></p>
+
+<p><label for="profile_comment">Major Offset (dB)</label><br/>
+<%= text_field 'profile', 'major_offset'  %></p>
+
+<p><label for="minor_deviation">Minor Offset (dB)</label><br/>
+<%= text_field 'profile', 'minor_offset'  %></p>
+<%unit_diff=ConfigParam.find(67).val.to_i==1 ? 60 : 0%>
+<p><label for="loss_offset">Loss (<%=unit_diff==0 ? "dBmV" : "dBuV"%>)</label><br/>
+<%= text_field 'profile', 'loss_offset' ,:value=>@profile.loss_offset+unit_diff %></p>
+
+<p><label for="link_loss">Link Loss</label><br/>
+<%= check_box 'profile', 'link_loss',{},1,0  %></p>
+
+<!--<p><label for="profile_status">Status</label><br/>
+<select id="profile_status" name="profile[status]"><option value="false">False</option><option value="true">True</option></select></p>
+-->
+<!--[eoform:profile]-->
+

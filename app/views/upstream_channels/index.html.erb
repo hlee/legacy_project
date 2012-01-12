@@ -1,0 +1,24 @@
+<h1>Listing upstream_channels</h1>
+
+<table class="datatable">
+  <tr class="datatable">
+    <th class="datatable">Name</th>
+    <th class="datatable">Freq (MHz)</th>
+    <th class="datatable">Bandwidth (MHz)</th>
+    <th colspan="2" class="datatable"><%= "Actions" %></th>
+  </tr>
+
+<% for upstream_channel in @upstream_channels %>
+  <tr class="datatable">
+    <td class="datatable"><%=h upstream_channel.name %></td>
+    <td class="datatable"><%=h upstream_channel.freq_disp %></td>
+    <td class="datatable"><%=h upstream_channel.bandwidth_disp %></td>
+    <td class="datatable"><%= link_to 'Edit', edit_upstream_channel_path(upstream_channel) %></td>
+    <td class="datatable"><%= link_to 'Delete', upstream_channel, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New upstream_channel', new_upstream_channel_path %>

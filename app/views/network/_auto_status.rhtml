@@ -1,0 +1,45 @@
+<div class="analyzer_functions">
+	<table class="functable">
+		<tr class="functable">
+			<td class="functable">
+				<% if (analyzer.get_status == Analyzer::DISCONNECTED) %>
+					<%=link_to(image_tag('analyzer/connect.png', :alt=>'Connect', :class=>'buttonup', :onmouseover=>"this.className='buttondown'", :onmouseout=>"this.className='buttonup'"), {:action=>'stop_monitor', :controller=>'network', :id=>analyzer.id}, :title=>'Connect')%>
+				<% elsif (analyzer.get_status == Analyzer::CONNECTED) %>
+					<%=link_to(image_tag('analyzer/disconnect.png', :alt=>'Disconnect', :class=>'buttonup', :onmouseover=>"this.className='buttondown'", :onmouseout=>"this.className='buttonup'"), {:action=>'maintenance',:controller=>'network', :id=>analyzer.id}, :title=>'Disconnect')%>
+				<% end %>
+			</td></tr><tr class="functable">
+			<td class="functable">
+				<% if (analyzer.get_status == Analyzer::CONNECTED && has_ingress?) %>
+				    <% if analyzer.auto_mode == 1%>
+					  <%=link_to(image_tag('analyzer/start_upstream.png', :alt=>'Start Ingress', :class=>'buttonup', :onmouseover=>"this.className='buttondown'", :onmouseout=>"this.className='buttonup'"), {:action=>'start_ingress',:controller=>'network', :id=>analyzer.id}, :title=>'Start Ingress')%>
+					<% else%>
+					  <%=link_to(image_tag('analyzer/start_upstream_disable.png', :alt=>'Start Ingress', :class=>'buttonup' ), :title=>'Start Ingress')%>
+					<% end%>  
+				<% elsif analyzer.get_status == Analyzer::INGRESS %>
+					<%=link_to(image_tag('analyzer/stop_upstream.png', :alt=>'Stop Ingress', :class=>'buttonup', :onmouseover=>"this.className='buttondown'", :onmouseout=>"this.className='buttonup'"), {:action=>'reason_entry',:controller=>'network', :id=>analyzer.id,:flag=>'dis'}, :title=>'Stop Ingress')%>
+				<% end %>
+			</td></tr><tr class="functable">
+			<td class="functable">
+				<% if (analyzer.get_status == Analyzer::CONNECTED && has_performance?) %>
+				    <% if analyzer.auto_mode == 2%>
+					  <%=link_to(image_tag('analyzer/start_downstream.png', :alt=>'Start Downstream', :class=>'buttonup', :onmouseover=>"this.className='buttondown'", :onmouseout=>"this.className='buttonup'"), {:action=>'start_performance',:controller=>'network', :id=>analyzer.id}, :title=>'Start Downstream')%>
+					<% else%>
+					  <%=link_to(image_tag('analyzer/start_downstream_disable.png', :alt=>'Start Downstream', :class=>'buttonup' ), :title=>'Start Downstream')%>
+					<% end%> 
+				<% elsif analyzer.get_status == Analyzer::DOWNSTREAM %>
+					<%=link_to(image_tag('analyzer/stop_downstream.png', :alt=>'Stop Downstream', :class=>'buttonup', :onmouseover=>"this.className='buttondown'", :onmouseout=>"this.className='buttonup'"), {:action=>'reason_entry',:controller=>'network', :id=>analyzer.id}, :title=>'Stop Downstream')%>
+				<% end %>
+			</td></tr><tr class="functable">
+			<td class="functable">
+				<% if (analyzer.get_status == Analyzer::DISCONNECTED) %>
+					<%=link_to(image_tag('analyzer/delete_disable.png', :alt=>'Delete', :class=>'buttonup' ), :title=>'Delete')%>
+				<% elsif (analyzer.get_status == Analyzer::CONNECTED) %>
+					<%=link_to(image_tag('analyzer/upgrade_disable.png', :alt=>'Upgrade Firmware', :class=>'buttonup'), :title=>'Upgrade Firmware')%>
+				<% end %>
+			</td></tr><tr class="functable">
+			<td class="functable">
+                                <%=link_to(image_tag('analyzer/reset.png', :alt=>'Reset', :class=>'buttonup', :onmouseover=>"this.className='buttondown'", :onmouseout=>"this.className='buttonup'"), {:action=>'reset_analyzer', :controller=>'network', :id=>analyzer.id}, :title=>'Reset')%>
+			</td>
+		</tr>
+	</table>
+</div>

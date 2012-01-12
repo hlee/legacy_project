@@ -1,0 +1,34 @@
+
+<p>
+<h1>Customer Links List</h1>
+<%=link_to "edit",:controller=>"link",:action=>"edit"%>||<%=link_to "add",:controller=>"link",:action=>"link_form"%><br />
+<div id="links_list">
+<%= render :partial => "links_list", :layout => false %>   
+</div>
+
+
+<form name="sform" action="" style="display:inline;">   
+Please input name or description:    
+<%= text_field_tag("query", params['query'], :size => 10 ) %>   
+</form>   
+  
+<%= image_tag("spinner_query.gif",   
+              :align => "absmiddle",   
+              :border => 0,   
+              :id => "spinner",   
+              :style =>"display: none;" ) %>   
+</p>   
+  
+<%= observe_field 'query',  :frequency => 2,   
+         :update => 'links_list',   
+         :before => "Element.show('spinner')",   
+         :success => "Element.hide('spinner')",   
+         :url => {:action => 'customer'},   
+         :with => 'query' %>   
+		 
+<hr>
+  
+
+  
+  
+

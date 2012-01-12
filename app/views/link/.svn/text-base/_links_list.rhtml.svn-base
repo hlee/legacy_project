@@ -1,0 +1,23 @@
+<p />
+<% if @total == 0 %>   
+  
+<p>No links found...</p>   
+  
+<% else %>   
+  
+<p>Number of links found : <b><%= @total %></b></p>   
+  
+<ul>
+<% @link_list.each { |link| %>
+<li><a href="<%=link.url%>"><%=link.name%></a></li>
+<% } %>
+</ul>
+
+<p style="margin-left:150px;">   
+<% if @links_pages.page_count > 1 %>   
+Page:   
+<%= pagination_links_remote @links_pages %>   
+<% end %>   
+</p> 
+  
+<% end %>  

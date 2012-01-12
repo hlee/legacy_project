@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:LegendItem styleName="normalLegend" xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Style source="./asset/Sunrise.css" />
+</mx:LegendItem>

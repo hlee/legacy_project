@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow creationComplete="initializeWindow()" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" styleName="zoomWindow" height="120" width="85">
+	<mx:Style source="./asset/Sunrise.css" />
+	<mx:Script>
+		<![CDATA[
+		    import com.sunrisetelecom.events.ZoomEvent;		
+			
+			[Embed(source="./asset/zoomOut.png")]
+			[Bindable]
+			private var _zoomOutIco:Class;		
+			
+			[Embed(source="./asset/zoomIn.png")]
+			[Bindable]
+			private var _zoomInIco:Class;
+			
+			[Embed(source="./asset/selected.png")]
+			[Bindable]
+			private var _selectedIco:Class;
+			
+			private function initializeWindow():void
+			{	
+				switchToZoomIn(true);
+			}
+			
+			private function onZoomInButtonClick():void
+			{
+				switchToZoomIn(true);
+				
+				var event:ZoomEvent = new ZoomEvent(ZoomEvent.ZOOM, true);
+				this.dispatchEvent(event);
+			}
+			
+			private function onZoomOutButtonClick():void
+			{
+				switchToZoomIn(false);
+				
+				var event:ZoomEvent = new ZoomEvent(ZoomEvent.ZOOM, false);
+				this.dispatchEvent(event);
+			}
+
+			private function switchToZoomIn(b:Boolean):void
+			{
+				if(b)
+				{
+					_zoomIn.selected = true;
+					_zoomIn.enabled = false;
+					
+					_zoomOut.selected = false;
+					//_zoomOut.enabled = true;
+					
+					_zoomInSelected.visible = true;
+					_zoomOutSelected.visible = false;
+				}
+				else
+				{
+					_zoomIn.selected = false;
+					_zoomIn.enabled = true;
+					
+					_zoomOut.selected = true;
+					//_zoomOut.enabled = false;
+					
+					_zoomInSelected.visible = false;
+					_zoomOutSelected.visible = true;					
+				}
+			}		
+		]]>
+	</mx:Script>
+	<mx:Canvas width="100%" height="100%">
+		<mx:Image x="0" y="10" id="_zoomInSelected" source="{_selectedIco}" />
+		<mx:Image x="0" y="60" id="_zoomOutSelected" source="{_selectedIco}" />
+		<mx:Button toolTip="Zoom In" x="25" y="0" width="40" id="_zoomIn" toggle="true" selected="true" icon="{_zoomInIco}" click="onZoomInButtonClick()" />
+		<mx:Button toolTip="Zoom Out" x="25" y="50" width="40" id="_zoomOut" toggle="true" selected="false" icon="{_zoomOutIco}" click="onZoomOutButtonClick()" />
+	</mx:Canvas>
+	
+</mx:TitleWindow>

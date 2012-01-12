@@ -1,0 +1,10 @@
+<h1>Network#index</h1>
+<p>Find me in app/views/network/index.rhtml</p>
+<table class="datatable">
+<thead>
+<tr><th>Analyzer Name</th><th>Analyzer IP</th></tr>
+</thead>
+<%@analyzer_list.each { |anl| %>
+   <tr class="datatable"><td class="datatable"><%=anl[:name]%></td><td class="datatable"><%=anl[:ip]%></td></tr>
+<%}%>
+</table>

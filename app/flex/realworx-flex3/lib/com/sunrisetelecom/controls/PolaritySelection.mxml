@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script>
+        <![CDATA[
+            override public function set data(value:Object):void
+            {
+				for(var i:int = 0; i < dataProvider.length; i++)
+				{
+					var v:String = dataProvider[i].@name;
+					if(v == value.polarity_name)
+					{
+						selectedItem = dataProvider[i];
+						break;
+					}
+				}
+            }
+        ]]>
+    </mx:Script>
+</mx:ComboBox>

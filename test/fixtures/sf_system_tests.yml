@@ -1,0 +1,19 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+one:
+  id: 1
+  sf_test_plan_id: 1
+  test_type: 10
+  min_value: 100
+  max_value: 1000
+two:
+  id: 2
+  sf_test_plan_id: 1
+  test_type: 11
+  min_value: 200
+  max_value: 2000
+three:
+  id: 3
+  sf_test_plan_id: 3
+  test_type: 11
+  min_value: 200
+  max_value: 2000

@@ -1,0 +1,127 @@
+<script src="/javascripts/calendar_date_select/calendar_date_select.js" type="text/javascript"></script>
+<%= javascript_include_tag "calendar_date_select/format_iso_date" %>
+
+<div>
+  <p class="sideBarTitle">Alarm List</p>
+  <hr>
+  <ul>
+    <% if has_ingress? %>
+      <li>
+        <%=
+          link_to 'Ingress Alarms', {
+            :controller=>'alarm', 
+            :action=>'index'
+          }
+        %>
+      </li>
+    <% end %>
+    <% if has_performance? %>
+      <li>
+        <%=
+          link_to 'Performance Alarms',{
+            :controller=>'alarm', 
+            :action=>'down_alarm_list'
+          }
+        %>
+      </li>
+    <% end %>
+  </ul>
+  <hr>
+  <% form_tag(
+      :controller=>'alarm', 
+      :action=>params[:action], 
+      :id=>nil
+    ) do
+  %>
+  <table>
+    <tr>
+      <th colspan=1 align="left">Start Date</th>
+    </tr>
+
+    <tr>
+      <td>
+	  <%=calendar_date_select_tag "start_date", @start_date, :time => "true"%>
+      </td>
+    </tr>
+
+    <tr>
+      <th colspan=1 align="left">End Date</th>
+    </tr>
+
+    <tr>
+      <td><%=calendar_date_select_tag "stop_date", @stop_date, :time => "true"%>
+      </td>
+    </tr>
+  </table>
+  <hr>
+  <b>Ack State</b><p />
+  <select name='acknowledged'>
+    <option <%= (@acknowledged.eql?('')) ? 'selected' : "" %> value = ''>None</option>
+    <option <%= (@acknowledged.eql?(0)) ? 'selected' : "" %> value='0'>Unacknowledged</option>
+    <option <%= (@acknowledged.eql?(1)) ? 'selected' : "" %> value='1'>Acknowledged</option>
+  </select>
+  <hr>
+  <b>Active State</b><p />
+  <select name='active'>
+    <option <%= (@active.eql?('')) ? 'selected' : "" %> value = ''>None</option>
+    <option <%= (@active.eql?(0)) ? 'selected' : "" %> value='0'>Inactive</option>
+    <option <%= (@active.eql?(1)) ? 'selected' : "" %> value='1'>Active</option>
+  </select>
+  <hr>
+  <%if params[:action] == 'index'%>
+    <b>Alarm Level</b><p />
+  <select name='alarm_level'>
+    <option <%= (@alarm_level.eql?('')) ? 'selected' : "" %> value = ''>None</option>
+    <option <%= (@alarm_level.eql?(Alarm.major)) ? 'selected' : "" %> value='<%=Alarm.major%>'>Major</option>
+    <option <%= (@alarm_level.eql?(Alarm.minor)) ? 'selected' : "" %> value='<%=Alarm.minor%>'>Minor</option>
+    <option <%= (@alarm_level.eql?(Alarm.loss)) ? 'selected' : "" %> value='<%=Alarm.loss%>'>Link Loss</option>
+    <option <%= (@alarm_level.eql?(10)) ? 'selected' : "" %> value='10'>Datalog (Max Trigger)</option>
+    <option <%= (@alarm_level.eql?(11)) ? 'selected' : "" %> value='11'>Datalog (Average Trigger)</option>
+ 
+  </select>
+  <hr>
+  <%end%>
+ <% if params[:action] == 'down_alarm_list' %>
+  <b>Alarm Level</b><p>
+  <select name='alarm_type'>
+    <option value='' <%= (@type.eql?('')) ? 'selected="SELECTED"' : "" %>>None</option>
+    <option value='<%=DownAlarm.warn%>' <%= (@type.eql?(DownAlarm.warn)) ? 'selected="SELECTED"' : "" %>>Minor</option>
+    <option value='<%=DownAlarm.error%>' <%= (@type.eql?(DownAlarm.error)) ? 'selected="SELECTED"' : "" %>>Major</option>
+  </select>
+  <hr>
+	<b>Measure</b><p>
+  <%measure_list=[['','']]
+    measure_list.concat( Measure.alarmed.collect {|meas| [meas.measure_label,meas.id]})
+				%>
+	<select name="measure_id">
+      <%=options_for_select(measure_list, @measure.to_i) %>
+	</select>
+	<hr>
+	<%end%>
+  <%site_list=[['','']]
+	  if params[:action] == 'index'
+       site_list.concat( Site.alarm_sites(:upstream)  ) 
+		else
+       site_list.concat( Site.alarm_sites(:downstream)  ) 
+		end
+				%>
+  <% unless site_list.empty? %>
+    <b>Site</b><p>
+    <select name="site_id">
+      <%=options_for_select(site_list, @site_id.to_i) %>
+    </select>
+    <hr>
+  <% end %>
+  <%channel_list=[['','']]
+    channel_list.concat( Channel.find(:all).collect {|channel| [channel.channel_name,channel.id]})
+				%>
+  <% if params[:action] == 'down_alarm_list' %>
+    <b>Channel <%= @channel %></b><p>
+    <select name="channel">
+      <%=options_for_select(channel_list.sort, @channel.to_i) %>
+    </select>
+    <hr>
+  <% end %>
+  <%= submit_tag "SEARCH"%>
+  <% end %><p>
+</div>

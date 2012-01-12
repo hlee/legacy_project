@@ -1,0 +1,43 @@
+<h1>Realworx License</h1>
+
+<table class="datatable">
+  <tr class="datatable">
+    <th colspan=2 class="datatable">License Details</th>
+  </tr>
+  <tr class="datatable">
+    <td class="datatable">Expiration Date</td>
+    <td class="datatable<%= has_license? ? "" : "_red" %>"><%= @license.expiration_date %></td>
+  </tr>
+  <tr class="datatable">
+    <td class="datatable">Ingress</td>
+    <td class="datatable<%= has_license? ? "" : "_red" %>"><%= @license.has_ingress? ? "enabled" : "disabled" %></td>
+  </tr>
+  <tr class="datatable">
+    <td class="datatable">Performance</td>
+    <td class="datatable<%= has_license? ? "" : "_red" %>"><%= @license.has_performance? ? "enabled" : "disabled" %></td>
+  </tr>
+  <tr class="datatable">
+    <td class="datatable">Licensed Mac Address</td>
+    <td class="datatable<%= has_license? ? "" : "_red" %>"><%= @license.mac_address %></td>
+  </tr>
+  <tr class="datatable">
+    <td class="datatable">System Mac Address</td>
+    <td class="datatable<%= has_license? ? "" : "_red" %>"><%= `/sbin/ifconfig | grep HWaddr | cut -c39-`.gsub("  \n", ' ').split(' ').join("<BR>") %></td>
+  </tr>
+</table>
+
+
+<h2>Upload new License file</h2>
+
+<% form_tag({:action=>"upload"},:multipart => true) do %><p>
+   <label for="License_file">License File:</label><%=file_field_tag "license_file"%>
+   <p>
+   <input type="submit" value="Upload File"/>
+<% end %>
+<p/>
+<b>Sunrise Contact information</b><p>
+North America Toll Free: 1-800-701-5208, Extension 3<br/>
+Outside of North America:  International customers should contact the nearest<br/>
+Sunrise Telecom Representative, or the factory at 1-408-360-2200, Extension 3<br/>
+E-mail: catv_tech_support@sunrisetelecom.com<br/>
+

@@ -1,0 +1,22 @@
+<h2>Test Plans for <%= @sf_system_file["display_name"] %></h2>
+<p>
+<table class="datatable">
+  <tr>
+    <th>Test Plan</th>
+    <th>Functions</th>
+  </tr>
+  <% @sf_test_plans.sort.each { |test_plan| %>
+    <tr>
+      <% @sf_test_plan=test_plan %>
+      <td>
+        <%= in_place_editor_field :sf_test_plan,'name' %>
+      </td>
+      <td>
+        <%=button_to('Delete',:action=>'test_plan_delete',:controller=>'setup',:id=>test_plan.id)%>
+        <%=button_to('Edit',:action=>'test_plan_edit',:controller=>'setup',:id=>test_plan.id)%>
+        <%=button_to('Channel Selection',:action=>'test_channel_list',:controller=>'setup',:id=>test_plan.id)%>
+        <%=button_to('Limits & Test Group',:action=>'test_measure_list',:controller=>'setup', :id=>test_plan.id) %>
+      </td>
+    </tr>
+  <% } %>
+</table>

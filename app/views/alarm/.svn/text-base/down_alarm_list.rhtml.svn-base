@@ -1,0 +1,17 @@
+<h1>Performance Alarms</h1>
+<%= stylesheet_link_tag 'redbox' %>
+
+<%=javascript_include_tag 'redbox' %>
+
+<%= image_tag("spinner.gif",
+  :align => 'absmiddle',
+  :border=> 0,
+  :id => "spinner",
+  :style=>"display: none;" )
+%>
+<div id="table">
+  <%= render :partial => "down_alarm_table", :layout => false %>
+</div>
+<% unless @criteria.empty? %>
+  <h4>Filter criteria: <%= @criteria.join(' and ') %> </h4>
+<% end %>

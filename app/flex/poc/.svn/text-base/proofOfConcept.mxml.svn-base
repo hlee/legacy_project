@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" initialize="init_app()">
+	    <mx:Script>
+        <![CDATA[
+        	import com.sunrisetelecom.avantron.SettingsObj;
+        	import mx.collections.ArrayCollection;
+            // Data includes URL to album cover.
+            import mx.controls.Alert;
+            import mx.managers.PopUpManager;
+            import com.sunrisetelecom.avantron.Protocol;
+            import com.sunrisetelecom.utils.DialogEntryEvent;
+            private var avantron:Protocol;
+            private var connected:Boolean=false;
+            private var settings:SettingsObj=null;
+            [Bindable] private var responses:ArrayCollection=new ArrayCollection();
+            [Bindable] private var funcs:Array=[
+               {label:"logout",data: 7},
+               {label:"logon",data: 1},
+               {label:"get server info",data: 2},{label:"new mode",data:3},
+               {label:"get settings",data:4},{label:"set settings",data:5},
+               {label:"Get Firmware",data:8}];
+public function init_app():void
+{
+   responses.addItem({event:"initialization",response_type:"",data:"Running init_app"});
+}
+public function process_response(... args):void
+{
+   var event:String=args[0];
+   var response_type:String;
+   if (args.length > 1)
+   {
+      response_type=args[1];
+   }	
+   var obj:Object={};
+   obj["event"]=event;
+   if (args.length > 1)
+   {
+   	obj["response_type"]=args[1]
+   	obj["data"]=args[2]
+   }
+   obj[data]="";
+   switch (event)
+   {
+   	case "connect":
+   	   trace("connect");
+   	   obj["response_type"]="connect event";
+   	   obj["data"]=""
+   	   break;
+   	case "getServerInfo":
+   	   obj["data"]=args[2].toString();
+   	   break;		
+   	case "getSettings":
+   	   trace("connect");
+   	   obj["data"]=args[2].toString();
+   	   settings=args[2];
+   	   break;		
+   	case "setSettings":
+   	case "newMode":
+   	   break;		
+        default:
+   		trace("Do not Recognize "+event+ "but will attempt to display anyway");
+   		if (args.length > 2)
+   		{
+   			obj["data"]=args[2].toString();
+   		}
+
+	}
+	responses.addItem(obj);
+}
+private function change_connect():void
+{
+	if (avantron == null)
+	{
+		avantron=new Protocol(process_response,host.text,parseInt(port.text));
+	}
+	if (avantron.connected()==true)
+	{
+		connect_button.label="Disconnect";
+		avantron.close();
+	}
+	else
+	{
+		connect_button.label="Connect";
+		avantron.start();
+	}
+}
+private function command_selected():void
+{
+	var entry_instance:DialogEntry;
+	if (avantron == null)
+	{
+		Alert.show("Failed to logon");
+	}
+	else
+	{
+           switch(command.selectedItem.data)
+           {
+              case 7:
+	        avantron.logoff();
+                break;
+              case 1:
+	        avantron.logon();
+                break;
+              case 2:
+	        avantron.getServerInfo();
+                break;
+              case 3:
+	   	entry_instance= DialogEntry(PopUpManager.createPopUp(this, DialogEntry, false));
+	   	entry_instance.setLabels(["NEW MODE"]);
+	   	entry_instance.addEventListener("userReaction",userEntryHandler); 
+              break;
+              case 4:
+	        avantron.getSettings();
+                break;
+              case 5:
+	   	entry_instance=DialogEntry(PopUpManager.createPopUp(this, DialogEntry,false));
+		entry_instance.setLabels(settings.toLabelList());
+		entry_instance.setValues(settings);
+	   	entry_instance.addEventListener("userReaction",userEntryHandler); 
+              break;
+              case 6:
+	        avantron.availRPTPS();
+                break;
+              case 8:
+                avantron.getFirmware();
+                break;
+		
+	   }
+	}
+}
+
+private function userEntryHandler(entry:DialogEntryEvent):void
+{
+        if (entry.m_data.hasOwnProperty("NEW MODE"))
+        { // NEW MODE ENTERED
+           avantron.newMode(parseInt(entry.m_data["NEW MODE"]));
+        }
+        else
+        {
+        	var settings:SettingsObj=new SettingsObj();
+        	settings.importObj(entry.m_data);
+        	avantron.setSettings(0,settings);
+        }
+}
+        ]]>
+    </mx:Script>
+
+	    <mx:TextInput id="host" x="121" y="51" text="10.0.1.216"/>
+	    <mx:Text x="71" y="53" text="Host"/>
+	    <mx:Text x="71" y="79" text="Port"/>
+	    <mx:TextInput id="port" x="121" y="77" text="3001"/>
+	    <mx:Text x="71" y="105" text="HMID"/>
+	    <mx:TextInput x="121" y="103" text="1" id="hmid"/>
+	    <mx:Button id="connect_button" x="71" y="144" label="Connect" click="change_connect()"/>
+	    <mx:ComboBox id="command" x="71" y="174" dataProvider="{funcs}" ></mx:ComboBox>
+	    <mx:Button x="285" y="174" label="Run Command" click="command_selected()"/>
+	    <mx:DataGrid x="71" y="204" height="253" width="2000" dataProvider="{responses}">
+	    	    <mx:columns>
+	    	    	    <mx:DataGridColumn headerText="Event" dataField="event" width="75"/>
+	    	    	    <mx:DataGridColumn headerText="Response type" dataField="response_type" width="100"/>
+	    	    	    <mx:DataGridColumn headerText="Data" dataField="data"/>
+	    	    </mx:columns>
+	    </mx:DataGrid>
+</mx:Application>

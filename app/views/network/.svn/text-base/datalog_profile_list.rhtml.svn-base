@@ -1,0 +1,41 @@
+<p/><hr/>Profile List for Analyzer <b><%=@anl.name%></b><hr/><p/>
+<%=button_to('Create New Datalog Profile',:action=>'datalog_profile_form',:controller=>'network', :analyzer_id => @analyzer_id)%><br><br>
+<table class="datatable">
+  <tbody>
+    <tr>
+     <th>Datalog Profile Name</th>
+     <th>Datalog Trace</th>
+     <th>Alarm Trigger Type</th>
+     <th>Freq_1 MHz</th>
+     <th>Freq_2 MHz</th>
+     <th>Freq_3 MHz</th>
+     <th>Freq_4 MHz</th>
+     <th>Function</th>
+<th>Limit</th>
+    </tr>
+
+<% @dp_list.each {|dp| %>
+
+    <tr class="<%= cycle("even","odd")%>">
+      <td><%=link_to(dp.name, :action=>:datalog_profile_form,:id=>dp.id)%></td>
+      <td><%=dp.datalog_descr%></td>
+      <td><%=dp.trigger_type_descr%></td>
+      <td><%=dp.freq1_disp%></td>
+      <td><%=dp.freq2_disp%></td>
+      <td><%=dp.freq3_disp%></td>
+      <td><%=dp.freq4_disp%></td>
+      <td><%=dp.limit_val%></td>
+      <td>  <%= button_to(
+            'Delete', { 
+              :action=>'datalog_profile_destroy',
+              :id=>dp.id
+            }, {
+              :confirm => "WARNING: This will delete this Datalog Profile.  Are you sure?"
+            }
+          )
+        %></td>
+    </tr>
+
+<% }%>
+  </tbody>
+</table>

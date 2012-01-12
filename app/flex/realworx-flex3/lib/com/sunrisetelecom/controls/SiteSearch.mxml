@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="800" height="332">
+    <mx:Script>
+        <![CDATA[
+            import com.sunrisetelecom.utils.Utils;
+            import mx.collections.ArrayCollection;
+            import mx.managers.PopUpManager;
+         
+            [Bindable]
+            private var _siteList:ArrayCollection;
+            private var _selectedSiteId:int;
+            
+            public function load(siteList:Array, siteId:int):void
+            {
+                _siteList = new ArrayCollection(siteList);
+                _siteList.filterFunction = searchOnly;
+                _siteList.refresh();
+                if(siteId != -1)
+                {
+                    _selectedSiteId = siteId;
+                }
+            }
+         
+            private function clickCancel():void
+            {
+                PopUpManager.removePopUp(this);
+            }
+            
+            private function clickOk():void
+            {
+                PopUpManager.removePopUp(this);
+            }
+            
+            private function onCriteriaChanged():void
+            {
+            	_siteList.refresh();
+            	if(!_siteList.contains(_datagrid.selectedItem))
+            	{
+                    _datagrid.selectedItem = null;
+                    okButton.enabled = false;
+            	}
+            }
+            
+            private function searchOnly(item:Object):Boolean
+            {
+                var pattern:RegExp = new RegExp(textSearch.text, "i");
+                
+                if (String(item.name).search(pattern) != -1)
+                {
+                    return true;
+                }
+                else if (String(item.port_name).search(pattern) != -1)
+                {
+                    return true;
+                }
+                else if (String(item.analyzer_name).search(pattern) != -1)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            
+            private function siteIdComparator(obj1:Object, obj2:Object):int
+            {
+                var s1:String = obj1.site_id.toString();
+                var s2:String = obj2.site_id.toString();
+
+                return Utils.floatComparator(s1, s2);
+            }
+            
+            private function siteNameComparator(obj1:Object, obj2:Object):int
+            {
+                var s1:String = obj1.name as String;
+                var s2:String = obj2.name as String;
+                
+                var p1:int = s1.indexOf("//");
+                var p2:int = s2.indexOf("//");
+                
+                if(p1 != -1 && p2 != -1 && p1 == p2)
+                {
+                    var t1:String = s1.substring(0, p1);
+                    var t2:String = s2.substring(0, p2);
+                    
+                    if(t1 == t2)
+                    {
+                        t1 = s1.substring(p1 + 2);
+                        t2 = s2.substring(p2 + 2);
+                        
+                        return Utils.floatComparator(t1, t2);
+                    }
+                }
+                
+                return Utils.floatComparator(s1, s2);
+            }
+
+        ]]>
+    </mx:Script>
+    <mx:Label x="10" y="13" text="Search Criteria (by Site):"/>
+    <mx:TextInput id="textSearch" x="159" y="11" change="onCriteriaChanged()"/>
+    <mx:AdvancedDataGrid id="_datagrid" x="10" y="41" width="760" height="209" dataProvider="{_siteList}" editable="false">
+        <mx:columns>
+            <mx:AdvancedDataGridColumn sortCompareFunction="siteIdComparator" headerText="Site ID" dataField="site_id"/>
+            <mx:AdvancedDataGridColumn headerText="Site" sortCompareFunction="siteNameComparator" dataField="name"/>
+            <mx:AdvancedDataGridColumn headerText="Analyzer" dataField="analyzer_name"/>
+            <!--mx:AdvancedDataGridColumn headerText="Switch ID" dataField="switch_id"/-->
+            <mx:AdvancedDataGridColumn headerText="Port" dataField="port_name"/>
+        </mx:columns>
+    </mx:AdvancedDataGrid>
+    <mx:Button id="okButton" x="632" y="260" label="OK" enabled="{_datagrid.selectedItem != null}" click="clickOk()" width="65"/>
+    <mx:Button id="cancelButton" x="705" y="260" label="Cancel" click="clickCancel()" width="65"/>
+</mx:TitleWindow>

@@ -1,0 +1,52 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html'
+one:
+  id: 101
+  name: 'one'
+two:
+  id: 102
+  name: 'two'
+three:
+  id: 103
+  name: 'three'
+four:
+  id: 104
+  name: 'four'
+five:
+  id: 105
+  name: 'five'
+six:
+  id: 106
+  name: 'six'
+seven:
+  id: 107
+  name: 'seven'
+eight:
+  id: 108
+  name: 'eight'
+nine:
+  id: 109
+  name: 'nine'
+ten:
+  id: 110
+  name: 'ten'
+eleven:
+  id: 111
+  name: 'eleven'
+twelve:
+  id: 112
+  name: 'twelve'
+thirteen:
+  id: 113
+  name: 'thirteen'
+fourteen:
+  id: 114
+  name: 'fourteen'
+fifteen:
+  id: 115
+  name: 'fifteen'
+sixteen:
+  id: 116
+  name: 'sixteen'
+seventeen:
+  id: 117
+  name: 'seventeen'

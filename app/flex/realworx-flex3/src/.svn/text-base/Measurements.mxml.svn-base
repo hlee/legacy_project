@@ -1,0 +1,1372 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application styleName="mainForm" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="978" height="600" applicationComplete="useWebService()" creationPolicy="all" horizontalScrollPolicy="off" verticalScrollPolicy="off" xmlns:utils="com.sunrisetelecom.utils.*" xmlns:controls="com.sunrisetelecom.controls.*">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import com.sunrisetelecom.utils.Unit;
+            import com.sunrisetelecom.controls.Constellation;
+            import com.sunrisetelecom.utils.Utils;
+            import com.sunrisetelecom.controls.QamPanel;
+            import mx.managers.CursorManager;
+            import com.sunrisetelecom.controls.MeasGraph;
+            import com.sunrisetelecom.events.SiteChangeEvent;
+            import com.sunrisetelecom.controls.ChannelBox;
+
+            import mx.managers.PopUpManager;
+            import mx.charts.series.items.LineSeriesItem;
+            import mx.charts.series.items.ColumnSeriesItem;
+            import mx.charts.events.ChartItemEvent;
+            import mx.collections.ListCollectionView;
+            import mx.events.MenuEvent;
+            import mx.collections.ICollectionView;
+            import mx.collections.SortField;
+            import mx.collections.Sort;
+            import mx.charts.series.items.BarSeriesItem;
+            import mx.charts.series.items.HLOCSeriesItem;
+            import mx.charts.HitData;
+            import mx.containers.GridItem;
+            import mx.containers.GridRow;
+            import mx.containers.Grid;
+            import mx.containers.HBox;
+            import mx.events.ListEvent;
+            import mx.formatters.NumberBase;
+            import mx.formatters.DateBase;
+            import mx.containers.VBox;
+            import mx.controls.dataGridClasses.DataGridColumn; 
+            import mx.utils.URLUtil;
+            import mx.rpc.soap.LoadEvent;
+            import mx.rpc.Fault;
+            import mx.rpc.soap.WebService;
+            import mx.rpc.events.ResultEvent;
+            import mx.rpc.events.FaultEvent;
+            import mx.controls.Alert;
+            import mx.collections.ArrayCollection;
+            import mx.controls.CheckBox;
+            import mx.controls.DataGrid;
+            import mx.collections.ArrayCollection;
+            import mx.rpc.soap.WebService;
+            
+            import flash.text.TextLineMetrics;
+            
+            [Bindable]
+            public var _portList:ArrayCollection = new ArrayCollection();
+
+            [Bindable]
+            private var _selectedSiteId:int = -1;
+            
+            [Bindable]
+            private var _siteList:Array = null;
+            
+            private var _selectedChannelId:int = -1;
+
+            private var _measureList:Array = new Array();
+            private var _channelList:ArrayCollection = new ArrayCollection();
+
+            private var _selectedChannels:Array = new Array();
+            private var _selectedMeasures:Array = new Array();
+            private var _limitLookup:Object = new Object();
+            private var _displayedChannels:Array = new Array();
+
+            private var _loadCount:int = 0;
+            private var _targetCount:int = 0;
+            
+            [Bindable]
+            private var _slmAnalogs:ArrayCollection = new ArrayCollection();
+            [Bindable]
+            private var _slmDigitals:ArrayCollection = new ArrayCollection();
+            
+            [Bindable]
+            private var _defaultUom:String = Unit.DBMV;
+            
+            private var _initParam:Boolean = true;
+            
+            private const UOMS:ArrayCollection = new ArrayCollection([9, 11, 17]);
+
+            /////////////////////////////////////
+            // useWebService
+            // Trigger the first amf transactions
+            ///////////////////////////////////
+            public function useWebService():void
+            {
+                messageService.get_uom();
+                messageService.get_sites.send({site_type: 1});
+                messageService.get_measures();
+            }
+            
+            /////////////////////////////
+            // onWebServiceFault
+            // If an error occurs show an alert message
+            ////////////////////////////
+            public function onWebServiceFault(event:FaultEvent):void
+            {
+                var fault:Fault = event.fault;
+                var message:String = "An error occurred." + fault.message + "|" + fault.faultString;
+                Alert.show(message);
+            }
+        
+            ////////////////////////////////////
+            // createDGColumns
+            // Create the columns for the datagrids
+            ////////////////////////////////////
+            public function createDGColumns():void
+            {
+                // dynamicaly create columns for datagrid
+                var dgColumns:Array = new Array();
+                var gridList:Array = [_summaryDisplay, _avgDisplay, _recentDisplay];
+                var dgArr:Object = new Object();
+                var col:DataGridColumn;
+                var col2:DataGridColumn;
+                for each(var grid:DataGrid in gridList)
+                {
+                    dgColumns = [];
+                    col = new DataGridColumn();
+                    col.headerText = "Channel IDS";
+                    col.dataField = "channel_id";
+                    col.visible = false;
+                    col2 = new DataGridColumn();
+                    col2.headerText = "Channel";
+                    col2.dataField = "channel_name";
+                    col2.sortCompareFunction = channelComparator;
+                    dgColumns[0] = col;
+                    dgColumns.push(col2);
+                    for(var i:int = 0; i < _selectedMeasures.length; i++)
+                    {
+                        var limitStr:String = "";
+                        var label:String = _selectedMeasures[i].label;
+                        if(_limitLookup.hasOwnProperty(label))
+                        {
+                            var minStr:String = _limitLookup[label]["min"];
+                            var maxStr:String = _limitLookup[label]["max"];
+                            
+                            var m:int = _selectedMeasures[i].data;
+                            
+                            var min:Number = parseFloat(minStr);
+                            var max:Number = parseFloat(maxStr);
+
+                            if(_defaultUom == Unit.DBUV)
+                            {
+                                if(UOMS.contains(m)) //dcp = 7, video_lvl = 11, audio_lvl = 17
+                                {
+                                    min = Math.round(min + 60);
+                                    max = Math.round(max + 60);
+                                }
+                            }
+                        
+                            minStr = isNaN(min) ? "" : min.toString();
+                            maxStr = isNaN(max) ? "" : max.toString();
+                            
+                            if(minStr.length > 0 || maxStr.length > 0)
+                            {
+                                limitStr = " [" + minStr + "/" + maxStr + "]";
+                            }
+                        }
+                        col = new DataGridColumn(label);
+                        col.headerText = label + limitStr;
+                        col.dataField = label;
+                        col.sortable = false;
+                        
+                        var text:TextLineMetrics = this.measureText(col.headerText);
+
+                        col.width = Math.max(60, text.width + 10);
+                        
+                        dgColumns.push(col);
+                    }
+
+                    grid.columns = dgColumns;
+                }
+            }
+            
+            private function channelComparator(obj1:Object, obj2:Object):int
+            {
+                var s1:String = obj1.channel_name as String;
+                var s2:String = obj2.channel_name as String;
+    
+                return Utils.floatComparator(s1, s2);
+            }
+            
+            //////////////
+            // formatDataTip
+            // Display date/time without secords. Used on date scrollbars
+            ////////////////
+            public function formatDataTip(i:Number):String
+            {
+                var disp_date:Date = new Date();
+                var secs:Number = i % 60;
+                disp_date.setTime(i - secs);
+                return disp_date.toString() + ":::" + (i - secs).toString();
+            }
+            
+            ///////////////////
+            // getData
+            // Gets the initial datagrid data
+            //instance - true if you are getting instance data
+            ////////////////////////////
+            public function getData(instance:Boolean):void
+            {       
+                var measObj:Object = null;
+                var chObj:Object = null;
+                
+                var selChannelIds:Array = [];
+                var selMeasIds:Array = [];
+
+                if(_initParam)
+                {
+                    _initParam = false;
+                    
+                    if(this.parameters.hasOwnProperty("meas_id"))
+                    {
+                        _selectedMeasures = [];
+                        
+                        var measId:int = this.parameters["meas_id"];
+    
+                        for each(measObj in _measureList)
+                        {
+                            if(measObj.data == measId)
+                            {
+                                _selectedMeasures.push(measObj);
+                                selMeasIds.push(measObj.data.toString());
+                                break;
+                            }
+                        }
+                    }
+         
+                    if(this.parameters.hasOwnProperty("ch_id"))
+                    {
+                        _selectedChannels = [];
+                        
+                        var chId:int = this.parameters["ch_id"];
+                        
+                        for each(chObj in _channelList)
+                        {
+                            if(chObj.data == chId)
+                            {
+                                _selectedChannels.push(chObj);
+                                selChannelIds.push(chObj.data.toString());
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if(selChannelIds.length != 1 && selMeasIds.length != 1)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    if(measures.selectedItems.length <= 0)
+                    {
+                        Alert.show("No measures Selected. Query requires at least one measure selected.");
+                        return;
+                    }
+                    else if(channels.selectedItems.length <= 0)
+                    {
+                        Alert.show("No Channels Selected. Query requires at least one channel selected.");
+                        return;
+                    }
+                    else if(start_date.selectedDate == null && !instance)
+                    {
+                        Alert.show("Start Date is required.");
+                    }
+                    else if(stop_date.selectedDate == null && !instance)
+                    {
+                        Alert.show("Stop Date is required.");
+                    }
+                    
+                    selChannelIds = [];
+                    selMeasIds = [];
+                    _selectedChannels = [];
+                    _selectedMeasures = [];
+                    
+                    for each(measObj in measures.selectedItems)
+                    {
+                       _selectedMeasures.push(measObj);
+                       selMeasIds.push(measObj.data.toString());
+                    }
+    
+                    for each(chObj in channels.selectedItems)
+                    {
+                        _selectedChannels.push(chObj);
+                        selChannelIds.push(chObj.data.toString());
+                    }
+                }
+                
+                var start_dt:Date = start_date.selectedDate;
+                var stop_dt:Date = stop_date.selectedDate;
+                var start:String = (start_dt.fullYear).toString() + "-" + (start_dt.month + 1).toString() + "-" + start_dt.date.toString() + " 00:00:00";
+                var stop:String = (stop_dt.fullYear).toString() + "-" + (stop_dt.month + 1).toString() + "-" + stop_dt.date.toString() + " 23:59:00";
+
+                summaryCanvas.enabled = false;
+                _avgCanvas.enabled = false;
+                _slmCanvas.enabled = false;
+                _recentCanvas.enabled = false;
+                messageService.get_measurements(_selectedSiteId, selMeasIds, selChannelIds, start, stop);
+                messageService.get_slm_summary(_selectedSiteId, selChannelIds, start, stop);
+                messageService.get_recent_measurements(_selectedSiteId, selMeasIds, selChannelIds);
+
+            }
+        
+            ////////
+            // loadInstance
+            // called when you hit the report button in the instance datagrid
+            ////////
+            public function loadInstance():void
+            {
+                getData(true);
+            }
+            
+            private function clearChannelInfoTabs():void
+            {
+                while(measurementTab.numChildren > 4)
+                {
+                    measurementTab.removeChildAt(4);
+                }
+            }
+        
+            ////////
+            // onSubmit
+            // called when you hit the main report button
+            /////////////
+            public function onSubmit():void
+            {
+                if(start_date.selectedDate > stop_date.selectedDate)
+                {
+                    Alert.show("Stop Date is earlier than Start Date, please reselect.");
+                    start_date.getFocus();
+                    return;
+                }
+
+                //We are removing all tabs other than the core 3.
+                //This assumes we always add children to the end.
+                clearChannelInfoTabs();
+                getData(false);
+            }
+        
+            /////////
+            // siteSelected
+            //Run when a site is selected
+            ///////////
+            public function siteSelected(event:SiteChangeEvent):void
+            {
+                if(_selectedSiteId == event.selectedSiteId) return;
+                
+                _selectedSiteId = event.selectedSiteId;
+                
+                messageService.get_channels(_selectedSiteId);
+                messageService.get_date_range(_selectedSiteId);
+            }
+            
+            /////////
+            // displayResults
+            // Poplulate data grids for summary and avg tabs.
+            /////////
+            private function displayResults(res:Object):void
+            {
+                _summaryDisplay.dataProvider = res["summary"];
+                _avgDisplay.dataProvider = res["avg"];
+            }
+            
+            ////////
+            // displayInstanceResults
+            // Populate instance data grids for instance tab
+            public function displayInstanceResults(res:Array):void
+            {
+                _recentDisplay.dataProvider = res;
+            }
+
+            //////////
+            // datafind
+            // A search algorithm for an array.
+            ////////
+            public function datafind(tgtid:int,dataArray:ArrayCollection):int
+            {
+                for(var x:int = 0; x < dataArray.length; x++)
+                {
+                    if(tgtid == dataArray[x].data)
+                    {
+                        return x;
+                    }
+                }
+                return -1;
+            }
+            
+                        
+            private function onGetUom(event:ResultEvent):void
+            {
+                var uom:int = event.result as int;
+                if(uom == 1)
+                {
+                    _defaultUom = Unit.DBUV;
+                }
+                else
+                {
+                    _defaultUom = Unit.DBMV;
+                }
+            }
+
+            //////////////
+            // onGetDateRange
+            // Called when we receive the results of a getDataRange event
+            /////////////
+            public function onGetDateRange(event:ResultEvent):void
+            {
+                var start:Date = event.result[0];
+                var end:Date = event.result[1];
+                
+                start_date.selectableRange = {rangeStart:start, rangeEnd:end};           
+                stop_date.selectableRange = {rangeStart:start, rangeEnd:end};
+                
+                if(_initParam && this.parameters.hasOwnProperty("start_date") && this.parameters.hasOwnProperty("stop_date"))
+                {
+                    try
+                    {
+                        var sd:Date = new Date(parseFloat(this.parameters["start_date"]) * 1000);
+                        var ed:Date = new Date(parseFloat(this.parameters["stop_date"]) * 1000);
+                        
+                        if(!isNaN(sd.date) && !isNaN(ed.date) && sd <= ed)
+                        {
+                            if(sd < start) sd = start;
+                            
+                            if(ed > end) ed = end;
+                            
+                            start_date.selectedDate = sd;
+                            stop_date.selectedDate = ed;
+                            
+                            getData(false);
+                            return;
+                        }
+                    }
+                    catch(e:Error)
+                    {
+                        trace("Error on onGetDateRange: " + e.message);
+                    }
+                }
+                
+                _initParam = false;
+                
+                start_date.selectedDate = start;
+                stop_date.selectedDate = end;
+            }
+            
+            /////////////
+            // onGetRecentMeasurements
+            // Called when we recieve the results of a getRecentMeasurements
+            ///////////////////
+            public function onGetRecentMeasurements(event:ResultEvent):void
+            {
+                if(event.result == null || event.result.measurements == null)
+                {
+                    return;
+                }
+                
+                var data:Object = new Object();
+                var m:int;
+                var ch:int;
+                var min_limit_str:String;
+                var max_limit_str:String;
+                var measurements:Array;
+                
+                createDGColumns();
+                
+                var results:Array = [];
+             
+                for(var x:int = 0; x < event.result.measurements.length; x++)
+                {
+                    data = event.result.measurements[x];
+                    //trace(x + "mid = " +data.measure_id); 
+                    var d:Object = new Object();
+                    var chidx:int = datafind(data.channel_id, _channelList);
+                    if(chidx == -1)
+                    {
+                        continue;
+                    }
+                    d["channel_id"] = _channelList[chidx].data;
+                    d["channel_name"] = _channelList[chidx].label;
+                
+                    for(var i:int = 0; i < data.measure_id.length; i++)
+                    {
+                        if(data.measure_id[i] == null)
+                        {
+                            continue;
+                        }
+                        m = data.measure_id[i];
+                        var measidx:int = datafind(m, new ArrayCollection(_measureList));
+                        
+                        if(data.min_limit[i] == null)
+                        {
+                            min_limit_str = "";
+                        }
+                        else
+                        {
+                            min_limit_str = data.min_limit[i].toString();
+                        }
+                        
+                        if(data.max_limit[i] == null)
+                        {
+                            max_limit_str = "";
+                        }
+                        else
+                        {
+                            max_limit_str=data.max_limit[i].toString();
+                        }
+                        
+                        var val:Number = data.val[i];
+
+                        if(_defaultUom == Unit.DBUV)
+                        {
+                            if(UOMS.contains(m)) //dcp = 7, video_lvl = 11, audio_lvl = 17
+                            {
+                                val += 60;
+                            }
+                        }
+                        
+                        var valStr:String = isNaN(val) ? "" : ((val == 0) ? "0.00" : val.toFixed(2));
+
+                        d[_measureList[measidx].label] = valStr;
+                    }
+                    results.push(d);
+                }
+                
+                displayInstanceResults(results);
+                
+                _recentCanvas.enabled = true;
+            }
+            
+            //////////
+            // onGetMeasurements
+            // Called when we recive the results of getMeasurements
+            //////////
+            public function onGetMeasurements(event:ResultEvent):void
+            {
+                if(event.result == null || event.result.length == 0)
+                {
+                    return;
+                }
+                
+                var data:Object = new Object();
+                var m:int;
+                var ch:int;
+                var min_limit_str:String;
+                var max_limit_str:String;
+
+                _displayedChannels = [];
+            
+                var res:Object = {"summary":[], "avg":[]};
+                _limitLookup = new Object();
+                
+                for(var x:int = 0; x < event.result.length; x++)
+                {
+                    data = event.result[x];
+                    //trace(x + "mid = " +data.measure_id); 
+                    var summaryData:Object = new Object();
+                    var avgData:Object = new Object();
+                    var chidx:int = datafind(data.channel_id, _channelList);
+                    
+                    if(chidx == -1)
+                    {
+                        continue;
+                    }
+                    
+                    summaryData["channel_id"] = _channelList[chidx].data;
+                    avgData["channel_id"] = _channelList[chidx].data;
+                    summaryData["channel_name"] = _channelList[chidx].label;
+                    avgData["channel_name"] = _channelList[chidx].label;
+                    
+                    _displayedChannels.push(data.channel_id);
+
+                    for(var i:int = 0; i < data.measure_id.length; i++)
+                    {
+                        if(data.measure_id[i] == null)
+                        {
+                            continue;
+                        }
+                        m = data.measure_id[i];
+                        var measidx:int = datafind(m, new ArrayCollection(_measureList));
+                        
+                        if(data.min_limit[i] == null)
+                        {
+                            min_limit_str = "";
+                        }
+                        else
+                        {
+                            min_limit_str = data.min_limit[i].toString();
+                        }
+                        
+                        if(data.max_limit[i] == null)
+                        {
+                            max_limit_str = "";
+                        }
+                        else
+                        {
+                            max_limit_str = data.max_limit[i].toString();
+                        }
+                        
+                        if(!_limitLookup.hasOwnProperty(_measureList[measidx].label))
+                        {
+                            var lim:Object = new Object();
+                            lim["min"] = min_limit_str;
+                            lim["max"] = max_limit_str;
+                            _limitLookup[_measureList[measidx].label] = lim;    
+                        }
+                        
+                        var min:Number = data.min[i];
+                        var max:Number = data.max[i];
+                        var avg:Number = data.avg[i];
+                        
+                        if(_defaultUom == Unit.DBUV)
+                        {
+                            if(UOMS.contains(m)) //dcp = 7, video_lvl = 11, audio_lvl = 17
+                            {
+                                min += 60;
+                                max += 60;
+                                avg += 60;
+                            }
+                        }
+                        
+                        var minStr:String = isNaN(min) ? "" : ((min == 0) ? "0.00" : ((min > 0.01) ? min.toFixed(2) : min.toString()));
+                        var maxStr:String = isNaN(max) ? "" : ((max == 0) ? "0.00" : ((max > 0.01) ? max.toFixed(2) : max.toString()));
+                        var avgStr:String = isNaN(avg) ? "" : ((avg == 0) ? "0.00" : ((avg > 0.01) ? avg.toFixed(2) : avg.toString()));
+                        
+                        summaryData[_measureList[measidx].label] = minStr + "/" + maxStr;
+                        avgData[_measureList[measidx].label] = avgStr;
+                    }
+                    res["summary"].push(summaryData);
+                    res["avg"].push(avgData);
+                }
+                createDGColumns();
+                //INSTinst_date.selectableRange={rangeStart:start_date.selectedDate,rangeEnd:stop_date.selectedDate};
+                displayResults(res);
+
+                summaryCanvas.enabled = true;
+                _avgCanvas.enabled = true;          
+            }
+    
+            //////////
+            // onGetChannels
+            // Called when we recive the results of getChannels event
+            //////////
+            public function onGetChannels(event:ResultEvent):void
+            {
+                //get a list of valid channels
+                _channelList = new ArrayCollection();
+                for(var i:int = 0; i < event.result.length; i++)
+                {
+                    var channel:Object = event.result[i];
+                    var channel_label:String = channel.channel_name;
+                    if(channel.channel_type == 0)
+                    {
+                        channel_label += " [A]";
+                    }
+                    else
+                    {
+                        channel_label += " [D]";
+                    }
+                    _channelList.addItem({label:channel_label, data:channel.id, channel_type:channel.channel_type});
+                }
+                var sort:Sort = new Sort();
+                sort.fields = [new SortField("label")];
+                _channelList.sort = sort;
+                _channelList.refresh();
+                channels.dataProvider = _channelList;
+  
+                messageService.get_date_range(_selectedSiteId);
+            }
+            
+            //////////
+            // onGetMeasures
+            // Called when we recive the results of getMeasures
+            //////////
+            public function onGetMeasures(event:ResultEvent):void
+            {                
+                //get a list of measures
+                for(var i:int = 0; i < event.result.length; i++)
+                {
+                    var measure:Object = event.result[i];
+                    _measureList[i] = {label:measure.attributes.measure_label,data:measure.attributes.id,digital_flag:measure.attributes.digital_flag};
+                }
+                measures.dataProvider = _measureList;
+            }
+        
+            //////////
+            // getDomain
+            // Takes the source of the application url and retrieves the domain
+            //////////
+            public function getDomain():String
+            {
+                var str:String = Application.application.url;
+                return str.substring(str.indexOf('//') + 2, str.indexOf('/', str.indexOf('//') + 2));
+            }
+
+            //////////
+            // onGetSites
+            // Results of the GetSites query
+            //////////
+            public function onGetSites(event:ResultEvent):void
+            {
+                var selected_idx:int = 0;
+                var selected:Array;
+                _siteList = event.result as Array;
+                if(_siteList && _siteList.length > 0)
+                {
+                    if(_initParam && this.parameters.hasOwnProperty("site_id"))
+                    {
+                        _selectedSiteId = this.parameters["site_id"];
+                    }
+                    else
+                    {
+                        _selectedSiteId = _siteList[0].site_id;
+                    }             
+                    messageService.get_channels(_selectedSiteId);
+                }
+                
+                siteBar.enabled = true;
+                siteBar.addEventListener(SiteChangeEvent.SITE_CHANGE, siteSelected);
+                //siteSelected();
+            }
+            
+            //////////
+            // channelClick
+            // Processes the channel click
+            //////////
+            private function channelClick(event:ListEvent):void
+            {
+                if(_displayedChannels.length >= event.rowIndex)
+                {
+                    _selectedChannelId = event.target.selectedItems[0].channel_id;
+                    
+                    var cbox:ChannelBox = findChannelBox(_selectedChannelId);
+                    if(cbox != null)
+                    {
+                        cbox.closeme();
+                    }
+                   //Alert.show("DoubleClick:"+event.rowIndex+","+displayedChannels[event.rowIndex-1]);
+                   messageService.get_channel_info(_selectedChannelId, _selectedSiteId);
+                }
+            }
+            
+            private function chanSelFromSlm(event:ChartItemEvent):void
+            {
+                if(event.hitData.chartItem is ColumnSeriesItem)
+                {
+                    var colItem:ColumnSeriesItem = ColumnSeriesItem(event.hitData.chartItem);
+                    
+                    _selectedChannelId = colItem.item.channel_id;
+
+                    var cbox:ChannelBox = findChannelBox(_selectedChannelId);
+                    if(cbox != null)
+                    {
+                        cbox.closeme();
+                    }
+                    messageService.get_channel_info(_selectedChannelId, _selectedSiteId);
+                }
+            }
+        
+            public function measGridRow(label:String,value:String):GridRow
+            {
+                var label_item:GridItem = new GridItem();
+                var val_item:GridItem = new GridItem();
+                var desc_label:Label = new Label();
+                var val_label:Label = new Label();
+                var grid_row:GridRow = new GridRow();
+                
+                desc_label.text = label;
+                val_label.text = value;
+                label_item.addChild(desc_label);
+                val_item.addChild(val_label);
+                grid_row.addChild(label_item);
+                grid_row.addChild(val_item);
+                
+                return grid_row;
+            }
+            
+            ///////////
+            // findChannelBox
+            // Loop over channel boxes in tabnavigator to find channel of interest.
+            ///////////
+            private function findChannelBox(id:int):ChannelBox
+            {
+                var cbox:ChannelBox = null;
+                var meas_tab_children:Array = measurementTab.getChildren();
+                for(var i:int = 0; i < meas_tab_children.length; i++)
+                {
+                    if(meas_tab_children[i].id == id)
+                    {
+                        cbox = meas_tab_children[i];
+                        return cbox;
+                    }
+                }
+                return null;
+            }
+    
+            ///////
+            // onGetSlmSummary
+            // Process Response to AMF call getSlmSummary this will paint the slm graph
+            /////////////////////
+            private function onGetSlmSummary(event:ResultEvent):void
+            {
+                _slmAnalogs.removeAll();
+                _slmDigitals.removeAll();
+                for(var idx:int = 0; idx < event.result.length; idx++)
+                {
+                    var slm_obj:Object = {};
+                    var res_obj:Object = event.result[idx];
+                    slm_obj.channel_id = res_obj.channel_id;
+                    slm_obj.channel_freq = res_obj.channel_freq / 1000000.0;
+                    //TODO Make sure all the attributes of rex_obj are of the same length
+                    for(var meas_idx:int = 0; meas_idx < res_obj.avg.length; meas_idx++)
+                    {
+                        var m:int = res_obj.measure_id[meas_idx];
+                        
+                        var max:int = int(res_obj.max[meas_idx]);
+                        var min:int = int(res_obj.min[meas_idx]);
+                        var avg:int = int(res_obj.avg[meas_idx]);
+                        var maxLimit:int = int(res_obj.max_limit[meas_idx]);
+                        var minLimit:int = int(res_obj.min_limit[meas_idx]);
+                        
+                        if(_defaultUom == Unit.DBUV)
+                        {
+                            if(UOMS.contains(m)) //dcp = 9, video_lvl = 11, audio_lvl = 17
+                            {
+                                max += 60;
+                                min += 60;
+                                avg += 60;
+                                maxLimit += 60;
+                                minLimit += 60;
+                            }
+                        }               
+                        
+                        if(m == 9) //DCP Measurement
+                        {
+                            slm_obj["dig_max"] = max;
+                            slm_obj["dig_min"] = min;
+                            slm_obj["dig_avg"] = avg;
+                            slm_obj["dig_max_limit"] = maxLimit; 
+                            slm_obj["dig_min_limit"] = minLimit;
+                        }
+                        else if(m == 11) //Video Lvl
+                        {
+                            slm_obj["vid_max"] = max;
+                            slm_obj["vid_min"] = min;
+                            slm_obj["vid_avg"] = avg;
+                            slm_obj["vid_max_limit"] = maxLimit;
+                            slm_obj["vid_min_limit"] = minLimit;
+                            
+                            slm_obj["max"] = min;
+                        }
+                        else if(m == 17) //Audio lvl
+                        {
+                            slm_obj["aud_max"] = max;
+                            slm_obj["aud_min"] = min;
+                            slm_obj["aud_avg"] = avg;    
+                            slm_obj["aud_max_limit"] = maxLimit;    
+                            slm_obj["aud_min_limit"] = minLimit;
+                            
+                            slm_obj["min"] = min;
+                        }
+                    }
+
+                    if(slm_obj.hasOwnProperty("dig_max"))
+                    {
+                        _slmDigitals.addItem(slm_obj);
+                    }
+                    else
+                    {
+                        _slmAnalogs.addItem(slm_obj);
+                    }
+        
+                    _slmCanvas.enabled = true;
+                }
+                //hlocchart.dataProvider=slm;
+            }
+            
+            private function onGetConstellation(event:ResultEvent):void
+            {
+                if(_selectedChannelId == -1) return;
+                
+                var matrix:Array = event.result.matrix as Array;
+                var modulation:uint = event.result.modulation;
+
+                var cbox:ChannelBox = findChannelBox(_selectedChannelId);
+                if(cbox == null) return;
+                
+                var qamPanel:QamPanel = new QamPanel();
+                
+                if(modulation == 3) //QAM256
+                {
+                    qamPanel.qamMode = Constellation.QAM256;
+                }
+                else if(modulation == 1) //QAM64
+                {
+                    qamPanel.qamMode = Constellation.QAM64;
+                }
+                
+                qamPanel.width = 400;
+                qamPanel.matrix = matrix;
+
+                cbox.addChild(qamPanel);
+                qamPanel.invalidate();
+
+                _loadCount += 1;
+                if(_loadCount >= _targetCount)
+                {
+                    updateMeas();
+                    CursorManager.removeBusyCursor();
+                }
+            }
+
+            //////////
+            // onGetMeasValues
+            // Generate measurement graphs.
+            //////////
+            private function onGetMeasValues(event:ResultEvent):void
+            {
+                if(event.result)
+                {
+                    _measList.addItem(event.result);
+                }
+
+                _loadCount += 1;
+                if(_loadCount >= _targetCount)
+                {
+                    updateMeas();
+                    CursorManager.removeBusyCursor();
+                }
+            }
+            
+            private var _measList:ArrayCollection = new ArrayCollection();
+            
+            private function updateMeas():void
+            {
+                var minTime:Date = null;
+                var maxTime:Date = null;
+                
+                var result:Object;
+                var len:int;
+                var dataPoint:Object;
+                
+                for each(result in _measList)
+                {
+                    len = result.dates.length;
+                    
+                    if(len < 0) continue;
+                    
+                    if(minTime == null || result.dates[0] < minTime)
+                    {
+                        minTime = result.dates[0];
+                    }
+                    
+                    var maxId:int = Math.max(0, len - 1);
+                    
+                    if(maxTime == null || result.dates[maxId] > maxTime)
+                    {
+                        maxTime = result.dates[maxId];
+                    }
+                }
+                
+                for each(result in _measList)
+                {
+                    var i:int;   
+                    
+                    var channel_id:int = result.channel_id;
+
+                    var series:ArrayCollection = new ArrayCollection();
+                    
+                    if(result.meas_values.length > result.dates.length)
+                    {
+                        len = result.dates.length;
+                        Alert.show("WARNING, measure/date count mismatch");
+                    }
+                    else if(result.meas_values.length < result.dates.length)
+                    {
+                        len = result.meas_values.length;
+                        Alert.show("WARNING, date/measure count mismatch");
+                    }
+                    else 
+                    {
+                        len = result.dates.length;
+                    }
+                    
+                    if(len > 0)
+                    {
+                        if(result.dates[0] > minTime)
+                        {
+                            dataPoint = {
+                                dt:minTime,
+                                val:NaN,
+                                max_val:NaN,
+                                min_val:NaN,
+                                min_limit:result.min_limits[0],
+                                max_limit:result.max_limits[0]
+                            };
+                            series.addItem(dataPoint);
+                        }
+                        
+                        for(i = 0; i < len; i++)
+                        {
+                            dataPoint = {
+                                dt:result.dates[i],
+                                val:result.meas_values[i],
+                                max_val:result.meas_max_values[i],
+                                min_val:result.meas_min_values[i],
+                                min_limit:result.min_limits[i],
+                                max_limit:result.max_limits[i]
+                            };
+                            series.addItem(dataPoint);
+                        }
+                        
+                        if(result.dates[len - 1] < maxTime)
+                        {
+                            dataPoint = {
+                                dt:maxTime,
+                                val:NaN,
+                                max_val:NaN,
+                                min_val:NaN,
+                                min_limit:result.min_limits[len - 1],
+                                max_limit:result.max_limits[len - 1]
+                            };
+                            series.addItem(dataPoint);
+                        }
+                    }
+    
+                    var cbox:ChannelBox = findChannelBox(channel_id);
+                    if(cbox != null)
+                    {
+                        var graph:MeasGraph = new MeasGraph();
+                        graph.title = result.measure_name;
+                        
+                        if(result.uom == Unit.DB)
+                        {
+                            graph.uom = _defaultUom;
+                        }
+                        else
+                        {
+                            graph.uom = result.uom;
+                        }
+                        
+                        if(!result.hasOwnProperty("sanity_max") || result.sanity_max == null)
+                        {
+                           graph.maxVal = NaN;
+                        }
+                        else
+                        {
+                            graph.maxVal = result.sanity_max;
+                        }
+                        
+                        if(!result.hasOwnProperty("sanity_min") || result.sanity_min == null)
+                        {
+                           graph.minVal = NaN;
+                        }
+                        else
+                        {
+                            graph.minVal = result.sanity_min;
+                        }
+    
+                        var pattern:RegExp = /Lock$/;
+                        var lock_flag:Boolean = pattern.test(graph.title);
+                        
+                        graph.set_vertical_axis(result.exp_flag, lock_flag);
+                        
+                        graph.setDataProvider(series);
+                        cbox.addChild(graph);
+                    }
+                }
+            }
+    
+            //////////
+            // onGetChannelInfo
+            // Called when we recive the results of getChannelInfo event
+            //////////
+            public function onGetChannelInfo(event:ResultEvent):void
+            {
+                var cbox:ChannelBox = findChannelBox(event.result.channel_id);
+                
+                var chId:int = event.result.channel_id;
+                
+                if(cbox == null)
+                {
+                   cbox = new ChannelBox();
+                   measurementTab.addChild(cbox);
+                   cbox.setLabel("Ch. " + event.result.channel_nbr + "(" + ((event.result.channel_freq * 1.0) / 1000000.0).toString() + " Mhz)");
+                   cbox.id = chId.toString();
+                }
+                
+                event.result.uom = _defaultUom;
+        
+                //Add Grid
+                cbox.setChannelInfo(event.result);
+                for(var i:int = 0; i < event.result.meas_list.length; i++)
+                {
+                    var measid:int = event.result.meas_list[i];
+                    messageService.get_meas_values(chId, measid, _selectedSiteId, start_date.selectedDate, stop_date.selectedDate);
+                }
+
+                _targetCount = event.result.meas_list.length;
+                
+                var modulation:uint = event.result.modulation;
+                
+                if(modulation == 1 || modulation == 3) //QAM64, QAM256
+                {
+                    messageService.get_constellation(chId, _selectedSiteId, start_date.selectedDate, stop_date.selectedDate);
+                    
+                    _targetCount++;
+                }
+                
+                _measList.removeAll();
+                
+                _loadCount = 0;
+                CursorManager.setBusyCursor();
+            }
+    
+            //////////////////
+            // slmDataTipFunc
+            // Called when we recieve a data tip from slm
+            ///////////////////////
+            private function slmDataTip(hitData:HitData):String
+            {
+                if(hitData.chartItem is HLOCSeriesItem)
+                {
+                    //var hlocItem:HLOCSeriesItem=HLOCSeriesItem(hitData.chartItem);
+                    //var hs:HLOCSeries=HLOCSeries(hitData.element)
+                    //return "<B>"+hs.displayName+"</b><br>Frequency:"+hlocItem.xValue.toFixed(2)+"Mhz<br>Max:"+hlocItem.highNumber.toFixed(2).toString()+"<br>Avg:"+hlocItem.closeNumber.toFixed(2).toString()+"<br>Min:"+hlocItem.lowNumber.toFixed(2).toString();
+                }
+                else if(hitData.chartItem is BarSeriesItem)
+                {
+                    var barItem:BarSeriesItem = BarSeriesItem(hitData.chartItem);
+                     return "Frequency " + barItem.xValue.toFixed(2) + " Mhz";  
+                }
+                else if(hitData.chartItem is LineSeriesItem)
+                {
+                    var lineItem:LineSeriesItem = LineSeriesItem(hitData.chartItem);
+                    
+                    return lineItem['element'].displayName + " = " + lineItem.yValue.toFixed(2) + " dB";
+                }
+                else if(hitData.chartItem is ColumnSeriesItem)
+                {
+                     var item:Object=hitData.chartItem.item;
+                     var result:String="Frequency "+item.channel_freq+" Mhz\n";
+                     if (item.hasOwnProperty("aud_max")) {result += "Audio Max=" + item.aud_max + "\n" ;}             
+                     if (item.hasOwnProperty("aud_min")) {result += "Audio Min=" + item.aud_min + "\n" ;}
+                     if (item.hasOwnProperty("aud_avg")) {result += "Audio Avg=" + item.aud_avg + "\n" ;}
+                     if (item.hasOwnProperty("dig_max")) {result += "Digital Max=" + item.dig_max  + "\n" ;}             
+                     if (item.hasOwnProperty("dig_min")) {result += "Digital Min=" + item.dig_min + "\n" ;}
+                     if (item.hasOwnProperty("dig_avg")) {result += "Digital Avg=" + item.dig_avg + "\n" ;}
+                     if (item.hasOwnProperty("vid_max")) {result += "Video Max=" + item.vid_max  + "\n" ;}             
+                     if (item.hasOwnProperty("vid_min")) {result += "Video Min=" + item.vid_min + "\n" ;}
+                     if (item.hasOwnProperty("vid_avg")) {result += "Video Avg=" + item.vid_avg + "\n" ;}
+                     return result;
+                }
+                return "";
+            }
+            
+            public function filterSelected(event:MenuEvent):void
+            {
+                channels.selectedIndices = [];
+                var channel_item_list:Array = new Array();
+                var measure_item_list:Array = new Array();
+                
+                if(event.index == 0)
+                {
+                    for(var i:int = 0; i < _channelList.length; i++)
+                    {
+                        channel_item_list.push(i);
+                    }
+                    for(i = 0; i < _measureList.length; i++)
+                    {
+                        if (_measureList[i].label == "Video Level")
+                        {
+                            measure_item_list.push(i);
+                        }
+                        if (_measureList[i].label == "Audio Level")
+                        {
+                            measure_item_list.push(i);
+                        }
+                        if (_measureList[i].label == "DCP")
+                        {
+                            measure_item_list.push(i);
+                        }
+                    }
+                }
+                else if(event.index == 1)
+                {
+                    for(i = 0; i < _channelList.length; i++)
+                    {
+                        if(_channelList[i].channel_type == 0)
+                        {
+                            channel_item_list.push(i);
+                        }
+                    }
+                    for(i = 0; i < _measureList.length; i++)
+                    {
+                        if(int(_measureList[i].digital_flag) == 0)
+                        {
+                            measure_item_list.push(i);
+                        }
+                    }
+                }
+                else if(event.index == 2)
+                {
+                    for(i = 0; i < _channelList.length; i++)
+                    {
+                        if (_channelList[i].channel_type == 1)
+                        {
+                            channel_item_list.push(i);
+                        }
+                    }
+                    for(i = 0; i < _measureList.length; i++)
+                    {
+                        if(int(_measureList[i].digital_flag) == 1)
+                        {
+                            measure_item_list.push(i);
+                        }
+                    }
+                }
+                channels.selectedIndices = channel_item_list;
+                measures.selectedIndices = measure_item_list;
+            }
+            
+            public function display_label(item:Object):String
+            {
+                var str:String = new String(item.label);
+                var result:String;
+                var len:int = str.length;
+                result = str;
+                if(len > 17)
+                {
+                    result = str.substr(0, 8) + "*" + str.substr(len - 8, 8);
+                }
+                return result;
+            }
+
+        ]]>             
+    </mx:Script>
+    <mx:RemoteObject id="messageService" fault="onWebServiceFault(event)" source="AmfServicesController" destination="rubyamf">
+        <mx:method name="get_sites"                result="onGetSites(event)"               />
+        <mx:method name="get_measurements"         result="onGetMeasurements(event)"        />
+        <mx:method name="get_recent_measurements"  result="onGetRecentMeasurements(event)"  />
+        <mx:method name="get_channels"             result="onGetChannels(event)"            />
+        <mx:method name="get_measures"             result="onGetMeasures(event)"            />
+        <mx:method name="get_date_range"           result="onGetDateRange(event)"           />
+        <mx:method name="get_channel_info"         result="onGetChannelInfo(event)"         />
+        <mx:method name="get_meas_values"          result="onGetMeasValues(event)"          />
+        <mx:method name="get_slm_summary"          result="onGetSlmSummary(event)"          />
+        <mx:method name="get_constellation"        result="onGetConstellation(event)"       />
+        <mx:method name="get_uom"                  result="onGetUom(event)"                 />
+    </mx:RemoteObject>
+    <mx:DateFormatter id="dateFormatter" formatString="MM/DD/YYYY J:NN:SS"/>
+    <mx:XMLList id="filter_list">
+        <node label="Select All" id="select_all"/>
+        <node label="Select Analog" id="select_analog"/>
+        <node label="Select Digital" id="select_digital"/>
+    </mx:XMLList>
+    <mx:HBox height="100%" width="100%" horizontalGap="0">
+        <mx:VBox verticalGap="2" paddingLeft="5" paddingRight="5" styleName="normal" height="100%">
+            <controls:SiteBar id="siteBar" selectedSiteId="{_selectedSiteId}" siteList="{_siteList}" enabled="false"/>
+            <mx:Label styleName="subtitleLabel" text="Channel Type Filter"/>
+            <mx:PopUpMenuButton id="filter" width="150" labelField="@label" dataProvider="{filter_list}" itemClick="filterSelected(event)"/>
+            <mx:Label styleName="subtitleLabel" text="Channel Selection"/>
+            <mx:List width="100%" height="119" id="channels" allowMultipleSelection="true"/>
+            <mx:Label styleName="subtitleLabel" text="Measure Selection"/>
+            <mx:List width="100%" height="130" id="measures" allowMultipleSelection="true"/>
+            <mx:HBox width="100%">
+                <mx:Label styleName="subtitleLabel" text="Start Date" width="63"/>
+                <mx:DateField id="start_date" showToday="true" enabled="true"/>
+            </mx:HBox>
+            <mx:HBox width="100%">
+                <mx:Label styleName="subtitleLabel" text="Stop Date" width="63"/>
+                <mx:DateField id="stop_date" showToday="true" enabled="true"/>
+            </mx:HBox>
+            <mx:Button label="Submit" id="submitButton" click="onSubmit()"/>
+        </mx:VBox>
+        <mx:TabNavigator styleName="normal" id="measurementTab" height="100%" width="100%" historyManagementEnabled="false">
+            <mx:VBox id="summaryCanvas" height="100%" width="{measurementTab.width - 4}" label="Min/Max">
+                <mx:HBox horizontalGap="0" width="100%">
+                    <mx:Label styleName="subtitleLabel" text="min(min limit)/max(max limit)" width="100%"/>
+                    <mx:Label styleName="subtitleLabel" text="Unit of Measure:" />
+                    <mx:Text styleName="normalText" text="{_defaultUom}" />
+                </mx:HBox>               
+                <mx:DataGrid name="summary" horizontalScrollPolicy="auto" lockedColumnCount="1" editable="false" id="_summaryDisplay" height="100%" width="100%" doubleClickEnabled="true" itemDoubleClick="channelClick(event)"/>
+            </mx:VBox>
+            <mx:VBox id="_avgCanvas" height="100%" width="{measurementTab.width - 4}" label="Average">
+                <mx:HBox horizontalGap="0" width="100%">
+                    <mx:Label styleName="subtitleLabel" text="Average" width="100%"/>
+                    <mx:Label styleName="subtitleLabel" text="Unit of Measure:" />
+                    <mx:Text styleName="normalText" text="{_defaultUom}" />
+                </mx:HBox>
+                <mx:DataGrid name="avg" horizontalScrollPolicy="auto" lockedColumnCount="1" editable="false" id="_avgDisplay" height="100%" width="100%" doubleClickEnabled="true" itemDoubleClick="channelClick(event)"/>
+            </mx:VBox>
+            <mx:VBox id="_recentCanvas" label="Most Recent" width="{measurementTab.width - 4}" height="100%">
+                <mx:HBox horizontalGap="0" width="100%">
+                    <mx:Label styleName="subtitleLabel" text="Average" width="100%"/>
+                    <mx:Label styleName="subtitleLabel" text="Unit of Measure:" />
+                    <mx:Text styleName="normalText" text="{_defaultUom}" />
+                </mx:HBox>
+                <mx:DataGrid name="recent" horizontalScrollPolicy="auto" lockedColumnCount="1" editable="false" id="_recentDisplay" width="100%" height="100%" doubleClickEnabled="true" itemDoubleClick="channelClick(event)"/>
+            </mx:VBox>
+            <mx:VBox id="_slmCanvas" height="100%" width="{measurementTab.width - 4}" label="SLM Summary">
+                <mx:Legend dataProvider="{_hlocChart}" direction="horizontal" width="100%"/>
+                <mx:ColumnChart doubleClickEnabled="true" itemClick="chanSelFromSlm(event)" id="_hlocChart" dataTipFunction="slmDataTip" dataTipMode="single" showDataTips="true" height="100%" width="100%">
+                    <mx:seriesFilters>
+                        <mx:Array/>
+                    </mx:seriesFilters>
+                    <mx:horizontalAxis>
+                        <mx:LinearAxis baseAtZero="false" padding="10"/>
+                    </mx:horizontalAxis>
+                    <mx:verticalAxis>
+                        <mx:LinearAxis title="{_defaultUom}" />
+                    </mx:verticalAxis>
+                    <mx:series>
+                        <controls:ExtendedLineSeries filterData="false" dataProvider="{_slmDigitals}" yField="dig_max_limit" xField="channel_freq" displayName="Max Digital Limit">
+                            <controls:lineStroke>
+                                <mx:Stroke color="0xE48701" weight="1" alpha="1"/>
+                            </controls:lineStroke>
+                        </controls:ExtendedLineSeries>
+                        <controls:ExtendedLineSeries filterData="false" dataProvider="{_slmDigitals}" yField="dig_min_limit" xField="channel_freq" displayName="Min Digital Limit">
+                            <controls:lineStroke>
+                                <mx:Stroke color="0xA5BC4E" weight="1" alpha="1"/>
+                            </controls:lineStroke>
+                        </controls:ExtendedLineSeries>
+                        <controls:ExtendedLineSeries filterData="false" dataProvider="{_slmAnalogs}" yField="vid_max_limit" xField="channel_freq" displayName="Max Video Limit">
+                            <controls:lineStroke>
+                                <mx:Stroke color="0x1B95D9" weight="1" alpha="1"/>
+                            </controls:lineStroke>
+                        </controls:ExtendedLineSeries>
+                        <controls:ExtendedLineSeries filterData="false" dataProvider="{_slmAnalogs}" yField="vid_min_limit" xField="channel_freq" displayName="Min Video Limit">
+                            <controls:lineStroke>
+                                <mx:Stroke color="0xCACA9E" weight="1" alpha="1"/>
+                            </controls:lineStroke>
+                        </controls:ExtendedLineSeries>
+                        <mx:ColumnSeries dataProvider="{_slmAnalogs}" displayName="Analog Video + Audio" minField="min" yField="max" xField="channel_freq">
+                            <mx:stroke>
+                                <mx:Stroke color="#c0c0c0" alpha="0.1" weight="1"/>
+                            </mx:stroke>
+                        </mx:ColumnSeries>
+                        <mx:ColumnSeries dataProvider="{_slmDigitals}" displayName="Digital Channel Power" yField="dig_max" minField="dig_min" xField="channel_freq">
+                            <mx:fill>
+                                <mx:SolidColor color="#008000"/>
+                            </mx:fill>
+                            <mx:stroke>
+                                <mx:Stroke color="#008000" weight="1"/>
+                            </mx:stroke>
+                        </mx:ColumnSeries>    
+                        <mx:ColumnSeries dataProvider="{_slmAnalogs}" displayName="Video Level" yField="vid_max" minField="vid_min" xField="channel_freq">
+                            <mx:fill>
+                                <mx:SolidColor color="#000080"/>
+                            </mx:fill>
+                            <mx:stroke>
+                                <mx:Stroke color="#000080" weight="1"/>
+                            </mx:stroke>
+                        </mx:ColumnSeries>
+                        <mx:ColumnSeries dataProvider="{_slmAnalogs}" displayName="Audio Level" yField="aud_max" minField="aud_min" xField="channel_freq">
+                            <mx:fill>
+                                <mx:SolidColor color="#800080"/>
+                            </mx:fill>
+                            <mx:stroke>
+                                <mx:Stroke color="#800080" weight="1"/>
+                            </mx:stroke>
+                        </mx:ColumnSeries>
+                    </mx:series>
+                </mx:ColumnChart>
+            </mx:VBox>
+        </mx:TabNavigator>
+    </mx:HBox>
+</mx:Application>

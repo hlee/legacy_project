@@ -1,0 +1,15 @@
+<h1>Ingress Alarms</h1>
+
+
+<%= image_tag("spinner.gif",
+  :align => 'absmiddle',
+  :border=> 0,
+  :id => "spinner",
+  :style=>"display: none;" )
+%>
+<div id="table">
+  <%= render :partial => "table", :layout => false %>
+</div>
+<% unless @criteria.empty? %>
+  <h4>Filter criteria: <%= @criteria.join(' and ') %> </h4>
+<% end %>

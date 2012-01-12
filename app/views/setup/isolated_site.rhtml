@@ -1,0 +1,34 @@
+<h2>Isolated Site List</h2>
+<%if @iso_list.nil?%>
+<%=flash[:notic] if flash[:notice]%>
+
+There is no isolated site now.
+<%else%>
+Here is the site list which analyzer or switch port has been deleted.
+<table class="datatable">
+<tr class="datatable" >
+  <td colspan="2">
+    <%=button_to('Create New Site',:action=>'site_form',:controller=>'setup')%>
+  </td>
+</tr>
+<tr class="datatable" >
+  <td colspan="2">
+    <%=button_to('Delete ALL',:action=>'delete_isolated',:controller=>'setup')%>
+  </td>
+</tr>
+<tr class="datatable">
+  <th class="datatable">Site Name</th>
+  <th class="datatable">Functions</th>
+</tr>
+<% @iso_list.sort{ |a,b| a.name.casecmp(b.name) }.each { |site| %>
+  <tr class="datatable">
+    <td class="datatable">
+      <%=link_to site.name, {:action => 'site_form', :id => site.id} %>
+    </td>
+    <td class="datatable">
+      <%=button_to('Delete',:action=>'site_delete',:controller=>'setup',:id=>site.id)%>
+    </td>
+  </tr>
+<% } %>
+</table>
+<%end%>

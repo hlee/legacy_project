@@ -1,0 +1,49 @@
+<div id="top"><a href="#main-copy" class="doNotDisplay doNotPrint">Skip
+      to main content.</a></div>
+<!-- ##### Header ##### -->
+<div id="header">
+  <div class="midHeader">
+    <img src="/images/RealWORXButton.gif">
+  </div>
+  <% 
+    if @sel.nil?
+      @sel=0
+    end
+  %>
+  <div class="subHeader"> 
+    <% if has_license? %>
+	    <a href="/dashboard/index"        <%=(@sel==0)  ? 'class="selected"' : ''%>>Dashboard</a>
+      <% if ! has_ingress? && has_performance? %>
+  	    <a href="/main/down_alarm_list" <%=(@sel==1)  ? 'class="selected"' : ''%>>Alarm Summary</a>
+      <% elsif ! has_performance? && has_ingress? %>
+  	    <a href="/main/index"           <%=(@sel==1)  ? 'class="selected"' : ''%>>Alarm Summary</a>
+      <% elsif has_performance? && has_ingress? %>
+  	    <a href="/main/index"           <%=(@sel==1)  ? 'class="selected"' : ''%>>Alarm Summary</a>
+      <% end %>
+      <% if ! has_ingress? && has_performance? %>
+  	    <a href="/alarm/down_alarm_list" <%=(@sel==2)  ? 'class="selected"' : ''%>>Alarms</a>
+      <% elsif ! has_performance? && has_ingress? %>
+  	    <a href="/alarm/index"           <%=(@sel==2)  ? 'class="selected"' : ''%>>Alarms</a>
+      <% elsif has_performance? && has_ingress? %>
+  	    <a href="/alarm/index"           <%=(@sel==2)  ? 'class="selected"' : ''%>>Alarms</a>
+      <% end %>
+  	  <% if has_ingress? %>
+  	    <a href="/datalog/index"      <%=(@sel==3)  ? 'class="selected"' : ''%>>Historical Ingress</a>
+  	  <% end %>
+  	  <% if has_performance? %>
+  	    <a href="/measurement/index"  <%=(@sel==4)  ? 'class="selected"' : ''%>>Measurement</a>
+  	  <% end %>
+  	  <% if has_ingress? %>
+  	    <a href="/livetrace"      <%=(@sel==8)  ? 'class="selected"' : ''%>>Realview</a>
+  	  <% end %>
+    <% end %>
+  	<a href="/link/index"        <%=(@sel==9)  ? 'class="selected"' : ''%>>Links</a>
+        <% if (ConfigParam.get_value(ConfigParam::Company) == 'Videotron') %>
+  	  <a href="/snapshot_manager/index"        <%=(@sel==10)  ? 'class="selected"' : ''%>>Snapshots</a>
+        <% end %>
+  	<a href="/network/index"        <%=(@sel==7)  ? 'class="selected"' : ''%>>Setup</a>
+	</div>
+  <% if !has_license? %>
+    <h1><font color=#ff4444>WARNING: Your license is expired and/or invalid.</font></h1>
+  <% end %>
+</div>

@@ -1,0 +1,102 @@
+<% if @total == 0 %>
+  <p>No Alarms found</p>
+<% else %>
+  <p>Number of alarms found: <b><%= @total %></b></p>
+  <%= will_paginate @alarms %>
+  <table class="datatable">
+    <tr>
+      <th <%= sort_td_class_helper "site" %>>
+        <%= sort_link_helper "Site", "site" %>
+      </th>
+      <th>Analyzer
+      </th>
+      <th>Port Name
+      </th>
+      <th <%= sort_td_class_helper "al" %>>
+        <%= sort_link_helper "Alarm Level", "al" %>
+      </th>
+      <th <%= sort_td_class_helper "ad" %>>
+        <%= sort_link_helper "Start Date", "ad" %>
+      </th>
+      <th <%= sort_td_class_helper "ed" %>>
+        <%= sort_link_helper "End Date", "ed" %>
+      </th>
+      <th <%= sort_td_class_helper "channel" %>>
+        <%= sort_link_helper "Channel", "channel" %>
+      </th>
+      <th <%= sort_td_class_helper "measure" %>>
+        <%= sort_link_helper "Measure", "measure" %>
+      </th>
+      <th>
+        Description
+      </th>
+      <th <%= sort_td_class_helper "as" %>>
+        <%= sort_link_helper "Alarm State", "as" %>
+      </th>
+    </tr>
+    <% @alarms.each do |alarm| %>
+        <tr class="<%=cycle("even","odd")%>">
+      <td>
+      <%= 
+        if alarm.site.nil?
+          'Unknown'
+        else
+          alarm.site.name
+        end
+      %>
+      </td>
+      <td>
+        <%=show_analyzer(alarm.site_id)%>
+      </td>
+      <td>
+        <%=show_port(alarm.site_id)%>
+      </td>
+      <% if alarm.is_major? %>
+        <td class=major>
+      <% else %>
+      	<td class=minor>
+      <% end %>
+      <%= alarm.level_txt %></td>
+      <td><%= alarm.event_time %></td>
+	  
+    	<% if alarm.active %>
+            <td class="active"><%= link_to "STILL ACTIVE", {:action => "index",:controller=>"measurement", :site_id=> alarm.site_id,:start_date=> alarm.event_time.to_i,:stop_date=>alarm.end_time.to_i,:channel_id=>alarm.channel.id,:meas_id=>alarm.measure_id}%></td>  
+        <% else %>
+            <td><%= link_to alarm.end_time(), {:action => "index",:controller=>"measurement", :site_id=> alarm.site_id,:start_date=> alarm.event_time.to_i,:stop_date=>alarm.end_time.to_i,:channel_id=>alarm.channel.id,:meas_id=>alarm.measure_id}%></td>
+        <%end%>
+      <td><%=  
+             if alarm.channel.nil?
+               "Unknown Channel"
+             else
+               alarm.channel.channel_name 
+             end
+           %></td>
+      <td><%= 
+             if alarm.measure.nil?
+                "Unknown Measure"
+             else
+                alarm.measure.measure_label 
+             end
+           %></td>
+      <td><%= alarm.descr %></td>
+      <td>
+        <% if params[:action] == 'down_alarm_list' %>
+          <span id=<%="downacknowledged_#{alarm.id}"%>><%= alarm.acknowledged ? "Ack" : "UnAck" %></span>
+          <% if current_user.has_static_permission?("alarm/set_alarms_acknowledged") %>
+            <%= in_place_collection_editor_field 'alarms', "downacknowledged", [["UnAck","0"],["Ack","1"]], alarm.id %>
+          <% end %>
+        <% else %>
+          <span id=<%="state_#{alarm.id}"%>><%=(alarm.acknowledged)?"UnAck":"Ack"%></span>
+          <% if current_user.has_static_permission?("alarm/set_alarms_acknowledged") %>
+            <%= in_place_collection_editor_field 'alarms', "acknowledged", [["UnAck","0"],["Ack","1"]], alarm.id %>
+          <% end %>
+        <% end %>
+      </td>
+   </tr>
+
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% end %>

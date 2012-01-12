@@ -1,0 +1,23 @@
+Response-> MsgWhy is the first byte nil?
+Why is the first byte nil?
+/home/tj/realworx-server/trunk/bin/../lib/instrument_session.rb:157:in `write': Broken pipe (Errno::EPIPE)
+from /home/tj/realworx-server/trunk/bin/../lib/instrument_session.rb:157:in `msg_with_ack'
+from /home/tj/realworx-server/trunk/bin/../lib/instrument_session.rb:452:in `logout'
+from ./monitor.rb:206:in `shutdown_instrument'
+from ./monitor.rb:248:in `shutdown'
+from ./monitor.rb:247:in `each_value'
+from ./monitor.rb:247:in `shutdown'
+from ./monitor.rb:266
+Type:90 Step Nbr:9
+Getting Alarms 17
+Broken pipe
+/home/tj/realworx-server/trunk/bin/../lib/instrument_session.rb:157:in `write'
+/home/tj/realworx-server/trunk/bin/../lib/instrument_session.rb:157:in `msg_with_ack'
+/home/tj/realworx-server/trunk/bin/../lib/instrument_session.rb:510:in `next_alarm'
+./monitor.rb:124:in `monitor'
+./monitor.rb:238:in `start_monitor'
+./monitor.rb:237:in `each_value'
+./monitor.rb:237:in `start_monitor'
+./monitor.rb:262
+Shutting Down
+

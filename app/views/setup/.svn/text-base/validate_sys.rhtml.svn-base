@@ -1,0 +1,39 @@
+<%= javascript_include_tag :defaults %>  
+<br>
+<h2>System Validation</h2>
+<br>
+<h3>SNMP Test</h3>
+<div>
+<%=button_to('SNMP Test', {:action=>'test_snmp'}, :name=>'test')%>-Send SNMP test alarm to all managers.
+</div>
+<br>
+
+<hr>
+<h3>Ping Test</h3>
+
+<%temp=0%>
+<%form_tag :action => 'test_ping' do%>
+<% @analyzer_list.each { |analyzer| %>
+<%= check_box('analyzer',analyzer.id,{:checked => true} )%><%=analyzer.name%><%temp+=1%>
+<%if temp==5 then temp=0%><br><%end%> 
+<%}%>
+<br>
+Ping Count: <%= text_field("ping","count",:size=>1) %>
+<br>
+<%= submit_tag 'Start Ping Test' %>
+<% end %>
+
+<hr>
+
+
+<h3>Switch Test</h3>
+			  
+<%form_tag :action => 'switch_show' do%>
+<%= select(:analyzer, :id, @analyzer_list.map {|u| [u.name, u.id]})%>
+<!--%=select('analyzer','id',@list)%-->
+<br>
+
+Switching Delay (seconds): <%= text_field("test","delay",:size=>1,:value=>2) %>(No more than 10)
+<br /><br />
+<%=submit_tag('Start switching Test',:onclick => "return alert('Test will run, don't start twice.')")   %>
+<% end %>

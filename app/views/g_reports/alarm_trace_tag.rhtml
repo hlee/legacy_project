@@ -1,0 +1,10 @@
+<HTML>
+  <BODY bgcolor="#6487DC">
+    <img src=/g_reports/alarm_trace?id=<%= params['id'] %> width="800" height="400">
+    The graph may take 15 seconds to render.
+    <% 
+     alarm=Alarm.find(params['id'])
+     target_datetime=alarm.event_time.strftime("%Y/%m/%d %H:%M:%S %Z");
+     %>
+  </BODY>
+</HTML>

@@ -1,0 +1,47 @@
+<h2>Network Manager</h2>
+<table>
+  <tr>
+    <th><h3>Editing Switches for <%= link_to(@analyzer.name, :action => 'analyzer_edit', :id => @analyzer.id) %></h3></th>
+  </tr>
+  <tr>
+    <td>
+      <%= button_to(
+          'Add Switch', { 
+            :action=>'switch_new',
+            :controller=>'network',
+            :id=>@analyzer.id
+          }, {
+            :disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10)
+          }
+        )
+      %>
+    </td>
+  </tr>
+</table>
+<table class="datatable">
+  <tr>
+    <th>Switch Name</th>
+    <th>Address</th>
+    <th>Location</th>
+    <th>Functions</th>
+  </tr>
+  <% @switch_list.each { |switch| %>
+    <tr>
+      <td><%= link_to switch.short_switch_name, {:action => 'switch_edit', :id => switch[:id]}, {:title => switch[:switch_name]} %></td>
+      <td><%=switch[:address]%></td>
+      <td><%=switch[:location]%></td>
+      <td>  
+        <%= button_to(
+            'Delete', { 
+              :action=>'switch_delete',
+              :id=>switch.id
+            }, {
+              :disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10),
+              :confirm => "WARNING: This will delete this switch from the Analyzer.  Are you sure?"
+            }
+          )
+        %>
+      </td>
+    </tr>
+  <% } %>
+</table>

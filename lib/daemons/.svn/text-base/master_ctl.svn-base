@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'daemons'
+require 'yaml'
+require 'erb'
+
+class Hash
+  def with_symbols!
+    self.each{|key,value| 
+      unless key.is_a?(Symbol)
+        self[key.to_s.to_sym] = value; 
+        self.delete(key)
+      end
+    } 
+    self
+  end
+end
+
+options = YAML.load_file(File.dirname(__FILE__) + "/../../config/daemons.yml").with_symbols!
+options[:dir_mode] = options[:dir_mode].to_sym
+
+#puts options.each{|key, value|  puts "#{key}: #{value}" }
+#puts ""
+
+pids = Array.new
+puts "Removing old pid"
+`rm #{File.dirname(__FILE__)}/../../log/master.rb*.pid`
+puts "Attempting to kill off old processes"
+#puts `ps auxww | grep master.rb | grep -v grep`
+`ps auxww | grep master.rb | grep -v grep`.split(/\n/).each do |line|
+  pids << line.split(/\s+/)[1]
+end
+pids.each do |process|
+  puts "Attempting to kill #{process}"
+  `kill -9 #{process} > /dev/null 2>&1` if process =~ /\d+/
+end
+#puts "Running Daemon code Daemons.run #{File.dirname(__FILE__)} + '/master.rb', #{options}"
+Daemons.run File.dirname(__FILE__) + '/master.rb', options

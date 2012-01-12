@@ -1,0 +1,29 @@
+set :rails_env, "production"
+set :runner, "realworx"
+set :user, "root"
+
+set :restart_lighttpd, true
+set :restart_mongrel, true
+set :restart_daemons, true
+
+role :app, "10.0.0.200"
+role :web, "10.0.0.200"
+role :db,  "10.0.0.200", :primary => true
+
+set :deploy_to, "/sunrise/www/#{application}"
+
+# Dev
+set :dev_db_user, "rw_user"
+set :dev_db_password, ""
+set :dev_database, "realworx_dev"
+set :socket, "/var/lib/mysql/mysql.sock"
+
+# Test
+set :test_db_user, "rw_user"
+set :test_db_password, ""
+set :test_database, "realworx_test"
+
+# Production
+set :production_db_user, "rw_user"
+set :production_db_password, ""
+set :production_database, "realworx"

@@ -1,0 +1,8 @@
+<% if @analyzer_list.empty? %>
+	You have no analyzers defined.  Please <%= link_to 'Create One', :controller => 'network', :action => 'analyzer_new' %>
+<% else %>
+<table class="dashboard" width="750">  
+    <%= render :partial => "analyzer", :layout => false, :collection => @analyzer_list %>
+</table>    
+<% end %>
+

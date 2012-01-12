@@ -1,0 +1,69 @@
+<table width=100%>
+  <tr>
+    <td colspan="2">
+      <%= button_to(
+          'Edit Switches', { 
+            :action=>'switch_list',
+            :controller=>'network',
+            :id=>@analyzer.id
+          }, { 
+            :disabled => @analyzer.switch_type.to_i == 0, 
+            :id => 'edit_switches' 
+          }
+        ) 
+      %>
+      <%= button_to(
+          'Edit Port Schedule', { 
+            :action=>'schedule_edit',
+            :controller=>'network',
+            :id=>@analyzer.id
+          }, {
+            :disabled => Switch.find(:all, 
+              :conditions => [ "analyzer_id = ? AND !master_switch_flag", 
+                @analyzer.id ]
+              ).empty?, 
+            :id => 'schedule_edit'
+          }
+        )
+      %>
+      <%= button_to(
+          'Generate Profile', { 
+            :action=>'generate_entry',
+            :controller=>'profile_mgr',
+            :id=>@analyzer.id
+          }, { 
+            :disabled => @analyzer.status.to_i.eql?(330), 
+            :id => 'generate_entry' 
+          }
+        ) 
+      %>
+      <%= button_to(
+          'Datalog Profiles', { 
+            :action=>'datalog_profile_list',
+            :controller=>'network',
+            :id=>@analyzer.id
+          }, { 
+            :id => 'datalog_profile_list' 
+          }
+        ) 
+      %> 
+
+
+    </td>
+    <td>
+      <span id="disabled_messages"></span><br>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3">
+    	<% form_tag :action => 'analyzer_update', :id => @analyzer do %>
+      	<table class="datatable" width=100%>
+          <%= render :partial => 'analyzer_form' %>
+          <tr>
+            <td colspan="2"><%= submit_tag 'Save', { :disabled => !@analyzer.status.nil? && @analyzer.status > 11 } %></td>
+          </tr>
+      	</table>
+      <% end %>
+    </td>
+  </tr>
+</table>

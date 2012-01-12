@@ -1,0 +1,9 @@
+<%=form_tag({:action=>"region_save" , :id=>@region.id}) %>
+<%= error_messages_for 'region' %>
+<table class="datatable" width='90%'>
+<tr bgcolor='#BFBFD2'><td colspan='2' style="valign:middle;"><h2>Region</h2></td></tr>
+<tr><td>Region Name:</td><td><%= text_field("region","name") %></td></tr>
+<tr bgcolor='#FFFCDF'><td>Region IP:</td><td><%= text_field("region","ip")%></td></tr>
+<tr><td colspan='2'><%=submit_tag %></td></tr>
+</table>
+</form>

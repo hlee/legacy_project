@@ -1,0 +1,2038 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--LastUpdate:200609131004Jerry-->
+<!--
+Definition
+<Unit name="">: The unit of the field displayed
+<Unit rate="">: the stored data / The displayed data    eg. rate = 1000 / 1
+<Unit precision="">: The precision of displayed data    eg. precision = 0.1, can display xx.x; precision = 10, can display xxx0
+-->
+<!--
+Display Type:
+bool
+byte
+uint
+int
+float
+enum
+enum2
+ipv4
+mac
+string
+password
+date
+time
+
+Storage Type:
+None: 0
+TypeBool: 1
+TypeByte: 2
+TypeUInt: 3
+TypeUInt16: 4
+TypeUInt32: 5
+TypeUInt64: 6
+TypeFloat: 7
+TypeString: 8
+TypeInt: 9
+TypeInt16: 10
+
+Tag Type:
+1. Property value:
+   - Channel Type (0, 1, 2)
+   - Modulation (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 100, 101, 102, 103, 104, 105, 106, 107, 108, 200, 300)
+
+2. Channel Plan:
+   - Muti-edit (M)
+   - Switch (S)
+   - Chanenl Type (Analog, Digital, Other)
+   - Hidden (H)
+
+3. System Test:
+   - Filed Type (min, max, tolerance, freezen)
+
+4. Setup:
+   - Favorite MAC (0, 1, 2, 3, 4 ......)
+
+
+-->
+<SystemConfiguration>
+  <DocumentInfo>
+    <Name>Realworx</Name>
+    <Company>Sunrise Telecom, Inc.</Company>
+    <Description>Realworx System Configuration File</Description>
+    <Version>1</Version>
+  </DocumentInfo>
+  <Filters>
+    <!--It the tag is "F", the field will be shown at any time.-->
+    <Filter id="F1">CM2000 Series</Filter>
+    <Filter id="F2">AT1800 Series</Filter>
+    <Filter id="F3">Test Series</Filter>
+    <Filter id="F4">realWorx</Filter>
+  </Filters>
+  <Section id="CHPL" label="Channel Plan">
+    <Section id="DFCH" label="Channel Plan">
+      <Properties>
+        <Description>This is the default Channel Plan.</Description>
+        <Property name="DefaultChannelPlan">
+          <value tag="0">CHL - 002</value>
+          <value tag="1">CHL - 003</value>
+          <value tag="1">CHL - 004</value>
+        </Property>
+        <Property name="TableFields">
+          <value>ID</value>
+          <value>Frequency</value>
+        </Property>
+        <Property name="ChannelType">CH03</Property>
+        <Property name="AMId">AC02</Property>
+        <Property name="DMId">DC03</Property>
+        <Property name="OMId">UC03</Property>
+        <Property name="Modulations">
+          <value tag="300">Unknown</value>
+          <value tag="0">QPSK</value>
+          <value tag="1">QAM64</value>
+          <value tag="2">QAM128</value>
+          <value tag="3">QAM256</value>
+          <value tag="4">QAM16</value>
+          <value tag="5">QAM32</value>
+          <value tag="6">QPR</value>
+          <value tag="7">FSK</value>
+          <value tag="8">BPSK</value>
+          <value tag="9">CW</value>
+          <value tag="10">VSB-AM</value>
+          <value tag="11">FM</value>
+          <value tag="12">CDMA</value>
+          <value tag="100">NTSC</value>
+          <value tag="101">PAL-B</value>
+          <value tag="102">PAL-G</value>
+          <value tag="103">PAL-I</value>
+          <value tag="104">PAL-M</value>
+          <value tag="105">PAL-N</value>
+          <value tag="106">SECAM-B</value>
+          <value tag="107">SECAM-G</value>
+          <value tag="108">SECAM-K</value>
+          <value tag="200">OFDM</value>
+        </Property>
+        <Property name="DefaultSymbolRates">
+          <value tag="300">N/A</value>
+          <value tag="0"></value>
+          <value tag="1">5.056941</value>
+          <value tag="2"></value>
+          <value tag="3">5.360537</value>
+          <value tag="4"></value>
+          <value tag="5"></value>
+          <value tag="6"></value>
+          <value tag="7"></value>
+          <value tag="8"></value>
+          <value tag="9"></value>
+          <value tag="10"></value>
+          <value tag="11"></value>
+          <value tag="12"></value>
+          <value tag="100">N/A</value>
+          <value tag="101">N/A</value>
+          <value tag="102">N/A</value>
+          <value tag="103">N/A</value>
+          <value tag="104">N/A</value>
+          <value tag="105">N/A</value>
+          <value tag="106">N/A</value>
+          <value tag="107">N/A</value>
+          <value tag="108">N/A</value>
+          <value tag="200">N/A</value>
+        </Property>
+      </Properties>
+      <DataFields>
+        <Group label="General">
+          <Field id="CH01" label="Channel" tag="M">
+            <Type name="string" max="4" storage="8"/>
+          </Field>
+          <Field id="CH02" label="Channel Name" tag="M,F1,F2">
+            <Type name="string" max="21" storage="8"/>
+          </Field>
+          <Field id="CH03" label="Channel Type" tag="S">
+            <Type name="enum" default="0" storage="2">
+              <item value="0">Analog</item>
+              <item value="1">Digital</item>
+              <item value="2">Other</item>
+            </Type>
+          </Field>
+          <Field id="CH04" label="Direction" tag="F2">
+            <Type name="enum" storage="2">
+              <item value="0">Upstream</item>
+              <item value="1">Downstream</item>
+            </Type>
+          </Field>
+          <Field id="CH08" label="Uint Type">
+            <Type name="enum" storage="2">
+              <item value="0">CM</item>
+              <item value="1">AT</item>
+            </Type>
+          </Field>
+          <Field id="CH05" label="Used in Full Scan">
+            <Type name="bool" min="0" max="1" default="0" storage="2" />
+          </Field>
+          <Field id="CH06" label="Used in Mini Scan">
+            <Type name="bool" min="0" max="1" default="0" storage="2" />
+          </Field>
+          <Field id="CH07" label="Active">
+            <Type name="bool" min="0" max="1" default="0" storage="2" />
+          </Field>
+        </Group>
+        <Group label="Analog" tag="Analog">
+          <Field id="AC01" label="Video Frequency" tag="M">
+            <Type name="float" default="5700000" storage="5" max="1000000000" min="1000000" />
+            <Unit name="MHz" rate="1000000" precision="0.0001" />
+          </Field>
+          <Field id="AC02" label="Modulation">
+            <Type name="enum" default="100" storage="4">
+              <item value="300">Unknown</item>
+              <item value="100">NTSC</item>
+              <item value="101">PAL-B</item>
+              <item value="102">PAL-G</item>
+              <item value="103">PAL-I</item>
+              <item value="104">PAL-M</item>
+              <item value="105">PAL-N</item>
+              <item value="106">SECAM-B</item>
+              <item value="107">SECAM-G</item>
+              <item value="108">SECAM-K</item>
+            </Type>
+          </Field>
+          <Field id="AC03" label="Video Dwell Time">
+            <Type name="enum" storage="4">
+              <item value="0">Zero</item>
+              <item value="1">Standard</item>
+              <item value="2">Vertical</item>
+              <item value="3">Horizontal</item>
+            </Type>
+          </Field>
+          <Field id="AC04" label="Video Audio1 Separation">
+            <Type name="float" default="4500000" min="0000000" max="7000000" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.0001" />
+          </Field>
+          <Field id="AC05" label="Audio1 Dwell Time">
+            <Type name="uint" default="1" min="1" max="1000" storage="4"/>
+          </Field>
+          <Field id="AC06" label="Video Audio2 Separation">
+            <Type name="float" default="0000000" min="0000000" max="7000000" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.0001" />
+          </Field>
+          <Field id="AC07" label="Audio2 Dwell Time">
+            <Type name="uint" default="1" min="1" max="1000" storage="4"/>
+          </Field>
+        </Group>
+        <Group label="Distortion" tag="Analog">
+          <Field id="AC08" label="Bandwidth">
+            <Type name="float" min="1" max="10000000" default="6000000" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.0001" />
+          </Field>
+          <Field id="AC09" label="CSO Gated Line">
+            <Type name="uint" default="7" min="7" max="35" storage="4"/>
+          </Field>
+          <Field id="AC10" label="CSO Gated Field">
+            <Type name="enum" storage="2">
+              <item value="0">Unknown</item>
+              <item value="1">Field1</item>
+              <item value="2">Field2</item>
+              <item value="3">Both</item>
+            </Type>
+          </Field>
+          <Field id="AC13" label="CSO Freq Offset Lower1">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC15" label="CSO Freq Offset Lower2">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC17" label="CSOFreq Offset Upper1">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC19" label="CSOFreq Offset Upper2">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC20" label="CTB Gated Line">
+            <Type name="uint" default="7" min="7" max="35" storage="4"/>
+          </Field>
+          <Field id="AC21" label="CTB Gated Field">
+            <Type name="enum" storage="2">
+              <item value="0">Unknown</item>
+              <item value="1">Field1</item>
+              <item value="2">Field2</item>
+              <item value="3">Both</item>
+            </Type>
+          </Field>
+          <Field id="AC22" label="CTB Freq Offset">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC23" label="CCN Gated Line">
+            <Type name="uint" default="7" min="7" max="35" storage="4"/>
+          </Field>
+          <Field id="AC24" label="CCN Gated Field">
+            <Type name="enum" storage="2">
+              <item value="0">Unknown</item>
+              <item value="1">Field1</item>
+              <item value="2">Field2</item>
+              <item value="3">Both</item>
+            </Type>
+          </Field>
+          <Field id="AC25" label="CCN Freq Offset Lower">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC26" label="CCN Freq Offset Upper">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC11" label="CSO Offset Flag">
+            <Type name="bool" default="0" storage="2"/>
+          </Field>
+          <Field id="AC12" label="CSO Freq Offset Lower1">
+            <Type name="bool" default="0" storage="2"/>
+          </Field>
+          <Field id="AC14" label="CSO Freq Offset Lower2">
+            <Type name="bool" default="0" storage="2"/>
+          </Field>
+          <Field id="AC16" label="CSO Freq Offset Upper1">
+            <Type name="bool" default="0" storage="2"/>
+          </Field>
+          <Field id="AC18" label="CSO Freq Offset Upper2">
+            <Type name="bool" default="0" storage="2"/>
+          </Field>
+        </Group>
+        <Group label="Miscellaneous" tag="Analog">
+          <Field id="AC27" label="ICR Line">
+            <Type name="uint" default="7" min="7" max="35" storage="4"/>
+          </Field>
+          <Field id="AC28" label="ICR Field">
+            <Type name="enum" storage="2">
+              <item value="0">Unknown</item>
+              <item value="1">Field1</item>
+              <item value="2">Field2</item>
+              <item value="3">Both</item>
+            </Type>
+          </Field>
+          <Field id="AC29" label="ICR Signal Type">
+            <Type name="enum" storage="2">
+              <item value="0">Unknown</item>
+              <item value="1">Multiburst</item>
+              <item value="2">GCR</item>
+              <item value="3">Cable Sweep</item>
+              <item value="4">Sinx</item>
+            </Type>
+          </Field>
+          <Field id="AC30" label="ICR Freq 1">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC31" label="ICR Freq 2">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC32" label="ICR Freq 3">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC33" label="ICR Freq 4">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC34" label="ICR Freq 5">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="AC35" label="Hum">
+            <Type name="enum" storage="2">
+              <item value="0">Unknown</item>
+              <item value="1">Video</item>
+              <item value="2">CW</item>
+            </Type>
+          </Field>
+          <Field id="AC36" label="Hum Frequency">
+            <Type name="enum" default="0" storage="2">
+              <item value="0">50/60 Hz</item>
+              <item value="1">100/120 Hz</item>
+              <item value="2">&lt;400 Hz</item>
+              <item value="3">All</item>
+            </Type>
+          </Field>
+          <Field id="AC37" label="DOM Line">
+            <Type name="uint" default="7" min="7" max="35" storage="4"/>
+          </Field>
+          <Field id="AC38" label="DOM Field">
+            <Type name="enum" storage="2">
+              <item value="0">Unknown</item>
+              <item value="1">Field1</item>
+              <item value="2">Field2</item>
+              <item value="3">Both</item>
+            </Type>
+          </Field>
+          <Field id="AC39" label="DOM Signal Type">
+            <Type name="enum" storage="2">
+              <item value="0">Unknown</item>
+              <item value="1">Multiburst</item>
+              <item value="2">GCR</item>
+              <item value="3">Cable Sweep</item>
+              <item value="4">Sinx</item>
+            </Type>
+          </Field>
+        </Group>
+        <Group label="Digital" tag="Digital">
+          <Field id="DC01" label="CenterFreq" tag="M">
+            <Type name="float" default="55250000" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.0001" />
+          </Field>
+          <Field id="DC02" label="Bandwidth">
+            <Type name="float" default="6000000" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.0001" />
+          </Field>
+          <Field id="DC03" label="Modulation">
+            <Type name="enum" default="3" storage="4">
+              <item value="300">Unknown</item>
+              <item value="0">QPSK</item>
+              <item value="1">QAM64</item>
+              <item value="2">QAM128</item>
+              <item value="3">QAM256</item>
+              <item value="4">QAM16</item>
+              <item value="5">QAM32</item>
+              <item value="6">QPR</item>
+              <item value="7">FSK</item>
+              <item value="8">BPSK</item>
+              <item value="9">CW</item>
+              <item value="10">VSB-AM</item>
+              <item value="11">FM</item>
+              <item value="12">CDMA</item>
+            </Type>
+          </Field>
+          <Field id="DC04" label="Symbol Rate">
+            <Type name="float" default="5360537" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.0001" />
+          </Field>
+          <Field id="DC05" label="Polarity">
+            <Type name="enum" storage="2">
+              <item value="0">Normal</item>
+              <item value="1">Reverse</item>
+              <item value="2">Auto</item>
+            </Type>
+          </Field>
+          <Field id="DC06" label="J83 Annex">
+            <Type name="enum" default="1" storage="2">
+              <item value="0">A</item>
+              <item value="1">B</item>
+              <item value="2">C</item>
+              <item value="3">None</item>
+            </Type>
+          </Field>
+          <Field id="DC07" label="Use FEC">
+            <Type name="bool" min="0" max="1" default="0" storage="2"/>
+          </Field>
+          <Field id="DC08" label="Equalizer">
+            <Type name="bool" min="0" max="1" default="0" storage="2"/>
+          </Field>
+          <Field id="DC09" label="Docsis Ranging" tag="H">
+            <Type name="int" min="-1" max="9" default="-1" storage="10"/>
+          </Field>
+        </Group>
+        <Group label="Other" tag="Other">
+          <Field id="UC01" label="CenterFrequency" tag="M">
+            <Type name="float" default="55250000" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.0001" />
+          </Field>
+          <Field id="UC02" label="ChannelWidth">
+            <Type name="float" default="6000000" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.0001" />
+          </Field>
+          <Field id="UC03" label="Modulation">
+            <Type name="enum" default="200" storage="4">
+              <item value="300">Unknown</item>
+              <item value="200">OFDM</item>
+            </Type>
+          </Field>
+          <Field id="UC04" label="SymbolRate">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="UC05" label="Burst">
+            <Type name="enum" storage="2">
+              <item value="0">Continuous</item>
+              <item value="1">Burst</item>
+            </Type>
+            <Unit name="" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="UC06" label="TDMALength">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field id="UC07" label="TDMARepeatRate">
+            <Type name="float" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+        </Group>
+      </DataFields>
+    </Section>
+    <Section id="DCSS" label="Docsis Ranging">
+      <Properties>
+        <Property name="default">
+          <value tag="0">Docsis 1</value>
+          <value tag="1">Docsis 2</value>
+          <value tag="2">Docsis 3</value>
+          <value tag="3">Docsis 4</value>
+          <value tag="4">Docsis 5</value>
+          <value tag="5">Docsis 6</value>
+          <value tag="6">Docsis 7</value>
+          <value tag="7">Docsis 8</value>
+          <value tag="8">Docsis 9</value>
+          <value tag="9">Docsis 10</value>
+        </Property>
+      </Properties>
+    </Section>
+    <Section id="PILT" label="Pilot">
+      <Properties>
+        <Property name="Analog">
+          <value tag="0">Analog Low</value>
+          <value tag="2">Analog High</value>
+        </Property>
+        <Property name="Digital">
+          <value tag="1">Digital Low</value>
+          <value tag="3">Digital High</value>
+        </Property>
+      </Properties>
+      <DataFields>
+        <Group label="Pilot">
+          <Field label="Channel Type" id="PL01">
+            <Type name="byte" default="0"  storage="2" />
+          </Field>
+          <Field label="Frequency" id="PL02">
+            <Type name="float" min="1" max="1000000000" default="5700000" storage="5"/>
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+        </Group>
+      </DataFields>
+    </Section>
+  </Section>
+  <Section id="SMRT" label="System Test Plans">
+    <Properties>
+      <Property name="Locations">
+        <value>Headend</value>
+        <value>Node</value>
+        <value>Amplifier</value>
+        <value>Line Extender</value>
+        <value>Tap</value>
+        <value>Ground Block</value>
+        <value>Set-Top</value>
+        <value>End-Of-Line</value>
+        <value>User</value>
+      </Property>
+    </Properties>
+    <Section id="CHSL" label="Test Plan Channel Selection">
+      <Properties>
+        <Property name="SmapleProperty">Sample</Property>
+      </Properties>
+      <DataFields>
+        <Group label="Channel Select">
+          <Field label="Group Test" id="100" tag="F" />
+          <Field label="HUM" id="1009" tag="F2" />
+          <Field label="CCN" id="1007" />
+          <Field label="CSO" id="1006" />
+          <Field label="CTB" id="1005" tag="F1" />
+          <Field label="FREQ" id="1000" tag="F1,F2" />
+          <Field label="ICFR" id="1001" tag="F2" />
+          <Field label="DOM" id="1008" tag="F1" />
+          <Field label="MER" id="1300" />
+          <Field label="Pre BER" id="1301" />
+          <Field label="Post BER" id="1302" tag="F1,F2" />
+        </Group>
+      </DataFields>
+    </Section>
+    <Section id="LMTS" label="Limits &amp; Test Group">
+      <DataFields>
+        <Group label="Analog">
+          <!--Analog Test-->
+          <ComplexField id="1010" label="Video Level" tag="F1,F2,F4">
+            <Field id="1010" label="Enabled" >
+              <Type name="bool" min="0" max="1" default="1" storage="2" />
+            </Field>
+            <Field id="1010" label="Min" tag="min">
+              <Type name="float" min="-40" max="60" default="-40" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+            <Field id="1010" label="Max" tag="max">
+              <Type name="float" min="-40" max="60" default="60" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+            <Field id="1010" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default=".1" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1011" label="V/A Ratio" tag="F1,F2,F4">
+            <Field id="1011" label="Enabled">
+              <Type name="bool" min="0" max="1" default="1" storage="2" />
+            </Field>
+            <Field id="1011" label="Min" tag="min">
+              <Type name="float" min="-20" max="0" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1011" label="Max" tag="max">
+              <Type name="float" min="-20" max="0" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1011" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default=".1" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1012" label="V/A 2 Ratio" tag="F1,F2,F4">
+            <Field id="1012" label="Enabled">
+              <Type name="bool" min="0" max="1" default="0" storage="2" />
+            </Field>
+            <Field id="1012" label="Min" tag="min">
+              <Type name="float" min="-20" max="0" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1012" label="Max" tag="max">
+              <Type name="float" min="-20" max="0" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1012" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1013" label="Adj CH Ratio" tag="F1,F4">
+            <Field id="1013" label="Enabled">
+              <Type name="bool" min="0" max="1" default="0" storage="2" />
+            </Field>
+            <Field id="1013" label="Max" tag="max">
+              <Type name="float" min="0" max="10" default="10" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1013" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default=".5" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1014" label="Tilt" tag="F1">
+            <Field id="1014" label="Enabled">
+              <Type name="bool" min="0" max="1" default="0" storage="2" />
+            </Field>
+            <Field id="1014" label="Max" tag="max">
+              <Type name="float" min="-30" max="30" default="20" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1014" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default=".5" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1015" label="Peak/Valley" tag="F1">
+            <Field id="1015" label="Enabled">
+              <Type name="bool" default="1" />
+            </Field>
+            <Field id="1015" label="Max" tag="max">
+              <Type name="float" min="0" max="20" default="20" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1015" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default="0.5" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3101" label="Mod Depth" tag="F4">
+            <Field id="3101" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3101" label="Min" tag="min">
+              <Type name="float" min="60" max="90" default="60" storage="7" />
+              <Unit name="Hz" rate="1" precision="1" />
+            </Field>
+            <Field id="3101" label="Max" tag="max">
+              <Type name="float" min="60" max="90" default="90" storage="7" />
+              <Unit name="Hz" rate="1" precision="1" />
+            </Field>
+            <Field id="3101" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="Hz" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+        </Group>
+        <Group label="Digital">
+          <!--Digital Test-->
+          <ComplexField id="1108" label="Carrier Level" tag="F1">
+            <Field id="1108" label="Enabled">
+              <Type name="bool" min="0" max="1" default="0" storage="2" />
+            </Field>
+            <Field id="1108" label="Min" tag="min">
+              <Type name="float" min="-40" max="60" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1108" label="Max" tag="max">
+              <Type name="float" min="-40" max="20" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1108" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default="0.1" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1117" label="Pre BER 64" >
+            <Field id="1117" label="Enabled" >
+              <Type name="bool" storage="2" default="1" />
+            </Field>
+            <Field id="1117" label="Max" tag="max">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name=""  precision=".000001" display="science" />
+            </Field>
+            <Field id="1117" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="" rate="1" precision="1" display="science" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1118" label="Pos BER 64" >
+            <Field id="1118" label="Enabled" >
+              <Type name="bool" storage="2" default="1" />
+            </Field>
+            <Field id="1118" label="Max" tag="max">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name=""  precision=".000001" display="science" />
+          </Field>
+          <Field id="1118" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name="" rate="1" precision="1" />
+          </Field>
+      </ComplexField>
+      <ComplexField id="1119" label="MER 64" >
+          <Field id="1119" label="Enabled" tag="freezen">
+              <Type name="bool" storage="2" default="1" />
+          </Field>
+          <Field id="1119" label="Min" tag="min">
+              <Type name="float" min="25" max="50" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+          </Field>
+          <Field id="1119" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+          </Field>
+      </ComplexField>
+      <ComplexField id="1123" label="Pre BER 256" >
+
+          <Field id="1123" label="Enabled" >
+              <Type name="bool" storage="2" default="1" />
+          </Field>
+          <Field id="1123" label="Max" tag="max">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name=""  precision=".000001" display="science" />
+            </Field>
+            <Field id="1123" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="" rate="1" precision="1" display="science" />
+            </Field>
+          </ComplexField>
+
+          <ComplexField id="1124" label="Pos BER 256">
+            <Field id="1124" label="Enabled">
+              <Type name="bool" storage="2" default="1" />
+
+            </Field>
+            <Field id="1124" label="Max" tag="max">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name=""  precision=".000001" display="science"/>
+            </Field>
+            <Field id="1124" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="" rate="1" precision="1" display="science" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1125" label="MER 256">
+            <Field id="1125" label="Enabled" >
+              <Type name="bool" storage="2" default="1" />
+            </Field>
+            <Field id="1125" label="Min" tag="min">
+              <Type name="float" min="25" max="50" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1125" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+
+          <ComplexField id="1109" label="Tilt" tag="F1,F2">
+            <Field id="1109" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1109" label="Max" tag="max">
+              <Type name="float" min="-30" max="30" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1109" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1110" label="Peak_To_Valley" tag="F1,F2">
+            <Field id="1110" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1110" label="Max" tag="max">
+              <Type name="float" min="0" max="20" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1110" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1127" label="Test Length" tag="F1,F2">
+            <Field id="1127" label="Enabled" tag="freezen">
+              <Type name="bool" storage="2" default="1" />
+            </Field>
+
+            <Field id="1127" label="Max" tag="max">
+              <Type name="float" min="0" max="30" default="0" storage="7" />
+              <Unit name="Sec" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3001" label="Digital Channel Power" tag="F4">
+            <Field id="3001" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3001" label="Min" tag="min">
+              <Type name="float" min="-30" max="65" default="-30" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+            <Field id="3001" label="Max" tag="max">
+              <Type name="float" min="-30" max="65" default="60" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+            <Field id="3001" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3002" label="EVM" tag="F4">
+            <Field id="3002" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3002" label="Min" tag="min">
+              <Type name="float" min="0" max="4.1" default="0.65" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3002" label="Max" tag="max">
+              <Type name="float" min="0" max="4.1" default="4.1" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3002" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3003" label="ENM" tag="F4">
+            <Field id="3003" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3003" label="Min" tag="min">
+              <Type name="float" min="1" max="12" default="1" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3003" label="Max" tag="max">
+              <Type name="float" min="1" max="12" default="12" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3003" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="12" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3004" label="SNR" tag="F4">
+            <Field id="3004" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3004" label="Min" tag="min">
+              <Type name="float" min="15" max="45" default="15" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3004" label="Max" tag="max">
+              <Type name="float" min="15" max="45" default="45" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3004" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3005" label="C/I" tag="F4">
+            <Field id="3005" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3005" label="Min" tag="min">
+              <Type name="float" min="20" max="45" default="20" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3005" label="Max" tag="max">
+              <Type name="float" min="20" max="45" default="45" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3005" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3006" label="In Ch Freq. Resp." tag="F4">
+            <Field id="3006" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3006" label="Min" tag="min">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3006" label="Max" tag="max">
+              <Type name="float" min="0" max="10" default="10" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3006" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="5" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3007" label="Echo Margin" tag="F4">
+            <Field id="3007" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3007" label="Min" tag="min">
+              <Type name="float" min="0" max="50" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3007" label="Max" tag="max">
+              <Type name="float" min="0" max="50" default="45" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3007" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="20" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3008" label="Compression" tag="F4">
+            <Field id="3008" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3008" label="Min" tag="min">
+              <Type name="float" min="0" max="10" default="20" storage="7" />
+              <Unit name="%" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3008" label="Max" tag="max">
+              <Type name="float" min="0" max="10" default="45" storage="7" />
+              <Unit name="%" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3008" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="%" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3009" label="Hum" tag="F4">
+            <Field id="3009" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3009" label="Min" tag="min">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="%" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3009" label="Max" tag="max">
+              <Type name="float" min="0" max="10" default="10" storage="7" />
+              <Unit name="%" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3009" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name="%" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3010" label="Phase Noise" tag="F4">
+            <Field id="3010" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3010" label="Min" tag="min">
+              <Type name="float" min="0" max="5" default="0" storage="7" />
+              <Unit name="deg" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3010" label="Max" tag="max">
+              <Type name="float" min="0" max="5" default="5" storage="7" />
+              <Unit name="deg" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3010" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="5" default="0" storage="7" />
+              <Unit name="deg" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3011" label="I/Q Gain Diff." tag="F4">
+            <Field id="3011" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3011" label="Min" tag="min">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="%" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3011" label="Max" tag="max">
+              <Type name="float" min="0" max="10" default="10" storage="7" />
+              <Unit name="%" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3011" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name="%" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3012" label="I/Q Phase Diff." tag="F4">
+            <Field id="3012" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3012" label="Min" tag="min">
+              <Type name="float" min="0" max="5" default="0" storage="7" />
+              <Unit name="deg" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3012" label="Max" tag="max">
+              <Type name="float" min="0" max="5" default="5" storage="7" />
+              <Unit name="deg" rate="1" precision="0.1" />
+            </Field>
+            <Field id="3012" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="5" default="0" storage="7" />
+              <Unit name="deg" rate="1" precision="0.1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3013" label="Carrier Freq Err" tag="F4">
+            <Field id="3013" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3013" label="Min" tag="min">
+              <Type name="float" min="-50" max="50" default="0" storage="7" />
+              <Unit name="Hz" rate="1" precision="1" />
+            </Field>
+            <Field id="3013" label="Max" tag="max">
+              <Type name="float" min="-50" max="50" default="50" storage="7" />
+              <Unit name="Hz" rate="1" precision="1" />
+            </Field>
+            <Field id="3013" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10" default="0" storage="7" />
+              <Unit name="Hz" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="3014" label="Symbol Rate Err." tag="F4">
+            <Field id="3014" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="3014" label="Min" tag="min">
+              <Type name="float" min="1000" max="10000" default="1000" storage="7" />
+              <Unit name="Hz" rate="1" precision="1" />
+            </Field>
+            <Field id="3014" label="Max" tag="max">
+              <Type name="float" min="1000" max="10000" default="10000" storage="7" />
+              <Unit name="Hz" rate="1" precision="1" />
+            </Field>
+            <Field id="3014" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="10000" default="0" storage="7" />
+              <Unit name="Hz" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+
+        </Group>
+        <Group label="Cable Modem">
+          <!--Modem Test-->
+          <ComplexField id="1501" label="Rx Level" tag="F1,F2">
+            <Field id="1501" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1501" label="Min" tag="min">
+              <Type name="float" min="-20" max="50" default="0" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+            <Field id="1501" label="Max" tag="max">
+              <Type name="float" min="-20" max="50" default="0" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+            <Field id="1501" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1500" label="Tx Level" tag="F1,F2">
+            <Field id="1500" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1500" label="Min" tag="min">
+              <Type name="float" min="-10" max="60" default="0" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+            <Field id="1500" label="Max" tag="max">
+              <Type name="float" min="-10" max="60" default="0" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+            <Field id="1500" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="dBmV" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1502" label="DS Throughput" tag="F1,F2">
+            <Field id="1502" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1502" label="Min" tag="min">
+              <Type name="float" min="1000000" max="30000000" default="0" storage="7" />
+              <Unit name="Mb/s" rate="1000000" precision=".000000001" />
+            </Field>
+            <Field id="1502" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="Mb/s" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1503" label="US Throughput" tag="F1,F2">
+            <Field id="1503" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1503" label="Min" tag="min">
+              <Type name="float" min="0" max="30000000" default="0" storage="7" />
+              <Unit name="Mb/s" rate="1000000" precision=".000000001" />
+            </Field>
+            <Field id="1503" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="Mb/s" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1504" label="MER" tag="F1,F2">
+            <Field id="1504" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1504" label="Min" tag="min">
+              <Type name="float" min="29" max="50" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1504" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1505" label="Pre Fec BER" tag="F1,F2">
+            <Field id="1505" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1505" label="Max" tag="max">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name=""  precision=".000001" display="science" />
+          </Field>
+          <Field id="1505" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name="" display="science" />
+          </Field>
+      </ComplexField>
+      <ComplexField id="1506" label="Post Fec BER" tag="F1,F2">
+          <Field id="1506" label="Enabled">
+              <Type name="bool" storage="2" />
+          </Field>
+          <Field id="1506" label="Max" tag="max">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name="" precision=".000001" display="science" />
+          </Field>
+          <Field id="1506" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="" display="science" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1507" label="BKER" tag="F1,F2">
+            <Field id="1507" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1507" label="Max" tag="max">
+              <Type name="float" min="0" max="1" default="0" storage="7" />
+              <Unit name=""  precision=".000001" display="science" />
+            </Field>
+            <Field id="1507" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="" rate="1" precision="1" display="science" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1508" label="Ping Time" tag="F1,F2">
+            <Field id="1508" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1508" label="Max" tag="max">
+              <Type name="float" min="0" max="100000" default="0" storage="7" />
+              <Unit name="ms" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1516" label="Test Length" tag="F1,F2">
+            <Field id="1516" label="Enabled" tag="freezen">
+              <Type name="bool" storage="2" default="1" />
+            </Field>
+
+            <Field id="1516" label="Max" tag="max">
+              <Type name="float" min="0" max="30" default="0" storage="7" />
+              <Unit name="Sec" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+
+        </Group>
+        <Group label="VoIP">
+          <!--VoIP Test-->
+          <ComplexField id="1600" label="US MOS" tag="F1,F2">
+            <Field id="1600" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1600" label="Min" tag="min">
+              <Type name="float" min="0" max="5" default="0" storage="7" />
+              <Unit name=""  precision=".1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1601" label="US R-Factor" tag="F1,F2">
+            <Field id="1601" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1601" label="Min" tag="min">
+              <Type name="float" min="0" max="100" default="0" storage="7" />
+              <Unit name="" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1602" label="US Latency" tag="F1,F2">
+            <Field id="1602" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1602" label="Max" tag="max">
+              <Type name="float" min="0" max="1000" default="0" storage="7" />
+              <Unit name="mSec" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1603" label="US Jitter" tag="F1,F2">
+            <Field id="1603" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1603" label="Max" tag="max">
+              <Type name="float" min="0" max="100" default="0" storage="7" />
+              <Unit name="mSec" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1604" label="US Lost Packets" tag="F1,F2">
+            <Field id="1604" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1604" label="Max" tag="max">
+              <Type name="float" min="0" max="100000" default="0" storage="7" />
+              <Unit name="" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+
+          <ComplexField id="1605" label="US % Pkt Loss" tag="F1,F2">
+            <Field id="1605" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1605" label="Max" tag="max">
+              <Type name="float" min="0" max="100" default="0" storage="7" />
+              <Unit name="%"  rate="1" precision=".1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1606" label="US Discarded Packets" tag="F1,F2">
+            <Field id="1606" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1606" label="Max" tag="max">
+              <Type name="float" min="0" max="100000" default="0" storage="7" />
+              <Unit name="" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1607" label="DS MOS" tag="F1,F2">
+            <Field id="1607" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1607" label="Min" tag="min">
+              <Type name="float" min="0" max="5" default="0" storage="7" />
+              <Unit name=""  precision=".1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1608" label="DS R-Factor" tag="F1,F2">
+            <Field id="1608" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1608" label="Min" tag="min">
+              <Type name="float" min="0" max="100" default="0" storage="7" />
+              <Unit name="" rate="1" precision="1" />
+            </Field>
+
+          </ComplexField>
+          <ComplexField id="1609" label="DS Latency" tag="F1,F2">
+            <Field id="1609" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1609" label="Max" tag="max">
+              <Type name="float" min="0" max="1000" default="0" storage="7" />
+              <Unit name="mSec" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1610" label="DS Jitter" tag="F1,F2">
+            <Field id="1610" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1610" label="Max" tag="max">
+              <Type name="float" min="0" max="100" default="0" storage="7" />
+              <Unit name="mSec" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+
+          <ComplexField id="1611" label="DS Loss Pkts" tag="F1,F2">
+            <Field id="1611" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1611" label="Max" tag="max">
+              <Type name="float" min="0" max="100000" default="0" storage="7" />
+              <Unit name="" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+
+          <ComplexField id="1612" label="DS % Pkt Loss" tag="F1,F2">
+            <Field id="1612" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1612" label="Max" tag="max">
+              <Type name="float" min="0" max="100" default="0" storage="7" />
+              <Unit name="%"  rate="1" precision=".1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1613" label="DS Discarded Pkts" tag="F1,F2">
+            <Field id="1613" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1613" label="Max" tag="max">
+              <Type name="float" min="0" max="1000" default="0" storage="7" />
+              <Unit name="" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1614" label="Minimum Bandwidth" tag="F1,F2">
+            <Field id="1614" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1614" label="Min" tag="min">
+              <Type name="float" min="0" max="500" default="0" storage="7" />
+              <Unit name="kbits/s" rate="1" precision="1" />
+            </Field>
+
+          </ComplexField>
+          <ComplexField id="1615" label="Call Setup Time" tag="F1,F2">
+            <Field id="1615" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1615" label="Max" tag="max">
+              <Type name="float" min="0" max="5000" default="0" storage="7" />
+              <Unit name="mSec" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1616" label="Call Tear Down Time" tag="F1,F2">
+            <Field id="1616" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1616" label="Max" tag="max">
+              <Type name="float" min="0" max="5000" default="0" storage="7" />
+              <Unit name="mSec" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+
+        </Group>
+        <Group label="Sweep">
+          <!--Sweep Test-->
+          <ComplexField id="1700" label="Tilt" tag="F1,F2">
+            <Field id="1700" label="Enabled" tag="freezen">
+              <Type name="bool" min="0" max="1" default="1" storage="2" />
+            </Field>
+            <Field id="1700" label="Min" tag="min">
+              <Type name="float" min="-40" max="40" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1700" label="Max" tag="max">
+              <Type name="float" min="-40" max="20" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1700" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1701" label="Peak/Valley" tag="F1,F2">
+            <Field id="1701" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1701" label="Max" tag="max">
+              <Type name="float" min="-40" max="20" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1701" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1702" label="Delta DB/MHz" tag="F1,F2">
+            <Field id="1702" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1702" label="Min" tag="min">
+              <Type name="float" min="-40" max="40" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1702" label="Max" tag="max">
+              <Type name="float" min="-40" max="20" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1702" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1703" label="Analog Level" tag="F1,F2">
+            <Field id="1703" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1703" label="Min" tag="min">
+              <Type name="float" min="-40" max="40" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1703" label="Max" tag="max">
+              <Type name="float" min="-40" max="20" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1703" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="1704" label="Digital Level" tag="F1,F2">
+            <Field id="1704" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="1704" label="Min" tag="min">
+              <Type name="float" min="-40" max="40" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1704" label="Max" tag="max">
+              <Type name="float" min="-40" max="20" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+            <Field id="1704" label="Tolerance" tag="tolerance">
+              <Type name="float" min="-40" max="0" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+        </Group>
+        <Group label="Other Test">
+          <!--Other Test-->
+          <ComplexField id="2001" label="IP Ping Time Max" tag="F1,F2">
+            <Field id="2001" label="Enabled">
+              <Type name="bool" min="0" max="1" default="1" storage="2" />
+            </Field>
+            <Field id="2001" label="Max" tag="max">
+              <Type name="float" min="0" max="10000" default="0" storage="7" />
+              <Unit name="mSec" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="2002" label="Leakage Max Level" tag="F1,F2">
+            <Field id="2002" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="2002" label="Max" tag="max">
+              <Type name="float" min="0" max="200" default="0" storage="7" />
+              <Unit name="uV/m" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+          <ComplexField id="2003" label="Test Point Loss" tag="F1,F2">
+            <Field id="2003" label="Enabled">
+              <Type name="bool" storage="2" />
+            </Field>
+            <Field id="2003" label="Tolerance" tag="tolerance">
+              <Type name="float" min="0" max="30" default="0" storage="7" />
+              <Unit name="dB" rate="1" precision="1" />
+            </Field>
+          </ComplexField>
+        </Group>
+      </DataFields>
+    </Section>
+    <Section id="TSDL" label="Test Scheduling">
+      <Properties>
+      </Properties>
+      <DataFields>
+        <!--
+        To be defined
+        -->
+      </DataFields>
+    </Section>
+  </Section>
+  <Section id="DEVC" label="Instrument Settings">
+    <Properties>
+    </Properties>
+    <Section id="GNRL" label="General">
+      <Properties>
+        <Description>This is General's Description.</Description>
+      </Properties>
+      <DataFields>
+        <Group label="General Info">
+          <Field label="System Name" id="5000" tag="F1,F2">
+            <Type name="string" default="sunrise" storage="8" max="16"/>
+          </Field>
+          <Field label="Channel Plan" id="5001">
+            <Type name="string" max="25" storage="8" />
+          </Field>
+          <Field label="Date" id="5002">
+            <Type name="date" default="2000-01-01" storage="8" />
+          </Field>
+          <Field label="Time" id="5003">
+            <Type name="time" default="00:00:00"  storage="8" />
+          </Field>
+          <Field label="Speaker" id="5004" tag="F1">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Backlight Timer" id="5005" tag="F2">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Powerdown Timer" id="5006" tag="F1">
+            <Type name="bool" min="False" max="True" storage="8" />
+          </Field>
+          <Field label="Units" id="5007" tag="F">
+            <Type name="enum2" default="True" storage="1">
+              <item value="True">dBuv</item>
+              <item value="False">dBmv</item>
+            </Type>
+          </Field>
+          <Field label="Constellation Samples" id="5022" tag="F1">
+            <Type name="enum2" default="0" storage="4">
+              <item value="0">0</item>
+              <item value="5000">5000</item>
+              <item value="10000">10000</item>
+              <item value="15000">15000</item>
+              <item value="20000">20000</item>
+              <item value="25000">25000</item>
+              <item value="30000">30000</item>
+            </Type>
+          </Field>
+          <Field label="Auto Diagnostics Samples" id="5023" tag="F2">
+            <Type name="enum2" default="0" storage="4">
+              <item value="50">50</item>
+              <item value="100">100</item>
+              <item value="150">150</item>
+              <item value="200">200</item>
+              <item value="250">250</item>
+            </Type>
+          </Field>
+          <Field label="Error Display Type" id="5024" tag="F1">
+            <Type name="enum2" default="True" storage="1">
+              <item value="True">ESR/SESR</item>
+              <item value="False">Err Sec</item>
+            </Type>
+          </Field>
+          <Field label="Sev Error Sec Threshold" id="5025" tag="F2">
+            <Type name="enum2" default="0.01" storage="7">
+              <item value="0.0000015">1.5E-6</item>
+              <item value="0.000001">1.0E-6</item>
+              <item value="0.00015">1.5E-4</item>
+              <item value="0.0001">1.0E-4</item>
+              <item value="0.0015">1.5E-3</item>
+              <item value="0.001">1.0E-3</item>
+              <item value="0.015">1.5E-2</item>
+              <item value="0.01">1.0E-2</item>
+            </Type>
+          </Field>
+          <!--<Field label="Auto Dig. Test Length" id="5025">
+              <Type name="string" storage="7" />
+              <Type name="int" min="1000000" max="1000000000" default="1000000"/>
+              <Unit name="Secs" rate="1000000" precision="0.000001" />
+          </Field>-->
+        </Group>
+      </DataFields>
+    </Section>
+    <Section id="GNRL" label="Security">
+      <Properties>
+        <Description>This is General's Description.</Description>
+      </Properties>
+      <DataFields>
+        <Group label="Security Info">
+          <Field label="Setup Password" id="5008">
+            <Type name="password" storage="8" />
+          </Field>
+
+          <Field label="Allow Channel Table Setup" id="5009">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Allow Limit Setup" id="5010">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Allow Modem Setup" id="5011">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Allow Upstream Setup" id="5012">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Allow Leakage Setup" id="5013">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Allow Return Pilot" id="5014">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Allow Browser Setup" id="5016">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Allow Realview" id="5015">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Allow Sweep Setup" id="5017">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Allow Analyzer Setup" id="5018">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Allow FCC Setup" id="5019">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Auto Save" id="5021">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Allow Config Download" id="5020">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+        </Group>
+      </DataFields>
+    </Section>
+    <Section id="CABM" label="Network">
+      <Properties>
+        <Description>Sunrise AT1800 System Configuration File</Description>
+      </Properties>
+      <DataFields>
+        <Group label="General">
+          <Field label="Docsis Mode" id="5026">
+            <Type name="enum2" default="0" storage="7">
+              <item value="0">Auto</item>
+              <item value="1">1.0</item>
+            </Type>
+          </Field>
+          <Field label="Emulator IP" id="5027">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Ping FTP Server" id="5028">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="Ranging Method" id="5029">
+            <Type name="enum2" default="0" storage="2">
+              <item value="0">Dwell On</item>
+              <item value="1">Scan Ranging Channels</item>
+              <item value="2">Scan Entire Spectrum</item>
+            </Type>
+          </Field>
+          <Field label="User Defined MAC" id="5030">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+          <Field label="User Select Docsis CH" id="5031">
+            <Type name="bool" min="False" max="True" default="0" storage="1" />
+          </Field>
+          <Field label="User Select UCD" id="5032">
+            <Type name="bool" min="False" max="True" storage="1" />
+          </Field>
+        </Group>
+        <Group label="Upstream">
+          <Field label="Upstream Ping Delay" id="5034">
+            <Type name="enum2" default="200" storage="4">
+              <item value="20">20 ms</item>
+              <item value="40">40 ms</item>
+              <item value="60">60 ms</item>
+              <item value="80">80 ms</item>
+              <item value="100">100 ms</item>
+              <item value="120">120 ms</item>
+              <item value="140">140 ms</item>
+              <item value="160">160 ms</item>
+              <item value="180">180 ms</item>
+              <item value="200">200 ms</item>
+              <item value="220">220 ms</item>
+              <item value="240">240 ms</item>
+              <item value="260">260 ms</item>
+              <item value="280">280 ms</item>
+              <item value="300">300 ms</item>
+              <item value="320">320 ms</item>
+              <item value="340">340 ms</item>
+              <item value="360">360 ms</item>
+              <item value="380">380 ms</item>
+              <item value="400">400 ms</item>
+              <item value="420">420 ms</item>
+              <item value="440">440 ms</item>
+              <item value="460">460 ms</item>
+              <item value="480">480 ms</item>
+              <item value="500">500 ms</item>
+            </Type>
+          </Field>
+          <Field label="Ping Packet Size" id="5035">
+            <Type name="enum2" default="256" storage="4">
+              <item value="0">0 Byte</item>
+              <item value="256">256 Bytes</item>
+              <item value="512">512 Bytes</item>
+              <item value="768">768 Bytes</item>
+              <item value="1024">1024 Bytes</item>
+            </Type>
+          </Field>
+          <Field label="Ping Address" id="5036">
+            <Type name="ipv4" default="0.0.0.0"  storage="5" />
+          </Field>
+        </Group>
+        <Group label="CM MAC">
+          <Field label="Favorite MAC 1" id="5033" tag="0">
+            <Type name="mac" default="00-D0-DD-D1-D1-D1" storage="8" />
+          </Field>
+          <Field label="Favorite MAC 2" id="5033" tag="1">
+            <Type name="mac" default="00-D0-DD-D1-D1-D1" storage="8" />
+          </Field>
+          <Field label="Favorite MAC 3" id="5033" tag="2">
+            <Type name="mac" default="00-D0-DD-D1-D1-D1" storage="8" />
+          </Field>
+          <Field label="Favorite MAC 4" id="5033" tag="3,F1">
+            <Type name="mac" default="00-D0-DD-D1-D1-D1" storage="8" />
+          </Field>
+          <Field label="Favorite MAC 5" id="5033" tag="4,F">
+            <Type name="mac" default="00-D0-DD-D1-D1-D1" storage="8" />
+          </Field>
+        </Group>
+        <Group label="Throughput">
+          <Field label="Server IP" id="5037">
+            <Type name="ipv4" default="172.21.20.1" storage="5" />
+          </Field>
+        </Group>
+        <Group label="Config Download Setup">
+          <Field label="Server IP" id="5043">
+            <Type name="ipv4" default="0.0.0.0"  storage="5" />
+          </Field>
+          <Field label="Username" id="5044">
+            <Type name="string" default="sunrise" storage="8" />
+          </Field>
+          <Field label="Password" id="5045">
+            <Type name="password" default="sunrise" storage="8" />
+          </Field>
+          <Field label="Port" id="5046">
+            <Type name="uint" min="0" max="65535" default="21" storage="4" />
+          </Field>
+        </Group>
+        <Group label="Results Upload Setup">
+          <Field label="Server IP" id="5048">
+            <Type name="ipv4" storage="5" />
+          </Field>
+          <Field label="Username" id="5049">
+            <Type name="string" default="sunrise" storage="8" />
+          </Field>
+          <Field label="Password" id="5050">
+            <Type name="password" default="sunrise" storage="8" />
+          </Field>
+          <Field label="Port" id="5051">
+            <Type name="uint" min="0" max="65535" default="21" storage="4" />
+          </Field>
+
+        </Group>
+        <Group label="Firmware Upgrade Setup">
+          <Field label="Server IP" id="5053">
+            <Type name="ipv4" storage="5" />
+          </Field>
+          <Field label="Username" id="5054">
+            <Type name="string" default="sunrise" storage="8" />
+          </Field>
+          <Field label="Password" id="5055">
+            <Type name="password" default="sunrise" storage="8" />
+          </Field>
+          <Field label="Port" id="5056">
+            <Type name="uint" min="0" max="65535" default="21" storage="4" />
+          </Field>
+        </Group>
+      </DataFields>
+    </Section>
+    <Section id="VOIP" label="VoIP">
+      <DataFields>
+        <Field label="Enable During AutoTest" id="6003">
+          <Type name="bool" min="False" max="True" storage="1" />
+        </Field>
+        <Field label="VoIP Ping Address" id="5092">
+          <Type name="ipv4" default="192.168.70.80" storage="5" />
+        </Field>
+        <Field label="MOS Server IP" id="5094">
+          <Type name="ipv4" default="3232253520" storage="5" />
+        </Field>
+        <Field label="MOS Server Port" id="5095">
+          <Type name="uint" min="0" max="65535" default="21" storage="4" />
+        </Field>
+        <Field label="MOS Test Duration" id="5096">
+          <Type name="uint" storage="4" />
+        </Field>
+      </DataFields>
+    </Section>
+    <Section id="IPET" label="IP Ethernet">
+      <DataFields>
+        <Field label="DHCP" id="5099">
+          <Type name="bool" min="False" max="True"  storage="1"/>
+        </Field>
+        <Field label="CPE Static IP" id="5100">
+          <Type name="ipv4" default="3232235521" storage="5" />
+        </Field>
+        <Field label="CPE Static Subnet" id="5101">
+          <Type name="ipv4" default="3232235521" storage="5" />
+        </Field>
+        <Field label="CPE Static Gateway" id="5102">
+          <Type name="ipv4" default="3232235521" storage="5" />
+        </Field>
+        <Field label="Obtain DNS Auto" id="5103">
+          <Type name="bool" min="False" max="True"  />
+        </Field>
+        <Field label="DNS Static IP" id="6001">
+          <Type name="ipv4" default="3232235521" storage="5" />
+        </Field>
+
+        <Field label="VoIP DHCP Flag" id="5104">
+          <Type name="bool" min="False" max="True" storage="1"/>
+        </Field>
+        <Field label="VoIP Static IP" id="5105">
+          <Type name="ipv4" default="192.168.0.1" storage="5" />
+        </Field>
+        <Field label="VoIP Static Subnet" id="5106">
+          <Type name="ipv4" default="255.255.255.0" storage="5" />
+        </Field>
+        <Field label="VoIP Static Gateway" id="5107">
+          <Type name="ipv4" default="192.168.0.254" storage="5" />
+        </Field>
+        <Field label="Obtain VoIP DNS Auto" id="5108">
+          <Type name="bool" min="False" max="True"  />
+        </Field>
+        <Field label="VOIP DNS Static IP" id="6002">
+          <Type name="ipv4" default="3232235521" storage="5" />
+        </Field>
+      </DataFields>
+    </Section>
+    <Section id="RLVW" label="Real View">
+      <DataFields>
+        <Table label="Real View" width="100,150,50">
+          <Field label="Location" id="5058">
+            <Type name="string" storage="8" />
+          </Field>
+          <Field label="IP Address" id="5059">
+            <Type name="ipv4" default="3232253520" storage="5" />
+          </Field>
+          <Field label="Port" id="5060">
+            <Type name="uint" min="0" max="65535" default="1202" storage="4" />
+          </Field>
+        </Table>
+        <Group label="Default Group">
+          <Field label="Realview M1 Frequency" id="5061">
+            <Type name="float" storage="5" />
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field label="Realview M1 Bandwidth" id="5062">
+            <Type name="uint" default="1024" storage="5" />
+          </Field>
+          <Field label="Realview M1 Detector" id="5063">
+            <Type name="enum2" default="0" storage="2">
+              <item value="1">Peak</item>
+              <item value="0">Average</item>
+            </Type>
+          </Field>
+          <Field label="Realview M2 Frequency" id="5064">
+            <Type name="float" storage="5" />
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field label="Realview M2 Bandwidth" id="5065">
+            <Type name="uint" storage="5" />
+          </Field>
+          <Field label="Realview M2 Detector" id="5066">
+            <Type name="enum2" default="0" storage="2">
+              <item value="1">Peak</item>
+              <item value="0">Average</item>
+            </Type>
+          </Field>
+          <Field label="Realview M3 Frequency" id="5067">
+            <Type name="float" storage="5" />
+            <Unit name="MHz" rate="1000000" precision="0.000001" />
+          </Field>
+          <Field label="Realview M3 Bandwidth" id="5068">
+            <Type name="uint" storage="5" />
+          </Field>
+          <Field label="Realview M3 Detector" id="5069">
+            <Type name="enum2" default="0" storage="2">
+              <item value="1">Peak</item>
+              <item value="0">Average</item>
+            </Type>
+          </Field>
+        </Group>
+      </DataFields>
+    </Section>
+    <Section id="UPST" label="Upstream Spectrum">
+      <DataFields>
+        <Field label="Upstream M1 Frequency" id="5070">
+          <Type name="float" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Upstream M1 Bandwidth" id="5071">
+          <Type name="uint" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Upstream M1 Detector" id="5072">
+          <Type name="enum2" default="0" storage="2">
+            <item value="1">Peak</item>
+            <item value="0">Average</item>
+          </Type>
+        </Field>
+        <Field label="Upstream M2 Frequency" id="5073">
+          <Type name="float" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Upstream M2 Bandwidth" id="5074">
+          <Type name="uint" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Upstream M2 Detector" id="5075">
+          <Type name="enum2" default="0" storage="2">
+            <item value="1">Peak</item>
+            <item value="0">Average</item>
+          </Type>
+        </Field>
+        <Field label="Upstream M3 Frequency" id="5076">
+          <Type name="float" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Upstream M3 Bandwidth" id="5077">
+          <Type name="uint" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Upstream M3 Detector" id="5078">
+          <Type name="enum2" default="0" storage="2">
+            <item value="1">Peak</item>
+            <item value="0">Average</item>
+          </Type>
+        </Field>
+      </DataFields>
+    </Section>
+    <Section id="DWST" label="Downstream Spectrum">
+      <DataFields>
+        <Field label="Downstream M1 Frequency" id="5079">
+          <Type name="float" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Downstream M1 Bandwidth" id="5080">
+          <Type name="uint" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Downstream Detector" id="5081">
+          <Type name="enum2" default="False" storage="2">
+            <item value="1">Peak</item>
+            <item value="0">Average</item>
+          </Type>
+        </Field>
+        <Field label="Downstream Frequency" id="5082">
+          <Type name="float" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Downstream Bandwidth" id="5083">
+          <Type name="uint" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Downstream M2 Detector" id="5084">
+          <Type name="enum2" default="False" storage="2">
+            <item value="1">Peak</item>
+            <item value="0">Average</item>
+          </Type>
+        </Field>
+        <Field label="Downstream M3 Frequency" id="5085">
+          <Type name="float" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Downstream M3 Bandwidth" id="5086">
+          <Type name="uint" storage="5" />
+          <Unit name="Hz" rate="1" precision="1" />
+        </Field>
+        <Field label="Downstream M3 Detector" id="5087">
+          <Type name="enum2" default="False" storage="2">
+            <item value="1">Peak</item>
+            <item value="0">Average</item>
+          </Type>
+        </Field>
+      </DataFields>
+    </Section>
+    <Section id="RTPT" label="Return Pilot">
+      <DataFields>
+        <Field label="Return Pilot Frequency" id="5088">
+          <Type name="float" storage="5" />
+        </Field>
+      </DataFields>
+    </Section>
+    <Section id="BROW" label="Browser">
+      <DataFields>
+        <Group label="General">
+          <Field label="Allow User to Edit" id="5091">
+            <Type name="bool" min="False" max="True"  default = "False" storage="2"/>
+          </Field>
+        </Group>
+        <Group label="Home URL">
+          <Field label="URL" id="5089">
+            <Type name="string" default="http://www.realgate.com" />
+          </Field>
+        </Group>
+        <Group label="Favorite URL">
+          <Field label="URL 1 " id="5090" tag="0">
+            <Type name="string" default="about:blank" />
+          </Field>
+          <Field label="URL 2 " id="5090" tag="1">
+            <Type name="string" default="about:blank" />
+          </Field>
+          <Field label="URL 3 " id="5090" tag="2">
+            <Type name="string" default="about:blank" />
+          </Field>
+          <Field label="URL 4 " id="5090" tag="3">
+            <Type name="string" default="about:blank" />
+          </Field>
+          <Field label="URL 5 " id="5090" tag="4">
+            <Type name="string" default="about:blank" />
+          </Field>
+        </Group>
+      </DataFields>
+    </Section>
+
+    <Section id="USGG" label="USG">
+      <DataFields>
+        <Field label="USG Frequency" id="5109">
+          <Type name="string" storage="5" />
+        </Field>
+      </DataFields>
+    </Section>
+    <Section id="FCCT" label="FCC Tests">
+      <DataFields>
+        <Field label="Start Time" id="5110">
+          <Type name="string" storage="8" />
+        </Field>
+        <Field label="Delay Between Test" id="5111">
+          <Type name="string" storage="8" />
+        </Field>
+        <Field label="Number Tests" id="5112">
+          <Type name="string" storage="8" />
+        </Field>
+        <Field label="Results Filename" id="5113">
+          <Type name="string" storage="8" />
+        </Field>
+      </DataFields>
+    </Section>
+    <Section id="SWEP" label="Sweep">
+      <DataFields>
+        <Field label="DS Comm Pilot/Freq" id="5114">
+          <Type name="float" max="100000" default="12.34" />
+          <Unit name="MHz" rate="1000" precision="1" />
+        </Field>
+        <Field label="Channel Plan" id="5115">
+          <Type name="string" />
+        </Field>
+        <Field label="DSRefSWPTable" id="5116">
+          <Type name="string" />
+        </Field>
+        <Field label="DS Start Frequency" id="5117">
+          <Type name="string" />
+        </Field>
+        <Field label="DS Stop Frequency" id="5118">
+          <Type name="string" />
+        </Field>
+        <Field label="US Start Frequency" id="5119">
+          <Type name="string" />
+        </Field>
+        <Field label="US Stop Frequency" id="5120">
+          <Type name="string" />
+        </Field>
+        <Field label="Sweep Scan Type" id="5121">
+          <Type name="string" />
+        </Field>
+      </DataFields>
+    </Section>
+  </Section>
+</SystemConfiguration>
+

@@ -1,0 +1,16 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  id: 1
+  analyzer_id: 1
+  name: dlp_1
+  freq1:  12_000_000
+  freq2:  15_000_000
+  freq3:  18_000_000
+  freq4: 21_000_000
+  datalog_trace: 1
+  trigger_type:  1
+  bandwidth:     1_000_000
+  limit_val:         -23
+  freq_count:    1
+

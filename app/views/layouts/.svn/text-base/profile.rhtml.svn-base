@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-AU">
+<head>
+  <meta http-equiv="content-type"
+ content="application/xhtml+xml; charset=UTF-8">
+  <meta name="author" content="sunrise">
+  <meta name="generator" content="sunrise">
+<!-- Navigational metadata for large websites (an accessibility feature): -->
+  <%= stylesheet_link_tag 'sinorca-screen' %>
+  <%= stylesheet_link_tag 'sinorca-print', :media => 'print' %>
+ <title><%= @page_title = "RealWORX"%> <%= @page_subtitle = "Profile Manager" %></title>
+</head>
+<body>
+   <% @sel=8%>
+   <%= render "shared/header" %>
+<div id="center">
+<!-- ##### Side Bar ##### -->
+<div id="side-bar">
+   <div>
+      <p class="sideBarTitle">Profile List</p>
+      <hr>
+      <ul>
+         <% Profile.find_active_profiles.each { |prof| %>
+         <%= link_to prof.name,{:action=>'edit'}  %><p>
+         <% } %>
+      </ul>
+
+</div>
+</div>
+<!-- ##### Main Copy ##### -->
+<div id="main-copy">
+   <%= @content_for_layout %>
+</div>
+</div>
+	<%= render "shared/footer" %>
+</body>
+</html>

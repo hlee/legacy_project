@@ -1,0 +1,25 @@
+<% if @record_pages.first  == @record_pages.current %>
+&lt;&lt; 
+<% else %>
+<%= link_to('<<', {:params => params.merge('page' => @record_pages.first)})  %>
+<% end %>
+|
+<% if @record_pages.current.previous %>
+<%= link_to('<', {:params => params.merge('page' => @record_pages.current.previous)})  %>
+<% else %>
+&lt;
+<% end %>
+|
+[<%= @record_pages.current.number %> out of <%= @record_pages.last.number %> Pages]
+|
+<% if @record_pages.current.next %>
+<%= link_to('>', {:params => params.merge('page' => @record_pages.current.next)})  %>
+<% else %>
+&gt;
+<% end %>
+|
+<% if @record_pages.last  == @record_pages.current %>
+&gt;&gt; 
+<% else %>
+<%= link_to('>>', {:params => params.merge('page' => @record_pages.last)})  %>
+<% end %>

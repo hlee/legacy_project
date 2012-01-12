@@ -1,0 +1,6 @@
+<h2> System File Upload </h2>
+<% form_tag({:action=>"upload_system_file"},:multipart => true) do %><p>
+   <label for="System_file">System File:</label><%=file_field_tag "system_file"%>
+   <input type="submit" value="Upload File" />
+<% end %>
+

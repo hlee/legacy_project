@@ -1,0 +1,57 @@
+<h2>Test Channels for <%= @test_plan.name %> Test Plan</h2>
+<%= link_to 'Return to list', :action => 'test_plan_list', :id => @test_plan.sf_system_file_id %>
+<% form_tag :action => 'test_channel_update', :id => @test_plan.id do %>
+  <table class="datatable">
+    <tr>
+      <th>Channel</th>
+      <th>Name</th>
+      <th>Enabled</th>
+      <th>Frequency</th>
+      <th>Analog/Digital</th>
+      <th>Modulation</th>
+      <th>J83 Annex</th>
+    </tr>
+    <% @channels.sort.each { |@channel| %>
+      <tr class="<%= cycle("even","odd") %>">
+        <td>
+          <%= @channel.sf_channel["channel_number"] %>
+        </td>
+        <td>
+          <%# in_place_editor_field :channel,'channel_name' %>
+          <%= @channel.sf_channel["channel_name"] %>
+        </td>
+        <td>
+          <%= check_box("channel", "enable_flag", {"name" => "channel[#{@channel.id}]"}) %>
+        </td>
+        <td>
+          <% 
+            display_frequency ||= @channel.sf_channel["channel_dtls"]["centerfreq"]
+            display_frequency ||= @channel.sf_channel["channel_dtls"]["videofreq"]
+          %>
+          <%= sprintf("%.4f MHz", display_frequency / 1000000.to_f) %>
+        </td>
+        <td>
+          <%= @channel.sf_channel.channel_type.eql?("1") ? "Digital" : "Analog" %>
+        </td>
+        <td>
+          <%= @channel.sf_channel.modstr %>
+        </td>
+        <td>
+          <% 
+            j83annex = case @channel.sf_channel["channel_dtls"]["j83annex"]
+              when 0: 'A'
+              when 1: 'B'
+              when 2: 'C'
+              else 'None'
+            end
+          %>
+          <%= j83annex %>
+        </td>
+          <%#button_to('Delete',:action=>'system_file_delete',:controller=>'setup',:id=>channel.id)%>
+          <%#button_to('Download',:action=>'system_file_download',:controller=>'setup',:id=>channel.id)%>
+          <%#button_to('Edit',:action=>'system_file_edit',:controller=>'setup',:id=>channel.id)%>
+      </tr>
+    <% } %>
+  </table>
+  <%= submit_tag 'Commit Changes' %>
+<% end %>

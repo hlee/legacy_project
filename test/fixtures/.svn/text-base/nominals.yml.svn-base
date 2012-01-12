@@ -1,0 +1,46 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+ one:
+   channel_id: 1
+   measure_id: 1
+   val: 10
+
+ two:
+   channel_id: 1
+   measure_id: 2
+   val: 20
+ three:
+   channel_id: 2
+   measure_id: 1
+   val: 10
+
+ four:
+   channel_id: 2
+   measure_id: 2
+   val: 20
+
+ five:
+   channel_id: 5
+   measure_id: 1
+   val: 10
+
+ six:
+   channel_id: 8
+   measure_id: 1
+   val: 10
+
+ seven:
+   channel_id: 5
+   measure_id: 2
+   val: 20
+
+ seven:
+   channel_id: 5
+   measure_id: 3
+   val: 20
+
+ eight:
+   channel_id: 8
+   measure_id: 2
+   val: 20
+

@@ -1,0 +1,21 @@
+<h1>Cascaded Delete Confirm</h1><br />
+
+<% form_tag :action => "associate_delete" do %>
+Analyzer <%=@an.name%> has data in the database,<br />
+Would you like to delete below data:<br />
+<ul>
+<%if ingress%>
+  <il>ingress data and alarm:<%= check_box ("data","ingress", {}, "yes", "no") %><il/><br />
+  <%end%>
+<% if downstream%>
+  <il>downstream data and alarm:<%= check_box ("data","downstream", {}, "yes", "no") %></il><br />
+<%end%>
+</ul>
+  <%= hidden_field_tag 'id', @an.id%> 
+<table border=0>
+<tr >
+<td rowspan="1">
+  <%= submit_tag "Delete"%>
+<% end%></td><td>
+<%= button_to "Cancel",:controller=>"network",:action=>"index"%></td>
+</table>

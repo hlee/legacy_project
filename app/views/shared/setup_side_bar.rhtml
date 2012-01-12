@@ -1,0 +1,53 @@
+<div>
+  <p class="sideBarTitle">Setup</p>
+</div>
+<ul>
+  <% if has_license? %>
+    <li>
+      <%=link_to 'Firmware Mgr',{:controller=>'setup', :action=>'upload_firmware'}%>
+    </li>
+  <% end %>
+  <li>
+    <%=link_to 'License Mgr',{:controller=>'licenses', :action=>'index'}%>
+  </li>
+  <% if has_license? %>
+    <li>
+      <%=link_to 'Network Mgr',{:controller=>'network', :action=>'index'}%>
+    </li>
+    <li>
+      <%=link_to 'Parameters Mgr',{:controller=>'config_params', :action=>'list'}%>
+    </li>
+    <% if has_ingress? %>
+      <li>
+        <%=link_to 'Profile Mgr',{:controller=>'profile_mgr', :action=>'index'}%>
+      </li>
+    <% end %>
+    <li>
+      <%=link_to 'Site List Mgr',{:controller=>'setup', :action=>'site_list'}%>
+    </li>
+    <li>
+      <%=link_to 'Region List Mgr',{:controller=>'setup', :action=>'region_list'}%>
+    </li>
+    <li>
+      <%=link_to 'System File Mgr',{:controller=>'setup', :action=>'system_file_list'}%>
+    </li>
+    <li>
+      <%=link_to 'User Mgr',{:controller=>'users', :action=>'index'}%>
+    </li>
+    <li>
+      <%=link_to 'SMTP Settings',{:controller=>'config_params', :action=>'smtp_settings'}%>
+    </li>
+    <li>
+      <%=link_to 'Upstream Channels',{:controller=>'upstream_channels', :action=>'index'}%>
+    </li>
+    <li>
+      <%=link_to 'DB Maintenance',{:controller=>'setup', :action=>'maintain_db'}%>
+    </li>	
+    <li>
+      <%=link_to 'System Validation',{:controller=>'setup', :action=>'validate_sys'}%>
+    </li>	
+	<li>
+      <%=link_to 'Plan Editor',{:controller=>'setup', :action=>'edit_plan'}%>
+ 	</li>
+  <% end %>
+</ul>

@@ -1,0 +1,53 @@
+#Assumes RAILS_ENV is set correctly.
+# reset auto connection retry or attempt times
+
+Analyzer.update_all("att_count = 0", "auto_mode <> 3")
+
+#truncate log from system_logs table according to the params_config
+limit_count=ConfigParam.get_value(54)
+first_id=SystemLog.find(:first,:order=>'id').id
+last_id=SystemLog.find(:first,:order=>'id desc').id
+SystemLog.delete_all(["id >=? and id <= ?",first_id,(last_id-limit_count-1)])
+
+# Summarize Measurement Data
+days = ConfigParam.get_value(36)
+if days.nil?  || days.eql?('')
+  days = 30
+else
+  days = days.to_i
+end
+Measurement.summarize(days)
+
+# Summarize Datalog Data
+days = ConfigParam.get_value(37)
+if days.nil? || days.eql?('')
+  days = 30
+else
+  days = days.to_i
+end
+Datalog.summarize(days)
+
+# Delete Old Ingress Alarms
+days = ConfigParam.get_value(38)
+if days.nil? || days.eql?('')
+  days = 7
+else
+  days = days.to_i
+end
+Alarm.summarize(days)
+
+# Delete Old Ingress Alarms
+days = ConfigParam.get_value(39)
+if days.nil? || days.eql?('')
+  days = 7
+else
+  days = days.to_i
+end
+DownAlarm.summarize(days)
+
+#Run Rake tasks to clear logs.
+
+require 'rake'
+Rake.application.rake_require '../../lib/tasks/clear_daemon_log'
+Rake.application['log:clear_all'].invoke
+

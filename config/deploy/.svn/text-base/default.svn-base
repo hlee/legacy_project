@@ -1,0 +1,27 @@
+set :rails_env, "production"
+set :runner, "jnoble"
+
+set :restart_lighttpd, false
+set :restart_mongrel, false
+set :restart_daemons, false
+
+role :app, "10.0.1.200"
+role :web, "10.0.1.200"
+role :db,  "10.0.1.200", :primary => true
+
+set :deploy_to, "/tmp/verizon/#{application}"
+
+# Dev
+set :dev_db_user, "rw"
+set :dev_db_password, ""
+set :dev_database, "realworx"
+
+# Test
+set :test_db_user, "rw_test"
+set :test_db_password, ""
+set :test_database, "realworx_test"
+
+# Production
+set :production_db_user, "rw_production"
+set :production_db_password, ""
+set :production_database, "realworx_production"

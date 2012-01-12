@@ -1,0 +1,35 @@
+Pages: <%= pagination_links @item_pages %>
+<p/><hr/>Snapshot Sessions 
+
+<hr/><p/>
+<table class="datatable">
+  <tbody>
+    <tr>
+     <th>Session</th>
+<th>Source</th>
+<th>Site</th><th>Count</th>
+<th>Start Time</th>
+<th>End Time</th>
+    </tr>
+
+<% @session_list.each {|session_obj| %>
+  <% site_name="Multiple Sites"
+     if (!session_obj[:site_id].nil?) 
+       site=Site.find(session_obj[:site_id])
+       site_name=site.name
+     end
+  %>
+
+    <tr class="<%= cycle("even","odd")%>">
+      <td><%=link_to(session_obj[:session], :action=>:session_browse,:session=>session_obj[:session])%></td>
+      <td><%=session_obj[:source]%></td>
+      <td><%=site_name%></td>
+      <td><%=session_obj[:snap_count]%></td>
+      <td><%=session_obj[:start_dt]%></td>
+      <td><%=session_obj[:stop_dt]%></td>
+    </tr>
+
+<% }%>
+  </tbody>
+</table>
+

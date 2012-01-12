@@ -1,0 +1,58 @@
+<h1>Listing profiles</h1>
+
+<%= stylesheet_link_tag 'redbox' %> <%= javascript_include_tag :defaults %> <%=javascript_include_tag 'redbox' %>
+<%= render "shared/paging" %>
+<!--<div id="hidden_content_graphbox" style="display:none; position: absolute; top:10px;z-index:100; width:800px; height:600px">-->
+<!--</div>-->
+<table class="datatable">
+  <tr class="datatable">
+    <th class="datatable">Name</th>
+    <th class="datatable">Comment</th>
+    <th class="datatable">Trace</th>
+    <th class="datatable">Functions</th>
+  </tr>
+  
+<% for profile in @profiles %>
+  <tr class="datatable">
+  <td class="datatable">
+    <%= link_to profile.short_name, {:action => 'edit', :id => profile.id}, {:title => profile.name} %>
+  </td>
+  <td>
+    <%=profile.comment%>
+  </td>
+      <td class="datatable">
+      <% if profile.trace.nil? %>
+         No Trace
+      <% else %>
+        <%= link_to(
+          image_tag(
+            url_for({
+              :controller =>  'g_reports',
+              :action     =>  'profile_trace', 
+              :id         =>  profile.id,
+              :small      =>  1}
+            ),{:border=>0}
+          ), {
+            :controller => 'g_reports', 
+            :action     => 'profile_trace_tag',
+            :id=>profile.id
+          },
+          :popup => ['new_window', 'height=500,width=820']
+        ) %>
+      <% end %>
+
+      </td>
+    <td class="datatable">
+    <%= link_to 'Delete', { :action => 'destroy', :id => profile }, :confirm => 'Are you sure?', :method => :post %></td>
+  </tr>
+<% end %>
+</table>
+<P>
+<% form_tag :controller => 'profile_mgr', :action => 'generate_entry' do %>
+  Select an Analyzer:
+  <select name="id">
+    <%=options_for_select(@analyzers)%>
+  </select>
+  <%= submit_tag 'Generate Profile' %>
+<% end %>
+<br />

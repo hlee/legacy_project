@@ -1,0 +1,17 @@
+<ol id="schedule">
+<% 
+   if session[:schedule]
+   session[:schedule].each { |port_id|%>
+  <li class="scheduled_ports"><%=port_id%></li>
+<%
+   }
+  end%>
+      <li class="scheduled_ports">y</li>
+      <li class="scheduled_ports">z</li>
+</ol>
+  <%= sortable_element 'schedule',
+         :complete=>visual_effect(:highlight, 'list'),
+         :ghosting=>true,
+         :only=>['scheduled_ports'],
+         :containment=>['ports','port_list','schedule']
+         %>

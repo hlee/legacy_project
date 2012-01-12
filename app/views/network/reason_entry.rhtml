@@ -1,0 +1,17 @@
+<h1>Input Reason</h1>
+<br />
+      <table class="datatable" width=100%>
+        <% form_tag :action => 'process_reason' do %>
+		  <tr>
+			<th class="datatable" colspan="2"><h3>Please input the reason to stop monitoring</h2></th>
+		  </tr>
+		  <tr>
+			<td><%= text_field 'reason', 'content' ,:size=>56%></td>
+		  </tr>
+		   <%=hidden_field(:reason, :id,:value=> @anl.id )%>
+
+          <tr>
+            <td colspan="2"><%= submit_tag "Submit" %></td>
+          </tr>
+        <% end %>
+      </table>

@@ -1,0 +1,58 @@
+10
+
+dir
+2036
+svn://10.0.0.33/realworx-rails/trunk/vendor/rails/activerecord/test/connections
+svn://10.0.0.33/realworx-rails
+
+
+
+2008-02-08T02:21:23.614019Z
+926
+tj
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+62ece1a7-cb2b-0410-9b78-fae666f0989e
+
+native_openbase
+dir
+
+native_sqlite
+dir
+
+native_frontbase
+dir
+
+native_postgresql
+dir
+
+native_sqlite3
+dir
+
+native_mysql
+dir
+
+native_oracle
+dir
+
+native_firebird
+dir
+
+native_sybase
+dir
+
+native_db2
+dir
+

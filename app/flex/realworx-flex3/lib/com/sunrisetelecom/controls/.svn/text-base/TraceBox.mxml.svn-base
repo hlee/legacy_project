@@ -1,0 +1,963 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox width="550" height="520" initialize="init()" xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import com.sunrisetelecom.utils.Unit;
+            import mx.controls.Alert;
+            import com.sunrisetelecom.events.CustomMouseEvent;
+            import mx.events.ItemClickEvent;
+            import mx.controls.Label;
+            import mx.collections.ArrayCollection;
+            
+            private var _yLabelList:ArrayCollection;
+            private var _xLabelList:ArrayCollection;
+            
+            private var _xGridCount:int = 10;
+            private var _yGridCount:int = 7;
+            
+            private var _v1Pos:Number = 0;
+            private var _v2Pos:Number = 0;
+            private var _h1Pos:Number = 0;
+            private var _h2Pos:Number = 0;
+          
+            private var _oldWidth:Number = NaN;
+            private var _oldHeight:Number = NaN;
+                        
+            private var _v1Freq:Number;
+            private var _v2Freq:Number;
+            private var _v1Level:Number;
+            private var _v2Level:Number;
+            private var _h1Level:Number;
+            private var _h2Level:Number;
+
+            private var _span:Number = 45;
+            private var _startFreq:Number = 5;
+            private var _attenuation:Number = 10;
+            private var _vertScale:Number = 10;
+
+            private var _imageBuffer:Array = [];
+            private var _peak:ArrayCollection = new ArrayCollection([]);
+            private var _peakFlag:Boolean = false;
+            
+            private var _needUpdateXLabel:Boolean = false;
+            private var _needUpdateYLabel:Boolean = false;
+            
+            [Bindable]
+            private var _borderColor:int = 0xc0c0c0;
+            [Bindable]
+            private var _backColor:int = 0xffffff;
+            [Bindable]
+            private var _canvasColor:int = 0xf8f8f8;
+            private var _gridColor:int = 0x808080;
+            private var _traceColor:int = 0x000080;
+            private var _peakColor:int = 0xff8040;
+            private var _markerColor:int = 0x800000;
+            
+            private var _gridAlpha:Number = 0.30;
+
+            [Bindable]
+            private var _uom:String = Unit.DBMV;      
+            
+            //before any operation, need set uom first
+            
+            private function init():void
+            {
+                _xLabelList = new ArrayCollection();
+                _yLabelList = new ArrayCollection();   
+            }
+
+            public function get uom():String
+            {
+                return _uom;
+            }
+            public function set uom(u:String):void
+            {
+                if(u == Unit.DBMV || u == Unit.DBUV)
+                {
+                    _uom = u;
+                    _needUpdateYLabel = true;
+                }
+            }
+            
+            public function get borderColor():int
+            {
+                return _borderColor;
+            }
+            public function set borderColor(color:int):void
+            {
+                _borderColor = color;
+            }
+            
+            public function get backColor():int
+            {
+                return _backColor;
+            }
+            public function set backColor(color:int):void
+            {
+                _backColor = color;
+            }
+            
+            public function get canvasColor():int
+            {
+                return _canvasColor;
+            }
+            public function set canvasColor(color:int):void
+            {
+                _canvasColor = color;
+            }
+            
+            public function get traceColor():int
+            {
+                return _traceColor;
+            }
+            public function set traceColor(color:int):void
+            {
+                _traceColor = color;
+            }
+            
+            public function get gridColor():int
+            {
+                return _gridColor;
+            }
+            public function set gridColor(color:int):void
+            {
+                _gridColor = color;
+            }
+            
+            public function get peakColor():int
+            {
+                return _peakColor;
+            }
+            public function set peakColor(color:int):void
+            {
+                _peakColor = color;
+            }
+            
+            public function get markerColor():int
+            {
+                return _markerColor;
+            }
+            public function set markerColor(color:int):void
+            {
+                _markerColor = color;
+            }
+            
+            [Bindable]
+            public function get peakFlag():Boolean
+            {
+                return _peakFlag;
+            }
+            public function set peakFlag(flag:Boolean):void
+            {
+                _peakFlag = flag;
+                
+                if(!flag)
+                {
+                    _textPeakV1.text = "";
+                    _textPeakV2.text = "";
+                    _textPeakVDiff.text = "";
+                }
+            }
+            
+            public function get controlBarEnabled():Boolean
+            {
+                if(!_controlBar) return false;
+                
+                return _controlBar.enabled;
+            }
+            public function set controlBarEnabled(val:Boolean):void
+            {
+                if(!_controlBar) return;
+                
+                _controlBar.enabled = val;
+            }
+            
+            public function get imageBuffer():Array
+            {
+                return _imageBuffer;
+            }
+            public function set imageBuffer(buffer:Array):void
+            {
+                _imageBuffer = buffer;
+            }
+            
+            public function get span():Number
+            {
+                return _span;
+            }
+            public function set span(s:Number):void
+            {
+                if(_span != s)
+                {
+                    _span = s;
+                    _needUpdateXLabel = true;
+                }
+            }
+            
+            public function get startFreq():Number
+            {
+                return _startFreq;
+            }
+            public function set startFreq(s:Number):void
+            {
+                if(_startFreq != s)
+                {
+                    _startFreq = s;
+                    _needUpdateXLabel = true;
+                }
+            }
+            
+            public function get attenuation():Number
+            {
+                return _attenuation;
+            }
+            public function set attenuation(a:Number):void
+            {
+                if(_attenuation != a)
+                {
+                    _attenuation = a;
+                    _needUpdateYLabel = true;
+                }
+            }
+            
+            public function get vertScale():Number
+            {
+                return _vertScale;
+            }
+            public function set vertScale(vs:Number):void
+            {
+                if(_vertScale != vs)
+                {
+                    _vertScale = vs;
+                    _needUpdateYLabel = true;
+                }
+            }
+            
+            public function get xGridCount():int
+            {
+                return _xGridCount;    
+            }
+            public function set xGridCount(c:int):void
+            {
+                if(_xGridCount != c)
+                {
+                    _xGridCount = c;
+                    _needUpdateXLabel = true;
+                }
+            }
+            
+            public function get yGridCount():int
+            {
+                return _yGridCount;    
+            }
+            public function set yGridCount(c:int):void
+            {
+                if(_yGridCount != c)
+                {
+                    _yGridCount = c;
+                    _needUpdateYLabel = true;
+                }
+            }
+            
+            private function addXLabel(text:String, x:Number = NaN, y:Number = NaN):void
+            {
+                var label:Label = new Label();
+                label.text = text;
+                label.styleName = "xAxisLabel";
+                label.width = 60;
+                if(isNaN(x) || isNaN(y))
+                {
+                    label.visible = false;
+                }
+                else
+                {
+                    label.x = x;
+                    label.y = y;
+                }
+                _xLabelList.addItem(label);
+                _canvas.addChild(label);
+            }
+            
+            public function get xLabelCount():int
+            {
+                return _xLabelList.length;
+            }
+            
+            private function removeAllXLabel():void
+            {
+                if(_xLabelList.length > 0)
+                {
+                    for each(var label:Label in _xLabelList)
+                    {
+                        _canvas.removeChild(label);
+                    }
+                    _xLabelList.removeAll();
+                }
+            }
+            
+            public function getXLabelTextAt(index:int):String
+            {
+                var label:Label = _xLabelList.getItemAt(index) as Label;
+                return  label.text;
+            }
+            
+            private function addYLabel(text:String, x:Number = NaN, y:Number = NaN):void
+            {
+                var label:Label = new Label();
+                label.text = text;
+                label.styleName = "yAxisLabel";
+                label.width = 30;
+                if(isNaN(x) || isNaN(y))
+                {
+                    label.visible = false;
+                }
+                else
+                {
+                    label.x = x;
+                    label.y = y;
+                }
+                _yLabelList.addItem(label);
+                _canvas.addChild(label);
+            }
+            
+            public function get yLabelCount():int
+            {
+                return _yLabelList.length;
+            }
+            
+            private function removeAllYLabel():void
+            {
+                if(_yLabelList.length > 0)
+                {
+                	for each(var label:Label in _yLabelList)
+                	{
+                		_canvas.removeChild(label);
+                	}
+                    _yLabelList.removeAll();
+                }
+            }
+            
+            public function getYLabelTextAt(index:int):String
+            {
+                var label:Label = _yLabelList.getItemAt(index) as Label;
+                return  label.text;
+            }
+            
+            public function resetPeak():void
+            {
+                _peak = new ArrayCollection(_imageBuffer);
+            }
+            
+            private function selectMarker(event:ItemClickEvent):void
+            {
+                var s:Object = event.currentTarget.selectedValue;
+                if(s == "v1")
+                {
+                    _checkBoxV1.selected = true;
+                }
+                else if(s == "v2")
+                {
+                    _checkBoxV2.selected = true;
+                }
+                else if(s == "h1")
+                {
+                    _checkBoxH1.selected = true;
+                }
+                else if(s == "h2")
+                {
+                    _checkBoxH2.selected = true;
+                }
+                else if(s == "vd")
+                {
+                    _checkBoxV1.selected = true;
+                    _checkBoxV2.selected = true;
+                }
+                else if(s == "hd")
+                {
+                    _checkBoxH1.selected = true;
+                    _checkBoxH2.selected = true;
+                }
+
+                var mEvent:CustomMouseEvent = new CustomMouseEvent();
+                mEvent.customObject = s;
+                updateMarker(mEvent);
+            }
+            
+            private function activeMarkerChanged(event:MouseEvent):void
+            {
+                var s:Object = _activeMarker.selectedValue;
+                
+                if(!_checkBoxV1.selected)
+                {
+                    _textFreqV1.htmlText = "";
+                    _textLevelV1.htmlText = "";
+                    _textPeakV1.htmlText = "";
+                    
+                    if(s == "v1" || s == "vd") _activeMarker.selection = null;   
+                }
+                
+                if(!_checkBoxV2.selected)
+                {
+                    _textFreqV2.htmlText = "";
+                    _textLevelV2.htmlText = "";
+                    _textPeakV2.htmlText = "";
+                    
+                    if(s == "v2" || s == "vd") _activeMarker.selection = null; 
+                }
+                
+                if(!_checkBoxV1.selected || !_checkBoxV2.selected)
+                {
+                    _textFreqVDiff.htmlText = "";
+                    _textLevelVDiff.htmlText = "";
+                    _textPeakVDiff.htmlText = "";
+                }
+                
+                if(!_checkBoxH1.selected)
+                {
+                    _textLevelH1.htmlText = "";
+                    
+                    if(s == "h1" || s == "hd") _activeMarker.selection = null; 
+                }
+                
+                if(!_checkBoxH2.selected)
+                {
+                    _textLevelH2.htmlText = "";
+                    
+                    if(s == "h2" || s == "hd") _activeMarker.selection = null; 
+                }
+                
+                if(!_checkBoxH1.selected || !_checkBoxH2.selected)
+                {
+                    _textLevelHDiff.htmlText = "";
+                }
+                
+                var c:CheckBox = event.currentTarget as CheckBox;
+                if(c && c.selected)
+                {
+                    var mEvent:CustomMouseEvent = new CustomMouseEvent();
+                    s = null;
+                    switch(c)
+                    {
+                        case _checkBoxV1:
+                            s = "v1";
+                            break;
+                        case _checkBoxV2:
+                            s = "v2";
+                            break;
+                        case _checkBoxH1:
+                            s = "h1";
+                            break;
+                        case _checkBoxH2:
+                            s = "h2";
+                            break;
+                    }
+                    mEvent.customObject = s;
+                    
+                    updateMarker(mEvent);
+                }
+            }
+            
+            private function moveMarker(event:MouseEvent):void
+            {
+                if(event.buttonDown)
+                {
+                    updateMarker(event);
+                }
+            }
+                        
+            private function updateMarker(event:MouseEvent):void
+            {
+                var s:Object = _activeMarker.selectedValue;
+
+                var customEvent:CustomMouseEvent = event as CustomMouseEvent;
+
+                if(s != null)
+                {
+                    if(customEvent && customEvent.type == CustomMouseEvent.CUSTOM && customEvent.customObject)
+                    {
+                        s = customEvent.customObject;
+                        event = null;
+                    }
+                    
+                    if(s == "v1" && _checkBoxV1.selected)
+                    {
+                        if(event) _v1Pos = event.localX;
+                        _v1Freq = pointToFreq(_v1Pos);
+                        _textFreqV1.htmlText = _numberFormatter.format(_v1Freq);
+                    }
+                    else if(s == "v2" && _checkBoxV2.selected)
+                    {
+                        if(event) _v2Pos = event.localX;
+                        _v2Freq = pointToFreq(_v2Pos);
+                        _textFreqV2.htmlText = _numberFormatter.format(_v2Freq);
+                    }
+                    else if(s == "h1" && _checkBoxH1.selected)
+                    {
+                        if(event) _h1Pos = event.localY;
+                        _h1Level = pointToLevel(_h1Pos);
+                        _textLevelH1.htmlText = _numberFormatter.format(_h1Level);
+                    }
+                    else if(s == "h2" && _checkBoxH2.selected)
+                    {
+                        if(event) _h2Pos = event.localY;
+                        _h2Level = pointToLevel(_h2Pos);
+                        _textLevelH2.htmlText = _numberFormatter.format(_h2Level);
+                    }
+                    else if(s == "vd" && _checkBoxV1.selected && _checkBoxV2.selected)
+                    {
+                        var vd:Number = _v2Pos - _v1Pos;
+                        if(!event || (event.localX + vd >= 0 && event.localX + vd <= _image.width))
+                        {
+                            if(event) _v1Pos = event.localX;
+                            _v1Freq = pointToFreq(_v1Pos);
+                            _textFreqV1.htmlText = _numberFormatter.format(_v1Freq);
+                            
+                            _v2Pos = _v1Pos + vd;
+                            _v2Freq = pointToFreq(_v2Pos);
+                            _textFreqV2.htmlText = _numberFormatter.format(_v2Freq);
+                        }
+                    }
+                    else if(s == "hd" && _checkBoxH1.selected && _checkBoxH2.selected)
+                    {
+                        var hd:Number = _h2Pos - _h1Pos;
+                        if(!event || (event.localY + hd >= 0 && event.localY + hd <= _image.height))
+                        {
+                            if(event) _h1Pos = event.localY;
+                            _h1Level = pointToLevel(_h1Pos);
+                            _textLevelH1.htmlText = _numberFormatter.format(_h1Level);
+                            
+                            _h2Pos = _h1Pos + hd;
+                            _h2Level = pointToLevel(_h2Pos);
+                            _textLevelH2.htmlText = _numberFormatter.format(_h2Level);
+                        }
+                    }
+                }
+                else
+                {
+                    if(customEvent && customEvent.type == CustomMouseEvent.CUSTOM && customEvent.customObject)
+                    {               
+                        switch(customEvent.customObject)
+                        {
+                            case "v1":
+                                _v1Freq = pointToFreq(_v1Pos);
+                                _textFreqV1.htmlText = _numberFormatter.format(_v1Freq);
+                                break;
+                            case "v2":
+                                _v2Freq = pointToFreq(_v2Pos);
+                                _textFreqV2.htmlText = _numberFormatter.format(_v2Freq);
+                                break;
+                            case "h1":
+                                _h1Level = pointToLevel(_h1Pos);
+                                _textLevelH1.htmlText = _numberFormatter.format(_h1Level);
+                                break;
+                            case "h2":
+                                _h2Level = pointToLevel(_h2Pos);
+                                _textLevelH2.htmlText = _numberFormatter.format(_h2Level);
+                                break;
+                        }
+                    }
+                }
+           
+                if(_checkBoxV1.selected && _checkBoxV2.selected)
+                {
+                    _textFreqVDiff.htmlText = _numberFormatter.format(_v1Freq - _v2Freq);
+                }
+                
+                if(_checkBoxH1.selected && _checkBoxH2.selected)
+                {
+                    _textLevelHDiff.htmlText = _numberFormatter.format(_h1Level - _h2Level);
+                }
+                
+                displayImage();
+            }
+            
+            private function pointToXIndex(p:Number):int
+            {
+                if(_image.width == 0) return NaN;
+                
+                return Math.min(_imageBuffer.length - 1, _imageBuffer.length * p / _image.width);
+            }
+            
+            private function pointToFreq(p:Number):Number
+            {
+                if(_image.width == 0) return NaN;
+                
+                return _span * p / _image.width + _startFreq;
+            }
+            
+            private function pointToLevel(p:Number):Number
+            {
+                return _attenuation - (_vertScale * _yGridCount) * p / _image.height;
+            }
+            
+            private function remapY(val:int):int
+            {
+                return _image.height - val * _image.height / (_vertScale * _yGridCount);
+            }
+            
+            public function displayImage():void
+            {
+                try
+                {
+                    if(_image == null || _image.width <= 0 || _image.height <= 0) return;
+                    
+                    var att:Number = _attenuation;
+                    
+                    var i:int;
+                    var g:Graphics = _image.graphics;
+                    
+                    //Begin draw background 
+                    g.moveTo(0, 0);
+                    g.clear();
+                    g.beginFill(_backColor);
+                    g.drawRect(0, 0, _image.width, _image.height);
+                    g.endFill();
+                    //End draw background 
+                    
+                    //Begin draw grid 
+                    g.lineStyle(0, _gridColor, _gridAlpha);
+                    var xSpan:Number = _image.width / _xGridCount;
+                    for(i = 0; i < _xGridCount + 1; i++)
+                    {
+                        g.moveTo(xSpan * i, 0);
+                        g.lineTo(xSpan * i, _image.height);
+                    }
+                    
+                    var ySpan:Number = _image.height / _yGridCount;
+                    for(i = 0; i < _yGridCount + 1; i++)
+                    {
+                        g.moveTo(0, ySpan * i);
+                        g.lineTo(_image.width, ySpan * i);
+                    }
+                    //End draw grid 
+                    
+                    var fTmp:Number;
+                    //Begin draw yLabel 
+                    if(_yGridCount > 0)
+                    {
+                        if(_needUpdateYLabel)
+                        {
+                            _needUpdateYLabel = false;
+                            removeAllYLabel();
+                        }
+                        
+                        if(_yLabelList.length == 0)
+                        {
+                            for(i = 0; i <= _yGridCount; i++)
+                            {
+                                fTmp = ySpan * i - 4;
+                                
+                                var yl:Number = att - i * _vertScale;
+                                addYLabel(yl.toString(), 0, fTmp);
+                            }
+                        }
+                        else if(_yLabelList.length == _yGridCount + 1)
+                        {
+                            i = 0;
+                            for each(var yLabel:Label in _yLabelList)
+                            {
+                                if(!yLabel.visible) yLabel.visible = true;
+                                
+                                if(yLabel.x != 0) yLabel.x = 0;
+                                
+                                fTmp = ySpan * i - 4;
+                                if(yLabel.y != fTmp) yLabel.y = fTmp;
+                            
+                                i++;
+                            }
+                        }
+                    }
+                    //End draw yLabel 
+                    
+                    //Begin draw xLabel
+                    if(_xGridCount > 0)
+                    {
+                        if(_needUpdateXLabel)
+                        {
+                            _needUpdateXLabel = false;
+                            removeAllXLabel();
+                        }
+                        
+                        var horizScale:Number = _span / (_xGridCount * 1.0);
+                        var labelPosY:Number = _image.height + 5;
+                        if(_xLabelList.length == 0)
+                        {
+                            for(i = 0; i <= _xGridCount; i++)
+                            {
+                                fTmp = xSpan * i - 30 + 30;
+                                
+                                var xl:Number = _startFreq + horizScale * i;
+                                addXLabel(xl.toFixed(3), fTmp, labelPosY);
+                            }
+                        }
+                        else if(_xLabelList.length == _xGridCount + 1)
+                        {
+                            i = 0;
+                            for each(var xLabel:Label in _xLabelList)
+                            {
+                                if(!xLabel.visible) xLabel.visible = true;
+                                
+                                fTmp = xSpan * i - 30 + 30;
+                                if(xLabel.x != fTmp) xLabel.x = fTmp;
+    
+                                if(xLabel.y != labelPosY) xLabel.y = labelPosY;
+                                
+                                i++;
+                            }
+                        }
+                    }
+                    //End draw xLabel 
+    
+                    //Begin draw trace and peak 
+                    if(_imageBuffer.length > 1)
+                    {
+                        fTmp = _image.width / _imageBuffer.length;
+                        g.lineStyle(0, _traceColor, 1);
+                        for(i = 1; i < _imageBuffer.length; i++)
+                        {
+                            g.moveTo(fTmp * (i - 1), remapY(_imageBuffer[i - 1]));
+                            g.lineTo(fTmp * i, remapY(_imageBuffer[i]));
+                        }
+    
+                        updatePeak();
+                        
+                        g.lineStyle(0, _peakColor, 1);
+                        if(_peakFlag)
+                        {
+                            for(i = 1; i < _peak.length; i++)
+                            {
+                                g.moveTo(fTmp * (i - 1), remapY(_peak[i - 1]));
+                                g.lineTo(fTmp * i, remapY(_peak[i]));
+                            }
+                        }
+                    }
+                    //End draw trace and peak 
+    
+                    //Begin update marker 
+                    var yRange:Number = _vertScale * _yGridCount;
+                    
+                    var v1Index:int = pointToXIndex(_v1Pos);
+                    var v2Index:int = pointToXIndex(_v2Pos);
+                    
+                    _v1Level = att - yRange + _imageBuffer[v1Index];
+                    _v2Level = att - yRange + _imageBuffer[v2Index];
+                    
+                    if(_checkBoxV1.selected)
+                    {
+                        _textLevelV1.htmlText = _numberFormatter.format(_v1Level);
+                        if(_peakFlag) 
+                        {
+                            _textPeakV1.htmlText = _numberFormatter.format(att - yRange + _peak[v1Index]);
+                        }
+                    }
+                    
+                    if(_checkBoxV2.selected)
+                    {
+                        _textLevelV2.htmlText = _numberFormatter.format(_v2Level);
+                        if(_peakFlag) 
+                        {
+                            _textPeakV2.htmlText = _numberFormatter.format(att - yRange + _peak[v2Index]);
+                        }
+                    }
+                    
+                    if(_checkBoxV1.selected && _checkBoxV2.selected)
+                    {
+                        _textLevelVDiff.htmlText = _numberFormatter.format(_v1Level - _v2Level);
+                        if (_peakFlag) 
+                        {
+                            _textPeakVDiff.htmlText = _numberFormatter.format(_peak[v1Index] - _peak[v2Index]);
+                        }
+                    }
+                    //End update marker 
+     
+                    //Begin draw marker 
+                    g.lineStyle(0, _markerColor);    
+                    if(_checkBoxV1.selected) 
+                    {
+                        g.moveTo(_v1Pos, 0);
+                        g.lineTo(_v1Pos, _image.height);
+                    }
+                    
+                    if(_checkBoxV2.selected) 
+                    {
+                        g.moveTo(_v2Pos, 0);
+                        g.lineTo(_v2Pos, _image.height);
+                    }
+                    
+                    if(_checkBoxH1.selected) 
+                    {
+                        g.moveTo(0, _h1Pos);
+                        g.lineTo(_image.width, _h1Pos);
+                    }
+                    
+                    if(_checkBoxH2.selected) 
+                    {
+                        g.moveTo(0, _h2Pos);
+                        g.lineTo(_image.width, _h2Pos);
+                    }
+                    //End draw marker 
+                }
+                catch(error:Error)
+                {
+                    trace("Error found when display image: " + error.message);
+                }
+            }
+            
+            private function updatePeak():void
+            {
+                for(var i:int = 0; i < _imageBuffer.length; i++)
+                {
+                    if(_peak.length <= i)
+                    {
+                        _peak.addItemAt(_imageBuffer[i], i);
+                    }
+                    else if(_peak[i] < _imageBuffer[i])
+                    {
+                        _peak.setItemAt(_imageBuffer[i], i);
+                    }
+                }
+            }
+            
+            private function onCanvasResize():void
+            {
+                if(!isNaN(_oldWidth) && !isNaN(_oldHeight) && _oldWidth != 0 && _oldHeight != 0)
+                {
+                    var hDiv:Number = _image.width / _oldWidth;
+                    
+                    _v1Pos = _v1Pos * hDiv;
+                    _v2Pos = _v2Pos * hDiv;
+                    
+                    var vDiv:Number = _image.height / _oldHeight;
+                    
+                    _h1Pos = _h1Pos * vDiv;
+                    _h2Pos = _h2Pos * vDiv;
+                }
+                
+                _oldWidth = _image.width;
+                _oldHeight = _image.height;
+                
+                displayImage();
+            }
+        ]]>
+    </mx:Script>
+    <mx:Canvas id="_canvas" verticalScrollPolicy="off" horizontalScrollPolicy="off" resize="onCanvasResize()" borderThickness="1" width="100%" height="100%" backgroundColor="{_canvasColor}" borderColor="{_borderColor}" borderStyle="solid">
+        <mx:Image id="_image" x="30" y="5" height="{_canvas.height - 37}" width="{_canvas.width - 57}" scaleContent="true" mouseMove="moveMarker(event)" mouseDown="updateMarker(event)"/>
+        <mx:Label text="{_uom}" x="-2" y="8" height="20" width="35" textAlign="right" styleName="tableUnit" />
+        <mx:Label text="MHz" x="30" y="{_canvas.height - 20}" height="20" width="30" textAlign="left" styleName="tableUnit" />
+    </mx:Canvas>
+    <mx:NumberFormatter id="_numberFormatter" precision="3" rounding="nearest"/>
+    <mx:VBox id="_controlBar" enabled="false" styleName="normal" width="100%" paddingBottom="2" borderColor="{_borderColor}" borderStyle="solid">
+	    <mx:RadioButtonGroup id="_activeMarker" itemClick="selectMarker(event)" />
+	    <mx:Grid styleName="normal" verticalGap="2" horizontalGap="5" width="100%" height="94">
+	        <mx:GridRow height="26" width="100%">
+                <mx:GridItem width="100%" height="100%"/>
+	            <mx:GridItem width="18" height="100%"/>
+	            <mx:GridItem width="100%" height="100%">
+                    <mx:VBox verticalGap="-8" paddingTop="0" paddingBottom="0">
+                        <mx:Label styleName="tableHeader" text="Frequency" width="72"/>
+                        <mx:Label styleName="tableUnit" text="(MHz)" width="72"/>
+                    </mx:VBox>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	               <mx:VBox verticalGap="-8" paddingTop="0" paddingBottom="0">
+                        <mx:Label styleName="tableHeader" text="Level" width="72"/>
+                        <mx:Label styleName="tableUnit" text="{'(' + _uom + ')'}" width="72"/>
+                    </mx:VBox>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	               <mx:VBox verticalGap="-8" paddingTop="0" paddingBottom="0">
+                        <mx:Label styleName="tableHeader" text="Peak" width="72"/>
+                        <mx:Label styleName="tableUnit" text="{'(' + _uom + ')'}" width="72"/>
+                    </mx:VBox>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%"/>
+	            <mx:GridItem width="18" height="100%"/>
+	            <mx:GridItem width="100%" height="100%">
+	               <mx:VBox verticalGap="-8" paddingTop="0" paddingBottom="0">
+                        <mx:Label styleName="tableHeader" text="Level" width="72"/>
+                        <mx:Label styleName="tableUnit" text="{'(' + _uom + ')'}" width="72"/>
+                    </mx:VBox>
+	            </mx:GridItem>
+	        </mx:GridRow>
+	        <mx:GridRow height="20" width="100%">
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:CheckBox label="Vert. Mark 1" id="_checkBoxV1" click="activeMarkerChanged(event)"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="18" height="100%">
+	                <mx:RadioButton groupName="_activeMarker" value="v1"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textFreqV1"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textLevelV1"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textPeakV1"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:CheckBox label="Horz. Mark 1" id="_checkBoxH1" click="activeMarkerChanged(event)"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="18" height="100%">
+	                <mx:RadioButton groupName="_activeMarker" value="h1"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textLevelH1"/>
+	            </mx:GridItem>
+	        </mx:GridRow>
+	        <mx:GridRow height="20" width="100%">
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:CheckBox label="Vert. Mark 2" id="_checkBoxV2" click="activeMarkerChanged(event)"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="18" height="100%">
+	                <mx:RadioButton groupName="_activeMarker" value="v2"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textFreqV2"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textLevelV2"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textPeakV2"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:CheckBox label="Horz. Mark 2" id="_checkBoxH2" click="activeMarkerChanged(event)"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="18" height="100%">
+	                <mx:RadioButton groupName="_activeMarker" value="h2"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textLevelH2"/>
+	            </mx:GridItem>
+	        </mx:GridRow>
+	        <mx:GridRow height="20" width="100%">
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:Label text="Vert. Difference"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="18" height="100%">
+	                <mx:RadioButton groupName="_activeMarker" value="vd"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textFreqVDiff"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textLevelVDiff"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textPeakVDiff"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:Label text="Horz. Difference"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="18" height="100%">
+	                <mx:RadioButton groupName="_activeMarker" value="hd"/>
+	            </mx:GridItem>
+	            <mx:GridItem width="100%" height="100%">
+	                <mx:TextInput editable="false" width="72" id="_textLevelHDiff"/>
+	            </mx:GridItem>
+	        </mx:GridRow>
+	    </mx:Grid>      	
+    </mx:VBox>
+</mx:VBox>

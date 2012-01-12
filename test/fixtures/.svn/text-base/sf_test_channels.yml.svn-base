@@ -1,0 +1,21 @@
+# Read about fixtures at http: //ar.rubyonrails.org/classes/Fixtures.html
+one:
+  id: 1
+  sf_test_plan_id: 1
+  sf_channel_id: 1
+two:
+  id: 2
+  sf_test_plan_id: 1
+  sf_channel_id: 2
+three:
+  id: 3
+  sf_test_plan_id: 2
+  sf_channel_id: 1
+four:
+  id: 4
+  sf_test_plan_id: 2
+  sf_channel_id: 2
+five:
+  id: 5
+  sf_test_plan_id: 3
+  sf_channel_id: 3

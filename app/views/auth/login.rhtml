@@ -1,0 +1,29 @@
+<h2>Login</h2>
+<%= error_messages_for 'user' %>
+<font color="red"><%= flash[:notice] %></font>
+<font color="red"><%= flash[:error] %></font>
+
+<% form_for :user, @user do |form| %>
+<dl>
+	<dt><label>Email/Login</label></dt>
+	<dd><%= form.text_field :email %></dd>
+	
+	<dt><label>Password</label></dt>
+	<%# :value => '' prevents the password from leaking back %>
+	<dd><%= form.password_field :password, { :value => '' } %></dd>
+	
+	<dt><%= submit_tag 'Login!' %></dt>
+</dl>
+<% end %>
+
+<script type="text/javascript">
+	form = document.forms[0];
+ 	if (form['user[email]'].value.length)
+	{
+ 		form['user[password]'].focus();
+	}
+	else
+	{
+		form['user[email]'].focus();
+	}
+</script>

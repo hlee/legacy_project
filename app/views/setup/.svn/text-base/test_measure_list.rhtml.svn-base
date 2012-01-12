@@ -1,0 +1,44 @@
+<h2>Limit Editor for <%= @test_plan.name %> Test Plan</h2>
+<%=error_messages_for :sf_system_test%>
+<p>
+<table class="datatable">
+  <tr>
+    <th>Measurement</th>
+    <th>Enabled</th>
+    <th>Min</th>
+    <th>Max</th>
+    <th>Tolerance</th>
+    <th></th>
+  </tr>
+  <% @system_tests.each { |@system_test| %>
+    <tr>
+      <% form_tag :action => 'test_measure_list',:measure_id => @system_test.id do %>
+        <td>
+          <%= @system_test.measure[0].measure_label %>
+        </td>
+        <td>
+          <%= check_box("system_test", "enable_flag", {}) %>
+        </td>
+        <td>
+          <% if @system_test.measure[0].check_min_flag %>
+            <%= text_field("system_test", "min_value", "size" => 5) %>
+          <% end %>
+        </td>
+        <td>
+          <% if @system_test.measure[0].check_max_flag %>
+            <%= text_field("system_test", "max_value", "size" => 5) %>
+          <% end %>
+        </td>
+        <td>
+          <% if @system_test.measure[0].check_max_flag || @system_test.measure[0].check_min_flag %>
+            <%= text_field("system_test", "tolerance", "size" => 5) %>
+          <% end %>
+        </td>
+        <td>
+          <%= hidden_field_tag("test_id", params[:id]) %>
+          <%= submit_tag 'Commit Changes' %>
+        </td>
+      <% end %>
+    </tr>
+  <% } %>
+</table>

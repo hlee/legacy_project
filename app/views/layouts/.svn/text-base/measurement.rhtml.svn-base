@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-AU">
+<head>
+  <meta http-equiv="content-type"
+ content="application/xhtml+xml; charset=UTF-8">
+  <meta name="author" content="sunrise">
+  <meta name="generator" content="sunrise">
+<!-- Navigational metadata for large websites (an accessibility feature): -->
+  <%= stylesheet_link_tag 'sinorca-screen' %>
+  <%= stylesheet_link_tag 'sinorca-print', :media => 'print' %>
+ <title><%= @page_title = "RealWORX"%> <%= @page_subtitle = "Measurement" %></title>
+ <%= javascript_include_tag :defaults %>
+</head>
+<body>
+<!-- For non-visual user agents: -->
+   <% @sel=4%>
+<%= render "shared/header" %>
+<!-- ##### Main Copy ##### -->
+<div id="datalog">
+   <%= @content_for_layout %>
+</div>
+	<%= render "shared/footer" %>
+</body>
+</html>

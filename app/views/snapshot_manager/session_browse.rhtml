@@ -1,0 +1,26 @@
+
+<h2><em>SESSION: </em><%=params[:session]%></h2>
+<!--<img src="http://10.0.0.60:3000/g_reports/snapshot_trace?sid[]=1" target="image"/>-->
+  <%if params.key?('session')%>
+      <table class="datatable" >
+       <tr ><th>Site Name</th><th>Description</th><th>Creation Time</th><th>Noise Floor</th><th>Baseline</th><th>Image</th></tr>
+      <%@snapshots.each { |snap| %>
+      <tr  class="<%=cycle("even","odd")%>"><td> <%=snap.site.name%></td><td><%=snap.description%></td><td><%=snap.created_at%></td><td><%=snap.noise_floor%></td><td> <%=(snap.baseline == 0) ? "NO" : "YES"%> </td><td>
+          <%= link_to(
+            "<img src='/g_reports/snapshot_trace?sid=#{snap.id}&small=1'/>",
+            {
+              :controller   => 'g_reports',
+              :action       => 'snapshot_trace',
+              :sid           => snap.id
+            },
+            :popup => ['new_window', 'height=500,width=820']
+          ) %>
+
+
+      <% } %>
+      </table>
+    </ul>
+  <%else%>
+    No Snapshots for this session.
+  <%end%>
+

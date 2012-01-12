@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-AU">
+   <head>
+      <meta http-equiv="PRAGMA" CONTENT="NO-CACHE">
+  <meta http-equiv="content-type"
+ content="application/xhtml+xml; charset=UTF-8">
+  <meta name="author" content="sunrise">
+  <meta name="generator" content="sunrise">
+<!-- Navigational metadata for large websites (an accessibility feature): -->
+  <%= stylesheet_link_tag 'sinorca-screen' %>
+  <%= stylesheet_link_tag 'sinorca-screen-print', :media => 'print' %>
+ <title><%= @page_title = "RealWORX"%> <%= @page_subtitle = "Datalog" %></title>
+ <%= javascript_include_tag "prototype" %>
+ <%= javascript_include_tag "scriptaculous" %>
+ <%= javascript_include_tag "AC_OETags.js" %>
+<script language="JavaScript" type="text/javascript">
+<!--
+// -----------------------------------------------------------------------------
+// Globals
+// Major version of Flash required
+var requiredMajorVersion = 9;
+// Minor version of Flash required
+var requiredMinorVersion = 0;
+// Minor version of Flash required
+var requiredRevision = 0;
+// -----------------------------------------------------------------------------
+// -->
+</script>
+</head>
+<body >
+   <% @sel=3%>
+<%= render "shared/header" %>
+<!-- ##### Main Copy ##### -->
+<div id="datalog">
+   <%= @content_for_layout %>
+</div>
+	<%= render "shared/footer" %>
+</body>
+</html>

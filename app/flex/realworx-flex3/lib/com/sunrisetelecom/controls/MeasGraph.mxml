@@ -1,0 +1,269 @@
+<mx:Panel headerHeight="25" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" xmlns:controls="com.sunrisetelecom.controls.*">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import com.sunrisetelecom.utils.Unit;
+            import mx.collections.ArrayCollection;
+            import mx.charts.LinearAxis;
+            import mx.charts.ChartItem;
+            import mx.charts.HitData;
+            import mx.charts.LogAxis;
+            import mx.events.FlexEvent;
+            import mx.charts.ChartItem;
+            import mx.charts.chartClasses.NumericAxis;
+            import mx.controls.Alert;
+            
+            [Bindable]
+            private var _graphData:ArrayCollection = new ArrayCollection();
+            
+            private var _expFlag:Boolean = false;
+            private var _lockFlag:Boolean = false;
+            
+            private var _maxVal:Number;
+            private var _minVal:Number;
+            
+            private var _uom:String = null;
+            
+            public function get uom():String
+            {
+                return _uom;
+            }
+            public function set uom(u:String):void
+            {
+                _uom = u;
+            }
+            
+            public function get maxVal():Number
+            {
+                return _maxVal;
+            }
+            public function set maxVal(v:Number):void
+            {
+                if(!_expFlag && !_lockFlag)
+                {
+                    if(!_uom)
+                    {
+                        throw new Error("Please set uom first");
+                    }
+                    
+                    if(_uom == Unit.DBUV)
+                    {
+                        v += 60;
+                    }
+                }
+                
+                _maxVal = v;
+            }
+            
+            public function get minVal():Number
+            {
+                return _minVal;
+            }
+            public function set minVal(v:Number):void
+            {
+                if(!_expFlag && !_lockFlag)
+                {
+                    if(!_uom)
+                    {
+                        throw new Error("Please set uom first");
+                        return;
+                    }
+                    
+                    if(_uom == Unit.DBUV)
+                    {
+                        v += 60;
+                    }
+                }
+                
+                _minVal = v;
+            }
+            
+            public function setDataProvider(dataProvider:ArrayCollection):void
+            {
+                if(dataProvider == null || dataProvider.length <= 1)
+                {
+                    /*
+                    For workround flex bug
+                    http://bugs.adobe.com/jira/browse/FLEXDMV-1731
+                    */
+                    return;
+                }
+                
+                var dataPoint:Object;
+                
+                //for bug #7182
+                if(_lockFlag)
+                {
+                    for each(dataPoint in dataProvider)
+                    {
+                        if(dataPoint.hasOwnProperty("val"))
+                        {
+                            if(dataPoint.val > 0)
+                            {
+                                dataPoint.val = 1;
+                            }
+                        }
+                    }
+                }
+                
+                if(!_expFlag && !_lockFlag)
+                {
+                    if(!_uom)
+                    {
+                        throw new Error("Please set uom first");
+                        return;
+                    }
+                
+                    if(_uom == Unit.DBUV)
+                    {
+                       for each(dataPoint in dataProvider)
+                       {
+                           if(dataPoint.hasOwnProperty("val") && dataPoint.val != null)
+                           {
+                               dataPoint.val += 60;
+                           }
+                           
+                           if(dataPoint.hasOwnProperty("max_val") && dataPoint.max_val != null)
+                           {
+                               dataPoint.max_val += 60;
+                           }
+                           
+                           if(dataPoint.hasOwnProperty("min_val") && dataPoint.min_val != null)
+                           {
+                               dataPoint.min_val += 60;
+                           }
+                           
+                           if(dataPoint.hasOwnProperty("max_limit") && dataPoint.max_limit != null)
+                           {
+                               dataPoint.max_limit += 60;
+                           }
+                           
+                           if(dataPoint.hasOwnProperty("min_limit") && dataPoint.min_limit != null)
+                           {
+                               dataPoint.min_limit += 60;
+                           }
+                       }
+                    }
+                }
+
+                _graphData = dataProvider;
+            }
+  
+            public function dispDataTip(hitData:HitData):String
+            {
+                var item:ChartItem = ChartItem(hitData.chartItem);
+                var dt:Date = new Date(item["xNumber"]);
+                var result:String;
+                if(_expFlag)
+                {
+                    result=item["element"]["displayName"]+"\n"+dt.toLocaleString()+" \n 1e"+item["yNumber"].toFixed(0);
+                }
+                else
+                {
+                    result=item["element"]["displayName"]+"\n"+dt.toLocaleString()+" \n"+item["yNumber"].toFixed(4);
+                }
+                return result;
+            }
+            
+            public function add_vertical_axis(event:FlexEvent):void
+            {
+                if(!_uom)
+                {
+                    throw new Error("Please set uom first");
+                    return;
+                }
+                
+                if(_expFlag)
+                {
+                    var la:LogAxis = new LogAxis();
+                    la.maximum = 0.00001;
+                    la.minimum = 0.0000000000001;
+                    la.maximumLabelPrecision = 15;
+                    main_chart.verticalAxis = la;
+                    main_chart.dataTipFunction = dispDataTip;
+                    return;
+                }
+                
+                var newAxis:LinearAxis = new LinearAxis();
+                newAxis.autoAdjust = true;
+                if(_lockFlag)
+                {
+                    newAxis.maximum = 1.1;
+                    newAxis.interval = 1;
+                    newAxis.baseAtZero = true;
+                    main_chart.verticalAxis = newAxis;
+                    main_chart.dataTipFunction = dispDataTip;
+                }
+                else
+                {
+                    newAxis.padding = 4;
+                    newAxis.baseAtZero = false;
+                    if(_uom != "")
+                    {
+                        newAxis.title = _uom;
+                    }
+                    if(!isNaN(_maxVal))
+                    {
+                        newAxis.maximum = _maxVal;
+                        newAxis.autoAdjust = false;
+                    }
+                    else
+                    {
+                        newAxis.autoAdjust = true;
+                    }
+                    
+                    if(!isNaN(_minVal))
+                    {
+                        newAxis.maximum = _maxVal;
+                        newAxis.autoAdjust = false;
+                    }
+                    else
+                    {
+                        newAxis.autoAdjust = true;
+                    }
+     
+                    main_chart.verticalAxis = newAxis;
+                    main_chart.dataTipFunction = dispDataTip;
+                }
+            }
+            
+            public function set_vertical_axis(exp_flag:Boolean, lock_flag:Boolean):void
+            {
+                _expFlag = exp_flag;
+                _lockFlag = lock_flag;
+            }
+        ]]>             
+    </mx:Script>
+    <mx:PlotChart id="main_chart" dataProvider="{_graphData}" dataTipMode="single" showDataTips="true" height="100" width="100%" dataTipFunction="dispDataTip" initialize="add_vertical_axis(event)" gutterLeft="100">
+        <mx:horizontalAxis>
+            <mx:DateTimeAxis displayLocalTime="true" />
+        </mx:horizontalAxis>
+        <mx:series>
+            <mx:PlotSeries yField="min_val" xField="dt" styleName="chartPlotSeries" displayName="Min Measurement">
+                <mx:stroke>
+                    <mx:Stroke color="0x008080" weight="1"/>
+                </mx:stroke>
+            </mx:PlotSeries>
+            <mx:PlotSeries yField="max_val" xField="dt" styleName="chartPlotSeries" displayName="Max Measurement">
+                <mx:stroke>
+                    <mx:Stroke color="0x800000" weight="1"/>
+                </mx:stroke>
+            </mx:PlotSeries>
+            <controls:ExtendedLineSeries filterData="false" yField="max_limit" xField="dt" form="curve" displayName="Max" visible="true" radius="0">
+                <controls:lineStroke>
+                    <mx:Stroke color="0xFF0000" weight="1" alpha=".8" />
+                </controls:lineStroke> 
+            </controls:ExtendedLineSeries>
+            <controls:ExtendedLineSeries filterData="false" yField="min_limit" xField="dt" form="curve" displayName="Min" visible="true" radius="0">
+                <controls:lineStroke>
+                    <mx:Stroke color="0x00FFFF" weight="1" alpha=".8" />
+                </controls:lineStroke> 
+            </controls:ExtendedLineSeries>
+            <mx:PlotSeries yField="val" xField="dt" styleName="chartPlotSeries" displayName="Measurement">
+                <mx:stroke>
+                    <mx:Stroke color="0x000000" weight="1"/>
+                </mx:stroke>
+            </mx:PlotSeries>
+        </mx:series>
+    </mx:PlotChart>
+</mx:Panel>

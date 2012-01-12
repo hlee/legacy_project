@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:CheckBox xmlns:mx="http://www.adobe.com/2006/mxml" paddingLeft="5" width="42" color="#198EF2" click="clicked(event)" implements="mx.core.IDataRenderer">
+    <mx:Script>
+        <![CDATA[
+            import mx.controls.dataGridClasses.DataGridListData;
+            import flash.events.Event;
+            import mx.events.FlexEvent;
+            
+            private var _activated:Boolean;
+ 			public var analog_test:Boolean;
+
+ 			private function clicked(event:Event):void
+ 			{
+ 				_activated = this.selected;
+               dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+               var myListData:DataGridListData = DataGridListData(listData);
+               myListData["item"][myListData.dataField] = _activated;
+  			}
+  			
+ 			public function get activated():Boolean
+ 			{
+ 				return _activated;
+ 			}
+
+            override public function set data(value:Object):void
+            {  
+            	var myListData:DataGridListData = DataGridListData(listData);
+                if(value.hasOwnProperty('channel'))
+                {
+                    var ch:DVChannel = value.channel as DVChannel;
+                    
+                	if (ch.is_analog == analog_test)
+                	{
+                		this.enabled = true;
+                	}
+                	else
+                	{
+                		this.enabled = false;
+                	}
+                	
+                }
+
+            	this._activated= value[myListData.dataField];
+            	this.selected = value[myListData.dataField];
+    
+                // Dispatch the dataChange event.
+                dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+            }   
+        ]]>
+    </mx:Script>
+</mx:CheckBox>

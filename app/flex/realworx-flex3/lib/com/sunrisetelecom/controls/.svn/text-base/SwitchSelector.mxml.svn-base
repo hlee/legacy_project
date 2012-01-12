@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="206" height="142">
+    <mx:Script>
+     	<![CDATA[
+     	    import com.sunrisetelecom.events.DialogEntryEvent;
+     		import mx.collections.ArrayCollection;
+    		[Bindable] private var portList:ArrayCollection=new ArrayCollection();
+    		private var selected_port:uint=0;
+    		public function load_data(ports:ArrayCollection, curr_value:uint):void
+    		{
+    			portList=ports;
+    			selected_port=curr_value;
+    			if (portCmb != null)
+    			{
+    			portCmb.selectedIndex=find_index(selected_port.toString(),portList);
+    			}
+    		}
+    		public function on_complete():void
+    		{
+    			portCmb.selectedIndex=find_index(selected_port.toString(),portList);
+    			
+    		}
+    		
+    		public function ok_click():void
+    		{
+    			selected_port=Number(portCmb.value);
+                dispatchEvent(new DialogEntryEvent("PORT",portCmb.value));
+    		}
+    		
+    		public function cancel_click():void
+    		{
+    			dispatchEvent(new DialogEntryEvent("CANCEL", selected_port));
+    		}
+    		
+    		private function find_index(dataval:String,data:ArrayCollection):int
+     		{
+     			var index:int=-1;
+     			for (index=0;index < data.length;index ++)
+     			{
+     				if (data[index].data == dataval)
+     				{
+     					return index;
+     				}
+     			}
+     			return -1;
+     		  }
+      	]]>
+    </mx:Script>
+	<mx:ComboBox id="portCmb" x="10" y="36" dataProvider="{portList}"></mx:ComboBox>
+	<mx:Label x="10" y="10" text="Port Selection"/>
+	<mx:Button x="10" y="66" label="Cancel" click="cancel_click()"/>
+	<mx:Button x="83" y="66" label="OK" click="ok_click()"/>
+</mx:TitleWindow>

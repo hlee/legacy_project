@@ -1,0 +1,19 @@
+<h2>Scheduled Source Edit</h2>
+<h3>
+Please select a port below for scan <%= @order_nbr %>:
+</h3>
+<% form_tag :action => 'scheduled_source_update', :id => params[:id] do %>
+  <table>
+    <tr>
+      <td><label for="Switch_port_select">Switch Port</label></td>
+      <td>
+        <select name="value">
+          <%= options_for_select(@ports, @scheduled_source.switch_port_id.to_i) %>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"><%= submit_tag 'Save', { :disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10) } %></td>
+    </tr>
+  </table>
+<% end %>

@@ -1,0 +1,58 @@
+<table class="datatable">
+  <tr>
+    <th <%= sort_td_class_helper "site" %>>
+      <%= sort_link_helper "Site", "site" %>
+    </th>
+    <th>Analyzer
+    </th>
+    <th>Port Name
+    </th>
+    <th <%= sort_td_class_helper "type" %>>
+      <%= sort_link_helper "Alarm Level", "type" %>
+    </th>
+    <th <%= sort_td_class_helper "measure" %>>
+      <%= sort_link_helper "Measurement", "measure" %>
+    </th>
+    <th <%= sort_td_class_helper "active" %>>
+      <%= sort_link_helper "Active", "active" %>
+    </th>
+    <th <%= sort_td_class_helper "inactive" %>>
+      <%= sort_link_helper "Inactive", "inactive" %>
+    </th>
+    <th <%= sort_td_class_helper "count" %>>
+      <%= sort_link_helper "Total", "count" %>
+    </th>
+    <th <%= sort_td_class_helper "recent" %>>
+      <%= sort_link_helper "Most Recent", "recent" %>
+    </th>
+  </tr>
+  <% @alarm_summary.each do |alarm| %>
+    <tr class="<%= cycle("even","odd") %>">
+      <td><%= alarm.site_name %></td>
+      <td><%=show_analyzer(alarm.site_name)%></td>
+      <td><%=show_port(alarm.site_name)%></td>
+      <td>
+        <%= alarm.typ == "1" ? "MAJOR" : "MINOR" %>
+      </td>
+      <% if params[:action].eql?('down_alarm_list') %>
+        <td><%= alarm.measure %></td>
+      <% end %>
+      <td>
+        <%= link_to(alarm.active, :controller => 'alarm', :action => 'down_alarm_list', 
+          :site_id => alarm.id, :active => 1, :site => alarm.site_name, :measure_id => alarm.measure_id) 
+        %>
+      </td>
+      <td>
+        <%= link_to(alarm.inactive, :controller => 'alarm', :action => 'down_alarm_list', 
+          :site_id => alarm.id, :active => 0, :site => alarm.site_name, :measure_id => alarm.measure_id)
+        %>
+      </td>
+      <td>
+        <%= link_to(alarm.cnt, :controller => 'alarm', :action => 'down_alarm_list', 
+          :site_id => alarm.id, :site => alarm.site_name, :measure_id => alarm.measure_id)
+        %>
+      </td>
+      <td><%= alarm.dt %></td>
+    </tr>
+  <% end %>
+</table>

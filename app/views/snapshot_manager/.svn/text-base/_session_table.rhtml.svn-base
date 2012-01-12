@@ -1,0 +1,8 @@
+  <table class="datatable">
+  <tbody>
+    <tr>
+     <th>Session</th><th>Site</th><th>Snapshot Count</th><th>Start Time</th><th>End Time</th>
+    </tr>
+  </tbody>
+</table>
+

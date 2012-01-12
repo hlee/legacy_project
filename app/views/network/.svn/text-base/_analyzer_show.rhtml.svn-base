@@ -1,0 +1,26 @@
+  <tr class="datatable">
+    <td class="datatable">
+      <%= link_to "#{analyzer[:name]}", :action => 'analyzer_edit', :id => analyzer[:id] %>
+    </td>
+    <td class="datatable">
+      <%= link_to "#{regid2name(analyzer[:region_id])}", :controller=> :setup,:action => 'region_form', :id => analyzer[:region_id] %>
+    </td>
+    <td class="datatable">
+      <%=link_to('Info Log',{:action=>'syslog_list',:controller=>'network',:id=>analyzer.id,
+        :msg_type=>8},:popup => ['Error Log','height=600,width=600,scrollbars=yes'])%>
+      <br>
+      <%=link_to('Warning Log',{:action=>'syslog_list',:controller=>'network',:id=>analyzer.id,
+        :msg_type=>16},:popup => ['Error Log','height=600,width=600,scrollbars=yes'])%>
+      <br>
+      <%=link_to('Error Log',{:action=>'syslog_list',:controller=>'network',:id=>analyzer.id,
+        :msg_type=>128},:popup => ['Error Log','height=600,width=600,scrollbars=yes'])%> 
+    </td>  
+    <td class="datatable">
+     <span> <%= analyzer.site.nil? ? "" : analyzer.site.name %></span>
+    </td>
+    <td class="datatable">
+      <div id="analyzer_<%= analyzer.clean_name %>_status">
+        <%= render :partial => 'analyzer_status_show', :locals => { :analyzer => analyzer } %>
+      </div>
+    </td>
+  </tr>

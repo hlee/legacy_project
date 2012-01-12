@@ -1,0 +1,67 @@
+--- 
+role_00011: 
+  updated_at: 2007-09-21 07:07:20 -04:00
+  id: 11
+  display_name: Profile Admin
+  identifier: profileadmin
+  created_at: 2007-09-21 07:07:20 -04:00
+role_00001: 
+  updated_at: 2007-09-21 07:52:28 -04:00
+  id: 1
+  display_name: Network Admin 2
+  identifier: networkadm2
+  created_at: 2007-09-21 07:07:19 -04:00
+role_00002: 
+  updated_at: 2007-09-21 07:07:19 -04:00
+  id: 2
+  display_name: Tech
+  identifier: tech
+  created_at: 2007-09-21 07:07:19 -04:00
+role_00003: 
+  updated_at: 2007-09-21 07:07:19 -04:00
+  id: 3
+  display_name: Network Admin
+  identifier: networkadmin
+  created_at: 2007-09-21 07:07:19 -04:00
+role_00004: 
+  updated_at: 2007-09-21 07:07:19 -04:00
+  id: 4
+  display_name: Alarm Admin
+  identifier: alarmadmin
+  created_at: 2007-09-21 07:07:19 -04:00
+role_00005: 
+  updated_at: 2007-09-21 07:07:19 -04:00
+  id: 5
+  display_name: System File Admin
+  identifier: sysfileadm
+  created_at: 2007-09-21 07:07:19 -04:00
+role_00006: 
+  updated_at: 2007-09-21 07:07:20 -04:00
+  id: 6
+  display_name: User Admin
+  identifier: useradmin
+  created_at: 2007-09-21 07:07:19 -04:00
+role_00007: 
+  updated_at: 2007-09-21 07:07:20 -04:00
+  id: 7
+  display_name: Development
+  identifier: development
+  created_at: 2007-09-21 07:07:20 -04:00
+role_00008: 
+  updated_at: 2007-09-21 07:07:20 -04:00
+  id: 8
+  display_name: Site Admin
+  identifier: siteadm
+  created_at: 2007-09-21 07:07:20 -04:00
+role_00009: 
+  updated_at: 2007-09-21 07:07:20 -04:00
+  id: 9
+  display_name: Remove Me
+  identifier: remove
+  created_at: 2007-09-21 07:07:20 -04:00
+role_00010: 
+  updated_at: 2007-09-21 07:07:20 -04:00
+  id: 10
+  display_name: Installer
+  identifier: installer
+  created_at: 2007-09-21 07:07:20 -04:00

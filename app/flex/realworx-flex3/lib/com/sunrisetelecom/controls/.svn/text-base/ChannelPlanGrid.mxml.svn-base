@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:AdvancedDataGrid xmlns:mx="http://www.adobe.com/2006/mxml" itemEditEnd="verifyInput(event)" editable="true" horizontalScrollPolicy="auto" verticalScrollPolicy="auto" xmlns:controls="com.sunrisetelecom.controls.*">
+    <mx:Script>
+    	<![CDATA[
+    	    import com.sunrisetelecom.utils.Utils;
+    	    import mx.utils.StringUtil;
+    		import mx.collections.ArrayCollection;
+    		import mx.events.AdvancedDataGridEvent;
+    		import mx.controls.AdvancedDataGrid;
+    		import mx.events.AdvancedDataGridEventReason;
+    		
+    		[Bindable]
+    		private var dpFlat:ArrayCollection;
+    		private var modulations:ArrayCollection;
+    
+    		public function set dp(data:ArrayCollection):void
+    		{
+    			dpFlat=data;
+    			dataProvider=dpFlat;
+    		}
+    		
+    		public function load_annexes(event:Event):void
+    		{
+    			event.target.dataProvider=DVChannel.annexes.annex as XMLList;
+    		}
+    		
+    		public function load_polarities(event:Event):void
+    		{
+    			event.target.dataProvider=DVChannel.polarities.polarity as XMLList;
+    		}
+    		
+    		public function load_modulations(event:Event):void
+    		{
+    			event.target.dataProvider=DVChannel.modulations.modulation as XMLList;
+    		}
+    		
+    		private function channel_labels(item:Object, col:AdvancedDataGridColumn):String
+    		{
+    			var dv:DVChannel = item as DVChannel;
+    			if(col.headerText == "Channel")
+    			{
+    				return dv.name;
+    			} 
+    			else if(col.headerText == "Frequency")
+    			{ 
+    				return dv.freq_str;
+    			}
+    			else if(col.headerText == "Modulation")
+    			{
+    				return dv.modulation_name;
+    			}
+    			else if(col.headerText == "Symbol Rate")
+    			{
+    				return dv.symbol_rate_str;
+    			}
+    			else if(col.headerText == "Bandwidth")
+    			{
+    				return dv.bandwidth_str;
+    			}
+    			else if(col.headerText == "Video Audio 1")
+    			{
+    				return dv.audio1_offset_str;
+    			}
+    			else if(col.headerText == "Video Audio 2")
+    			{
+    				return dv.audio2_offset_str;
+    			}			
+    			return "UNRECOGNIZED";
+    		}
+    		
+    		private function verifyInput(event:AdvancedDataGridEvent):void
+    		{
+    			if( event.reason == AdvancedDataGridEventReason.CANCELLED) return;
+    
+    			var editor:mx.controls.TextInput = (event.currentTarget as AdvancedDataGrid).itemEditorInstance as mx.controls.TextInput;
+    			if ((event.dataField == "number") || (event.dataField=="name") || 
+    				(event.dataField == "freq_str") || (event.dataField == "bandwidth_entry"))
+    			{
+    					
+    				var null_pattern:RegExp=/^\s*$/
+    			
+    				if (editor.text.search(null_pattern)>-1)
+    				{
+    					event.preventDefault();
+    					editor.errorString= "Blank not allowed";
+    					return;
+    				}  
+    			}        
+    			if(event.dataField == "freq_str")
+    			{
+    				var freq_nbr:Number=parseFloat(editor.text);
+    				if ((freq_nbr > 1000.0) || (freq_nbr < 30.0))
+    				{
+    					event.preventDefault();
+    					editor.errorString = "Frequency must be between 30 MHz and 1 GHz";
+    				}
+    			}
+    			if((event.dataField == "audio1_offset_str") ||
+    				(event.dataField == "audio2_offset_str"))
+    				{
+    					var sep:Number=parseFloat(editor.text);
+    					if ((sep > 7) || (sep < 0.0))
+    					{
+    						event.preventDefault();
+    						editor.errorString="Audio Offset must be a positive number less than 7 MHz";
+    					}
+    				}
+    			if(event.dataField == "bandwidth_entry")
+    			{
+    				var bwd:Number = parseFloat(editor.text);
+    				if ((bwd > 10) || (bwd < 0) || isNaN(bwd))
+    				{
+    					event.preventDefault();
+    					editor.errorString="Bandwidth must be a positve number less than 10 MHz";
+    				}
+    
+    			}
+    			if(event.dataField == "symbol_rate_entry")
+    			{
+    				var symbol_rate:Number=parseFloat(editor.text)
+    				if (isNaN(symbol_rate)) 
+    				{
+    					event.preventDefault();
+    					editor.errorString = "Symbol Rate must be numeric.";
+    				}
+    			}
+    		}
+    		
+    		private function numberComparator(obj1:Object, obj2:Object):int
+    		{
+    		    var s1:String = obj1.number as String;
+    		    var s2:String = obj2.number as String;
+    		    
+    			return Utils.floatComparator(s1, s2);
+    		}
+    		
+    		private function freqComparator(obj1:Object, obj2:Object):int
+    		{
+                var s1:String = obj1.freq_str as String;
+                var s2:String = obj2.freq_str as String;
+    
+                return Utils.floatComparator(s1, s2);
+    		}
+    	]]>
+    </mx:Script>
+	<mx:columns>
+		<mx:AdvancedDataGridColumn dataField="system_file" headerText="System File"/>
+		<mx:AdvancedDataGridColumn dataField="number" sortCompareFunction="numberComparator" headerText="Channel" editable="true"/>
+		<mx:AdvancedDataGridColumn dataField="name" headerText="Channel Name" editable="true"/>
+		<mx:AdvancedDataGridColumn  dataField="freq_str" sortCompareFunction="freqComparator" labelFunction="channel_labels" headerText="Frequency" editable="true">
+		<mx:itemEditor>
+			<mx:Component>
+				<mx:TextInput restrict="0-9." maxChars="10"/>
+			</mx:Component>
+		</mx:itemEditor>
+		</mx:AdvancedDataGridColumn>
+		<mx:AdvancedDataGridColumn dataField="modulation_name"  headerText="Modulation" editable="true">
+		<mx:itemEditor>
+			<mx:Component>
+			     <controls:ModulationSelection labelField="@name" initialize="outerDocument.load_modulations(event)"/>
+			</mx:Component>
+		</mx:itemEditor>
+		</mx:AdvancedDataGridColumn>
+		<mx:AdvancedDataGridColumn dataField="symbol_rate_entry" labelFunction="channel_labels" headerText="Symbol Rate" editable="true"/>
+		<mx:AdvancedDataGridColumn dataField="annex_name" editable="true" headerText="Annex">
+			<mx:itemEditor>
+    			<mx:Component>
+    				<controls:AnnexSelection labelField="@name" initialize="outerDocument.load_annexes(event)"/>
+    			</mx:Component>
+			</mx:itemEditor>
+		</mx:AdvancedDataGridColumn> 
+		<mx:AdvancedDataGridColumn dataField="polarity_name" editable="true" headerText="Polarity">
+			<mx:itemEditor>
+    			<mx:Component>
+    				<controls:PolaritySelection labelField="@name" initialize="outerDocument.load_polarities(event)"/>
+    			</mx:Component>
+			</mx:itemEditor>
+		</mx:AdvancedDataGridColumn>
+		<mx:AdvancedDataGridColumn dataField="bandwidth_entry" labelFunction="channel_labels" headerText="Bandwidth" editable="true"/>
+		<mx:AdvancedDataGridColumn dataField="audio1_offset_str" labelFunction="channel_labels" headerText="Video Audio 1" editable="true"/>
+		<mx:AdvancedDataGridColumn dataField="audio2_offset_str" labelFunction="channel_labels" headerText="Video Audio 2" editable="true"/>		
+	</mx:columns>
+</mx:AdvancedDataGrid>

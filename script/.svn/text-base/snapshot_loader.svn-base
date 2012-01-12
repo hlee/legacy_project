@@ -1,0 +1,37 @@
+require 'time'
+x=Integer(rand*16) + 1
+session= "SESSION_0"
+site_id=2
+Alarm.find(:all).each { |alarm|
+  next if alarm.site_id == 10001
+  s=Snapshot.new()
+  s.baseline=0
+  site_id=2
+  s.description="DEVICE_NAME=CP_#{alarm.id%16}<br> DEVICE_LOCATION=XXX"
+  source="SGVR"
+  if ((alarm.id % 16) == 0)
+    session="SESSION_#{alarm.id}"
+    if ((alarm.id % 3 ) == 0)
+      source="SGVR"
+      s.baseline=1
+      s.description="BASELINE"
+     site_id=2
+    else
+      source="Realview"
+     site_id=nil
+    end
+  end
+   s.source=source
+   if (site_id.nil?)
+     s.site_id=alarm.site_id
+   else
+     s.site_id=site_id
+   end
+   s.create_dt=Time.now()+(rand*10000)
+   s.session=session
+   s.image=alarm.image
+   s.noise_floor=(((rand*5)*100.0).round)/100.0
+    puts s.site_id
+   s.save
+    
+}

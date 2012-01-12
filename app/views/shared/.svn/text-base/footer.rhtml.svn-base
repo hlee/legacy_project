@@ -1,0 +1,28 @@
+<!-- ##### Footer ##### -->
+<div id="footer">
+	<div class="left">
+		<% if current_user.is_anonymous? %>
+			<%= link_to 'Login', :controller => 'auth', :action => 'login' %>
+		<% else %>
+			Logged in as: <%= current_user.email %>
+			<%= link_to 'Logout', :controller => 'auth', :action => 'logout' %>
+		<% end %>
+	</div>
+	<br class="doNotDisplay doNotPrint">
+	<div class="right">
+    Realworx Version <%= ConfigParam.get_value('version') %><BR>
+    <% license = ConfigParam.get_value('License') %>
+    <% if license.warning? %>
+      <font class=license_warning>
+    <% else %>
+      <font class=license>
+    <% end %>
+    License Expires: <%= ConfigParam.get_value('License').expiration_date %></font><BR>
+		Another fine product from<br>
+		<a href="http://www.sunrisetelecom.com" class="doNotPrint">Sunrise Telecom</a><br>
+		E-mail:&nbsp;
+    <% email = ConfigParam.get_value("Email Address") %>
+		<a mailto="<%= email %>" title="Email webmaster"><%= email %></a><br>
+	</div>
+</div>
+

@@ -1,0 +1,39 @@
+<%= error_messages_for 'switch' %>
+
+<!--[form:switch]-->
+<% if params[:action] == 'switch_new' && Analyzer.find(@analyzer_id).switches.length == 0
+     combiner_box=true
+   else
+     combiner_chbox=false
+   end
+%>
+<table>
+  <tr>
+    <td><label for="switch_switch_name">Switch Name</label></td>
+    <td>
+      <%= text_field 'switch', 'switch_name'  %>
+      <%= hidden_field 'switch','analyzer_id',{:value=>@analyzer_id} %>
+    </td>
+  </tr>
+  <tr>
+    <td><label for="switch_master_Switch_src">Use as Combiner?</label></td>
+    <td>
+    <% if combiner_box %>
+      <%= check_box( 'switch','master_switch_flag') %>
+    <% elsif @switch[:master_switch_flag] %>
+      YES
+    <% else %>
+      NO
+    <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td><label for="switch_location">Location</label></td>
+    <td><%= text_field 'switch', 'location'  %></td>
+  </tr>
+  <tr>
+    <td><label for="switch_address">Switch Address</label></td>
+    <td><%=text_field "switch","address", {:size=>3} %></td>
+  </tr>
+<!--[eoform:switch]-->
+

@@ -1,0 +1,613 @@
+sp0:
+  id: 80
+  switch_id: 1
+  name: Port 0
+  port_nbr: 1
+sp1:
+  id: 1
+  switch_id: 1
+  name: Port 1
+  port_nbr: 2
+  profile_id: 5002
+  site_id: 102
+  purpose: 1
+sp2:
+  id: 2
+  switch_id: 1
+  name: Port 2
+  port_nbr: 3
+  purpose: 1
+sp3:
+  id: 3
+  switch_id: 1
+  name: Port 3
+  port_nbr: 4
+  site_id: 104
+  purpose: 1
+sp4:
+  id: 4
+  switch_id: 1
+  name: Port 4
+  port_nbr: 5
+  site_id: 105
+  purpose: 0
+sp5:
+  id: 5
+  switch_id: 1
+  name: Port 5
+  port_nbr: 6
+  site_id: 106
+  purpose: 1
+sp6:
+  id: 6
+  switch_id: 1
+  name: Port 6
+  port_nbr: 7
+  site_id: 107
+sp7:
+  id: 7
+  switch_id: 1
+  name: Port 7
+  port_nbr: 8
+  site_id: 108
+sp8:
+  id: 8
+  switch_id: 1
+  name: Port 8
+  port_nbr: 9
+  site_id: 109
+sp9:
+  id: 9
+  switch_id: 1
+  name: Port 9
+  port_nbr: 10
+  site_id: 110
+sp10:
+  id: 10
+  switch_id: 1
+  name: Port 10
+  port_nbr: 11
+  site_id: 111
+sp11:
+  id: 11
+  switch_id: 1
+  name: Port 11
+  port_nbr: 12
+  site_id: 112
+sp12:
+  id: 12
+  switch_id: 1
+  name: Port 12
+  site_id: 113
+  port_nbr: 13
+sp13:
+  id: 13
+  switch_id: 1
+  name: Port 13
+  port_nbr: 14
+  site_id: 114
+sp14:
+  id: 14
+  switch_id: 1
+  name: Port 14
+  port_nbr: 15
+  site_id: 115
+sp15:
+  id: 15
+  switch_id: 1
+  name: Port 15
+  port_nbr: 16
+  site_id: 116
+sp16:
+  id: 16
+  switch_id: 2
+  name: Port 16
+  port_nbr: 1
+  site_id: 117
+sp17:
+  id: 17
+  switch_id: 2
+  name: Port 17
+  port_nbr: 2
+sp18:
+  id: 18
+  switch_id: 2
+  name: Port 18
+  port_nbr: 3
+sp19:
+  id: 19
+  switch_id: 2
+  name: Port 19
+  port_nbr: 4
+sp20:
+  id: 20
+  switch_id: 2
+  name: Port 20
+  port_nbr: 5
+sp21:
+  id: 21
+  switch_id: 2
+  name: Port 21
+  port_nbr: 6
+sp22:
+  id: 22
+  switch_id: 2
+  name: Port 22
+  port_nbr: 7
+sp23:
+  id: 23
+  switch_id: 2
+  name: Port 23
+  port_nbr: 8
+sp24:
+  id: 24
+  switch_id: 2
+  name: Port 24
+  port_nbr: 9
+sp25:
+  id: 25
+  switch_id: 2
+  name: Port 25
+  port_nbr: 10
+sp26:
+  id: 26
+  switch_id: 2
+  name: Port 26
+  port_nbr: 11
+sp27:
+  id: 27
+  switch_id: 2
+  name: Port 27
+  port_nbr: 12
+sp28:
+  id: 28
+  switch_id: 2
+  name: Port 28
+  port_nbr: 13
+sp29:
+  id: 29
+  switch_id: 2
+  name: Port 29
+  port_nbr: 14
+sp30:
+  id: 30
+  switch_id: 2
+  name: Port 30
+  port_nbr: 15
+sp31:
+  id: 31
+  switch_id: 2
+  name: Port 31
+  port_nbr: 16
+sp32:
+  id: 32
+  switch_id: 3
+  name: Port 32
+  port_nbr: 1
+sp33:
+  id: 33
+  switch_id: 3
+  name: Port 33
+  port_nbr: 2
+sp34:
+  id: 34
+  switch_id: 3
+  name: Port 34
+  port_nbr: 3
+sp35:
+  id: 35
+  switch_id: 3
+  name: Port 35
+  port_nbr: 4
+sp36:
+  id: 36
+  switch_id: 3
+  name: Port 36
+  port_nbr: 5
+sp37:
+  id: 37
+  switch_id: 3
+  name: Port 37
+  port_nbr: 6
+sp38:
+  id: 38
+  switch_id: 3
+  name: Port 38
+  port_nbr: 7
+sp39:
+  id: 39
+  switch_id: 3
+  name: Port 39
+  port_nbr: 8
+sp40:
+  id: 40
+  switch_id: 3
+  name: Port 40
+  port_nbr: 9
+sp41:
+  id: 41
+  switch_id: 3
+  name: Port 41
+  port_nbr: 10
+sp42:
+  id: 42
+  switch_id: 3
+  name: Port 42
+  port_nbr: 11
+sp43:
+  id: 43
+  switch_id: 3
+  name: Port 43
+  port_nbr: 12
+sp44:
+  id: 44
+  switch_id: 3
+  name: Port 44
+  port_nbr: 13
+sp45:
+  id: 45
+  switch_id: 3
+  name: Port 45
+  port_nbr: 14
+sp46:
+  id: 46
+  switch_id: 3
+  name: Port 46
+  port_nbr: 15
+sp47:
+  id: 47
+  switch_id: 3
+  name: Port 47
+  port_nbr: 16
+sp48:
+  id: 48
+  switch_id: 4
+  name: Port 48
+  port_nbr: 1
+sp49:
+  id: 49
+  switch_id: 4
+  name: Port 49
+  port_nbr: 2
+sp50:
+  id: 50
+  switch_id: 4
+  name: Port 50
+  port_nbr: 3
+sp51:
+  id: 51
+  switch_id: 4
+  name: Port 51
+  port_nbr: 4
+sp52:
+  id: 52
+  switch_id: 4
+  name: Port 52
+  port_nbr: 5
+sp53:
+  id: 53
+  switch_id: 4
+  name: Port 53
+  port_nbr: 6
+sp54:
+  id: 54
+  switch_id: 4
+  name: Port 54
+  port_nbr: 7
+sp55:
+  id: 55
+  switch_id: 4
+  name: Port 55
+  port_nbr: 8
+sp56:
+  id: 56
+  switch_id: 4
+  name: Port 56
+  port_nbr: 9
+sp57:
+  id: 57
+  switch_id: 4
+  name: Port 57
+  port_nbr: 10
+sp58:
+  id: 58
+  switch_id: 4
+  name: Port 58
+  port_nbr: 11
+sp59:
+  id: 59
+  switch_id: 4
+  name: Port 59
+  port_nbr: 12
+sp60:
+  id: 60
+  switch_id: 4
+  name: Port 60
+  port_nbr: 13
+sp61:
+  id: 61
+  switch_id: 4
+  name: Port 61
+  port_nbr: 14
+sp62:
+  id: 62
+  switch_id: 4
+  name: Port 62
+  port_nbr: 15
+sp63:
+  id: 63
+  switch_id: 4
+  name: Port 63
+  port_nbr: 16
+sp64:
+  id: 64
+  switch_id: 6
+  name: Port 64
+  port_nbr: 1
+sp65:
+  id: 65
+  switch_id: 6
+  name: Port 65
+  port_nbr: 2
+sp66:
+  id: 66
+  switch_id: 6
+  name: Port 66
+  port_nbr: 3
+sp67:
+  id: 67
+  switch_id: 6
+  name: Port 67
+  port_nbr: 4
+sp68:
+  id: 68
+  switch_id: 6
+  name: Port 68
+  port_nbr: 5
+sp69:
+  id: 69
+  switch_id: 6
+  name: Port 69
+  port_nbr: 6
+sp70:
+  id: 70
+  switch_id: 6
+  name: Port 70
+  port_nbr: 7
+sp71:
+  id: 71
+  switch_id: 6
+  name: Port 71
+  port_nbr: 8
+sp72:
+  id: 72
+  switch_id: 6
+  name: Port 72
+  port_nbr: 9
+sp73:
+  id: 73
+  switch_id: 6
+  name: Port 73
+  port_nbr: 10
+sp74:
+  id: 74
+  switch_id: 6
+  name: Port 74
+  port_nbr: 11
+sp75:
+  id: 75
+  switch_id: 6
+  name: Port 75
+  port_nbr: 12
+sp76:
+  id: 76
+  switch_id: 6
+  name: Port 76
+  port_nbr: 13
+sp77:
+  id: 77
+  switch_id: 6
+  name: Port 77
+  port_nbr: 14
+sp78:
+  id: 78
+  switch_id: 6
+  name: Port 78
+  port_nbr: 15
+sp79:
+  id: 79
+  switch_id: 6
+  name: Port 79
+  port_nbr: 16
+sp80:
+  id: 100
+  switch_id: 7
+  name: Port 80
+  port_nbr: 1
+  purpose: 1
+sp81:
+  id: 101
+  switch_id: 7
+  name: Port 81
+  port_nbr: 2
+  purpose: 1
+sp82:
+  id: 102
+  switch_id: 7
+  name: Port 82
+  port_nbr: 3
+  purpose: 1
+sp83:
+  id: 103
+  switch_id: 7
+  name: Port 83
+  port_nbr: 4
+  purpose: 1
+sp84:
+  id: 104
+  switch_id: 7
+  name: Port 84
+  port_nbr: 5
+  purpose: 1
+sp85:
+  id: 105
+  switch_id: 7
+  name: Port 85
+  port_nbr: 6
+  purpose: 1
+sp86:
+  id: 106
+  switch_id: 7
+  name: Port 86
+  port_nbr: 7
+  purpose: 1
+sp87:
+  id: 107
+  switch_id: 7
+  name: Port 80
+  port_nbr: 8
+  purpose: 1
+sp88:
+  id: 108
+  switch_id: 7
+  name: Port 80
+  port_nbr: 9
+  purpose: 1
+sp89:
+  id: 109
+  switch_id: 7
+  name: Port 80
+  port_nbr: 10
+  purpose: 1
+sp90:
+  id: 110
+  switch_id: 7
+  name: Port 80
+  port_nbr: 11
+  purpose: 1
+sp91:
+  id: 111
+  switch_id: 7
+  name: Port 80
+  port_nbr: 12
+  purpose: 1
+sp92:
+  id: 112
+  switch_id: 7
+  name: Port 80
+  port_nbr: 13
+  purpose: 1
+sp93:
+  id: 113
+  switch_id: 7
+  name: Port 80
+  port_nbr: 14
+  purpose: 1
+sp94:
+  id: 114
+  switch_id: 7
+  name: Port 80
+  port_nbr: 15
+  purpose: 1
+sp95:
+  id: 115
+  switch_id: 7
+  name: Port 80
+  port_nbr: 16
+  purpose: 1
+sp180:
+  id: 120
+  switch_id: 8
+  name: Port 80
+  port_nbr: 1
+  purpose: 1
+sp181:
+  id: 121
+  switch_id: 8
+  name: Port 81
+  port_nbr: 2
+  purpose: 1
+sp182:
+  id: 122
+  switch_id: 8
+  name: Port 82
+  port_nbr: 3
+  purpose: 1
+sp183:
+  id: 123
+  switch_id: 8
+  name: Port 83
+  port_nbr: 4
+  purpose: 1
+sp184:
+  id: 124
+  switch_id: 8
+  name: Port 84
+  port_nbr: 5
+  purpose: 1
+sp185:
+  id: 125
+  switch_id: 8
+  name: Port 85
+  port_nbr: 6
+  purpose: 1
+sp186:
+  id: 126
+  switch_id: 8
+  name: Port 86
+  port_nbr: 7
+  purpose: 1
+sp187:
+  id: 127
+  switch_id: 8
+  name: Port 80
+  port_nbr: 8
+  purpose: 1
+sp188:
+  id: 128
+  switch_id: 8
+  name: Port 80
+  port_nbr: 9
+  purpose: 1
+sp189:
+  id: 129
+  switch_id: 8
+  name: Port 80
+  port_nbr: 10
+  purpose: 1
+sp190:
+  id: 130
+  switch_id: 8
+  name: Port 80
+  port_nbr: 11
+  purpose: 1
+sp191:
+  id: 131
+  switch_id: 8
+  name: Port 80
+  port_nbr: 12
+  purpose: 1
+sp192:
+  id: 132
+  switch_id: 8
+  name: Port 80
+  port_nbr: 13
+  purpose: 1
+sp193:
+  id: 133
+  switch_id: 8
+  name: Port 80
+  port_nbr: 14
+  purpose: 1
+sp194:
+  id: 134
+  switch_id: 8
+  name: Port 80
+  port_nbr: 15
+  purpose: 1
+sp195:
+  id: 135
+  switch_id: 8
+  name: Port 80
+  port_nbr: 16
+  purpose: 1

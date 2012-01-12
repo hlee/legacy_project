@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box initialize="initConstellation()" xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="400">
+    <mx:Script>
+        <![CDATA[
+            import mx.core.UIComponent;
+            import mx.events.ResizeEvent;
+            public static const QAM64:uint = 8;
+            public static const QAM256:uint = 16;
+            
+            private const DATA_RANGE:uint = 256; 
+
+            private var _pointCount:int = 16;
+        
+            private var _radix:uint = 16;
+
+            private var _matrix:Array = null;
+            private var _data:Array = null;
+
+            private var _dataColor:uint = 0x000000;
+            private var _gridColor:uint = 0x404040;
+
+            private var _currentX:uint;
+            private var _currentY:uint;
+            
+            //There are how many cells in one row or column
+            private var _currentRadix:uint;
+            
+            private var _zoomIn:Boolean = true;
+            
+            private var _selectPanel:UIComponent;
+            
+            private function initConstellation():void
+            {
+                this.qamMode = QAM256;
+
+                this.addEventListener(MouseEvent.CLICK, onMouseClickHandler);
+                this.addEventListener(MouseEvent.MOUSE_OUT, ouMouseOutHandler);
+                this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMoveHandler);
+                this.addEventListener(ResizeEvent.RESIZE, onResizeHandler);
+
+                _selectPanel = new UIComponent();
+                _selectPanel.x = 0;
+                _selectPanel.y = 0;
+                
+                _selectPanel.width = this.width;
+                _selectPanel.height = this.height;   
+                
+                this.addChild(_selectPanel);  
+            }
+            
+            public function get qamMode():uint
+            {
+                return _radix;
+            }
+            public function set qamMode(mode:uint):void
+            {
+                switch(mode)
+                {
+                    case QAM64:
+                        {
+                            _radix = mode;
+                            _pointCount = mode;
+                        }
+                        break;
+                    case QAM256:
+                        {
+                            _radix = mode;
+                            _pointCount = mode;
+                        }
+                        break;
+                    default:
+                        return;
+                }
+
+                _currentRadix = _radix;
+                
+                _currentX = 0;
+                _currentY = 0;
+                
+                updateData();
+            }
+            
+            public override function set width(value:Number):void
+            {
+                super.width = value;
+                super.height = value;
+            }
+            
+            public override function set height(value:Number):void
+            {
+                super.width = value;
+                super.height = value;
+            }
+            
+            private function onMouseMoveHandler(event:MouseEvent):void
+            {
+                var rect:Rectangle = new Rectangle(0, 0, this.width, this.height);
+                
+                if(rect.contains(event.localX, event.localY))
+                {
+                    this.buttonMode = true;
+                    this.useHandCursor = true;
+                }
+                else
+                {
+                    this.buttonMode = false;
+                    this.useHandCursor = false;
+                }
+                
+                darwSelectedRectangle(event.localX, event.localY);
+            }
+            
+            private function onResizeHandler(event:ResizeEvent):void
+            {
+                _selectPanel.width = this.width;
+                _selectPanel.height = this.height;
+                
+                _selectPanel.graphics.clear();
+                
+                this.invalidate();
+            }
+            
+            public function changeZoomMode(zoomIn:Boolean):void
+            {
+                _zoomIn = zoomIn;
+                
+                if(_selectPanel != null) _selectPanel.graphics.clear();
+                
+                if(!_zoomIn) //added for bug #5571
+                {
+                    onMouseClickHandler(null);
+                }
+            }
+            
+            private function ouMouseOutHandler(event:MouseEvent):void
+            {
+            }       
+            
+            private function darwSelectedRectangle(x:Number, y:Number):void
+            {
+                var rect:Rectangle = null;
+                
+                if(_zoomIn)
+                {
+                    if(_currentRadix % 2 == 1) return;
+                    
+                    rect = judgeRectangle(x, y);
+                }
+                else
+                {
+                    if(_currentRadix == _radix) return;
+
+                    rect = new Rectangle(0, 0, this.width, this.height);
+                    if(!rect.contains(x, y))
+                    {
+                        rect = null;
+                    }
+                }
+    
+                this.invalidate();
+                
+                var g:Graphics = _selectPanel.graphics;
+                
+                g.clear();
+                
+                if(rect != null)
+                {
+                    
+                    var color:uint = _dataColor;
+                    g.beginFill(color, 0.3);
+                    g.lineStyle(1, color);
+                    g.drawRect(rect.x, rect.y, rect.width, rect.height);
+                    
+                    g.endFill();
+                }
+            }
+            
+            private function judgeRectangle(x:Number, y:Number):Rectangle
+            {
+                var half:Number = this.width / 2;
+                
+                var rect:Rectangle = new Rectangle(0, 0, half, half);
+                
+                if(rect.contains(x, y)) return rect;
+                
+                rect = new Rectangle(half, 0, half, half);
+                
+                if(rect.contains(x, y)) return rect;
+                
+                rect = new Rectangle(0, half, half, half);
+                
+                if(rect.contains(x, y)) return rect;
+                
+                rect = new Rectangle(half, half, half, half);
+                
+                if(rect.contains(x, y)) return rect;
+                
+                return null;
+            }
+            
+            private function onMouseClickHandler(event:MouseEvent):void
+            {
+                var rect:Rectangle = null;
+
+                if(_zoomIn)
+                {
+                    if(_currentRadix % 2 == 1) return;
+                    
+                    rect = judgeRectangle(event.localX, event.localY);
+                }
+                else
+                {
+                    if(_currentRadix == _radix) return;
+    
+                    rect = new Rectangle(0, 0, this.width, this.height);
+                    if(!rect.contains(x, y))
+                    {
+                        rect = null;
+                    }
+                }
+                
+                if(rect != null)
+                {
+                    var half:Number = this.width / 2;
+                    
+                    if(rect.x == 0 && rect.y == 0)
+                    {
+                        if(rect.width == half) //topleft
+                        {
+                            _currentRadix /= 2;
+                        }
+                        else //all
+                        {
+                            var temp:uint = _currentRadix * 2;
+                            
+                            if(_currentX % temp != 0)
+                            {
+                                _currentX -= _currentRadix;
+                            }
+                            
+                            if(_currentY % temp != 0)
+                            {
+                                _currentY -= _currentRadix;
+                            }
+                            
+                            _currentRadix = temp;
+                        }
+                    }
+                    else if(rect.x == 0 &&  rect.y == half) //bottomleft
+                    {
+                        _currentRadix /= 2;
+    
+                        _currentY += _currentRadix;
+                    }
+                    else if(rect.x == half && rect.y == 0) //topright
+                    {
+                        _currentRadix /= 2;
+                        
+                        _currentX += _currentRadix;
+                        _currentY = _currentY;
+                    }
+                    else if(rect.x == half && rect.y == half) //bottomright
+                    {
+                        _currentRadix /= 2;
+                        
+                        _currentX += _currentRadix;
+                        _currentY += _currentRadix;
+                    }
+                    
+                    this.invalidate();
+                    _selectPanel.graphics.clear();
+                }
+            }
+            
+            public function set dataColor(color:uint):void
+            {
+                _dataColor = color;
+            }
+            
+            public function set matrix(data:Array):void
+            {
+                _matrix = data;
+                
+                updateData();
+            }
+            public function get matrix():Array
+            {
+                return _matrix;
+            }
+            
+            private function updateData():void
+            {
+                if(!_matrix || _radix == 0) return;
+
+                var half:uint = DATA_RANGE / 2;
+                
+                _data = new Array(Math.pow(DATA_RANGE, 2));
+                
+                var i:int;
+                
+                for(i = 0; i < _data.length; i++)
+                {
+                    _data[i] = new Object();
+                    _data[i].val = 0;
+                    _data[i].alpha = 0;
+                }
+
+                for each(var p:Array in _matrix)
+                {
+                    if(p.length == 2)
+                    {
+                        var x:int = p[0];
+                        var y:int = p[1];
+                        
+                        if(x >= -DATA_RANGE && y >= -DATA_RANGE)
+                        {
+                            var id:int = (y + half) + (-x + half - 1) * DATA_RANGE;
+                            if(id >= 0 && id < _data.length)
+                            {
+                                _data[id].val++;
+                            }
+                        }
+                    }
+                }
+
+                var densityList:Array = new Array();
+                
+                for(i = 0; i < _data.length; i++)
+                {
+                    var val:int = _data[i].val;
+                    
+                    if(val >= densityList.length)
+                    {   
+                        densityList[val] = 1;
+                    }
+                    else
+                    {
+                        densityList[val]++;
+                    }
+                }
+                
+                var maxDdensity:int = densityList.length;
+                
+                if(_matrix.length > 1000 && densityList.length > 100)
+                {
+                    for(i = 1; i < densityList.length - 1; i++)
+                    {
+                        if(isNaN(densityList[i]))
+                        {
+                            maxDdensity = i - 1;
+                            break;
+                        }
+                    }
+                }
+                
+                var max:Number = maxDdensity * 1.0;
+                
+                for(i = 0; i < _data.length; i++)
+                {
+                    _data[i].alpha = Math.min(1, _data[i].val / max);
+                }
+            }
+
+            public function invalidate():void
+            {
+                var g:Graphics = this.graphics;
+                
+                g.clear();
+                
+                drawGrid(g, this.width);
+                drawData(g, this.width);
+            }
+            
+            private function drawData(g:Graphics, width:Number):void
+            {       
+                if(_matrix == null) return;           
+                
+                var range:uint = _currentRadix * _pointCount;
+    
+                var minX:int = _currentX * _pointCount;
+                var minY:int = _currentY * _pointCount;
+    
+                var maxX:int = minX + range;
+                var maxY:int = minY + range;
+                
+                var rate:Number = this.width * 1.0 / range;
+
+                var i:int;
+                var j:int;
+                
+                for(i = minX; i < maxX; i++)
+                {
+                    for(j = minY; j < maxY; j++)
+                    {
+                        var id:int = i + j * DATA_RANGE;
+                        if(id < 0 || id >= _data.length || !_data[id].hasOwnProperty("val"))
+                        {
+                            continue;
+                        }
+
+                        if(_data[id].val > 0)
+                        {
+                            var alpha:Number = _data[id].alpha;
+                            g.lineStyle(1, _dataColor, alpha);
+                            g.beginFill(_dataColor, alpha);
+                            
+                            var x:Number = rate * (i - minX + 0.5);
+                            var y:Number = rate * (j - minY + 0.5);                       
+                            g.drawCircle(x, y, 1);
+                        }
+                    }
+                }
+                
+                g.endFill();
+            }
+            
+            private function drawGrid(g:Graphics, width:Number):void
+            {   
+                if(_currentRadix == 0) return;
+                
+                var cell:Number = width / _currentRadix;
+                
+                var i:int;
+                var j:int;
+                
+                if(_currentRadix == _radix)
+                {
+                    var tempPos:Number =  _currentRadix * cell / 2;
+                    
+                    g.beginFill(_gridColor, 0);
+                    g.lineStyle(1, _gridColor, 1);
+                    
+                    g.moveTo(0, tempPos);
+                    g.lineTo(width, tempPos);         
+                    
+                    g.moveTo(tempPos, 0);
+                    g.lineTo(tempPos, width);
+                    
+                    g.endFill();
+                }
+                
+                g.beginFill(_gridColor, 0);
+                g.lineStyle(0.5, _gridColor, 0.3);
+                
+                for(i = 0; i <= _currentRadix; i++)
+                {               
+                    g.moveTo(0, i * cell);
+                    g.lineTo(width, i * cell);            
+                    
+                    g.moveTo(i * cell, 0);
+                    g.lineTo(i * cell, width);
+                }
+                
+                var crossHalfWidth:Number = cell / 10;
+                
+                for(i = 0; i < _currentRadix; i++)
+                {               
+                    var spanX:Number = (i + 0.5) * cell;
+                    
+                    for(j = 0; j < _currentRadix; j++)
+                    {
+                        var spanY:Number = (j + 0.5) * cell;
+                        
+                        g.moveTo(spanX - crossHalfWidth, spanY);
+                        g.lineTo(spanX + crossHalfWidth, spanY);          
+                        
+                        g.moveTo(spanX, spanY - crossHalfWidth);
+                        g.lineTo(spanX, spanY + crossHalfWidth);                  
+                    }
+                }           
+                
+                g.endFill();
+                
+            }
+        ]]>
+    </mx:Script>
+</mx:Box>

@@ -1,0 +1,113 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+one:
+  id: 1
+  measure_id: 9
+  channel_id: 1
+  site_id: 101
+  value: 15
+  dt: 2007-02-02 10:00:00
+two:
+  id: 2
+  measure_id: 9
+  channel_id: 2
+  site_id: 101
+  value: 10
+  dt: 2007-02-02 10:00:00
+three:
+  id: 3
+  measure_id: 9
+  channel_id: 3
+  site_id: 101
+  value: 10
+  dt: 2007-02-02 10:00:00
+four:
+  id: 4
+  measure_id: 9
+  channel_id: 4
+  value: 10
+  site_id: 101
+  dt: 2007-02-02 10:00:00
+five:
+  id: 5
+  measure_id: 11
+  channel_id: 1
+  value: 40
+  site_id: 101
+  dt: 2007-02-02 10:00:00
+six:
+  id: 6
+  measure_id: 11
+  channel_id: 2
+  value: 10
+  site_id: 101
+  dt: 2007-02-02 10:00:00
+seven:
+  id: 7
+  measure_id: 11
+  channel_id: 3
+  value: 10
+  site_id: 101
+  dt: 2007-02-02 10:00:00
+eight:
+  id: 8
+  measure_id: 11
+  channel_id: 4
+  site_id: 101
+  value: 10
+  dt: 2007-02-02 10:00:00
+nine:
+  id: 9
+  measure_id: 9
+  channel_id: 1
+  site_id: 102
+  value: 10
+  dt: 2007-02-02 10:00:00
+ten:
+  id: 10
+  measure_id: 9
+  channel_id: 2
+  site_id: 102
+  value: 10
+  dt: 2007-02-02 10:00:00
+eleven:
+  id: 11
+  measure_id: 9
+  channel_id: 3
+  site_id: 102
+  value: 10
+  dt: 2007-02-02 10:00:00
+twelve:
+  id: 12
+  measure_id: 9
+  channel_id: 4
+  value: 10
+  site_id: 102
+  dt: 2007-02-02 10:00:00
+thirteen:
+  id: 13
+  measure_id: 11
+  channel_id: 1
+  value: 10
+  site_id: 102
+  dt: 2007-02-02 10:00:00
+fourteen:
+  id: 14
+  measure_id: 11
+  channel_id: 2
+  value: 10
+  site_id: 102
+  dt: 2007-02-02 10:00:00
+oneb:
+  id: 15
+  measure_id: 9
+  channel_id: 1
+  site_id: 101
+  value: 20
+  dt: 2007-03-02 10:30:00
+onec:
+  id: 16
+  measure_id: 13
+  channel_id: 3
+  site_id: 101
+  value: 25
+  dt: 2007-03-02 11:00:00

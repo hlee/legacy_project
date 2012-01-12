@@ -1,0 +1,27 @@
+<%if @anl.status==10 %>
+<h1>Switch Test Error</h1>
+<br>
+
+<div style="margin-top:20px;margin-left:20px">
+
+Analyzer <%=@anl.name%> is not connected.<br> 
+Please connect it first before test switch.
+</div>
+<%else%>
+<%= periodically_call_remote(
+              :url => {:controller => '/setup', :action => 'show_switch_port',:id => @anl.id}, 
+			  :frequency => '2', 
+			  :update => 'nbr_port')%>
+<br>
+
+<h1>Switch Test</h1>
+<br>
+
+<div style="margin-top:20px;margin-left:20px">
+current analyzer is <%=@anl.name%><br />
+<span id='nbr_port'>
+<%=image_tag('spinner.gif')%><br/>
+Cautions: Switch Test is running, Please DONOT click test again. 
+</span>
+</div>
+<%end%>

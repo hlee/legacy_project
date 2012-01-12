@@ -1,0 +1,25 @@
+<h1>Editing <%= @config_param.name %></h1>
+
+<% form_tag :action => 'update', :id => @config_param do %>
+   <%if @config_param.name=="Unit Of Measure"%>
+   <p><label for="config_param_val">Val</label><br/>
+       	<select name='config_param[val]'>
+          <%=options_for_select([
+			  ["dBuV", 1],
+			  ["dBmV", 2]], 
+			  @config_param.val.to_i)
+     	  %>
+        </select>
+   <%else%>
+	<%= render :partial => 'form' %>
+   <%end%>
+  <%= submit_tag 'Save' %>
+<% end %>
+
+<%=
+      if @config_param.category.eql?('SMTP')
+        link_to 'Return to list', :action => 'smtp_settings'
+      else
+        link_to 'Return to list', :action => 'list'
+      end
+%>

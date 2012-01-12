@@ -1,0 +1,104 @@
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            public function closeme():Boolean
+            {
+                parent.removeChild(this);
+                return true;
+            }
+        
+            public function setLabel(label:String):void
+            {
+                this.label = label;
+            }
+        
+            public function setChannelInfo(obj:Object):void
+            {
+                chnbr.text = obj.channel_nbr;
+                chfreq.text = ((obj.channel_freq * 1.0) / 1000000).toString() + " MHz";
+                mod.text = getModulationName(obj.modulation);
+                chname.text = obj.channel_name;
+                uom.text = obj.uom;
+            }
+            
+            public static function getModulationName(id:uint):String
+            {
+                switch(id)
+                {
+                    case 300:   return "Unknown";
+                    case 0:     return "QPSK";
+                    case 1:     return "QAM64";
+                    case 2:     return "QAM128";
+                    case 3:     return "QAM256";
+                    case 4:     return "QAM16";
+                    case 5:     return "QAM32";
+                    case 6:     return "QPR";
+                    case 7:     return "FSK";
+                    case 8:     return "BPSK";
+                    case 9:     return "CW";
+                    case 10:    return "VSB-AM";
+                    case 11:    return "FM";
+                    case 12:    return "CDMA";
+                    case 100:   return "NTSC";
+                    case 101:   return "PAL-B";
+                    case 102:   return "PAL-G";
+                    case 103:   return "PAL-I";
+                    case 104:   return "PAL-M";
+                    case 105:   return "PAL-N";
+                    case 106:   return "SECAM-B";
+                    case 107:   return "SECAM-G";
+                    case 108:   return "SECAM-K";
+                    case 200:   return "OFDM";            
+                }
+            
+                return "Unknown";
+            }             
+        ]]>             
+    </mx:Script>
+    <mx:HBox width="100%" paddingLeft="5" paddingRight="5" paddingTop="5">       
+        <mx:Grid width="100%">
+            <mx:GridRow>
+                <mx:GridItem>
+                    <mx:Label styleName="tableHeader" text="Channel Number"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:Text id="chnbr"/>
+                </mx:GridItem>
+            </mx:GridRow>
+            <mx:GridRow>
+                <mx:GridItem>
+                    <mx:Label styleName="tableHeader" text="Channel Frequency"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:Text id="chfreq"/>
+                </mx:GridItem>
+            </mx:GridRow>
+            <mx:GridRow>
+                <mx:GridItem>
+                    <mx:Label styleName="tableHeader" text="Channel Name"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:Text id="chname"/>
+                </mx:GridItem>
+            </mx:GridRow>
+            <mx:GridRow>
+                <mx:GridItem>
+                    <mx:Label styleName="tableHeader" text="Modulation"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:Text id="mod"/>
+                </mx:GridItem>
+            </mx:GridRow>
+            <mx:GridRow>
+                <mx:GridItem>
+                    <mx:Label styleName="tableHeader" text="Unit of Measure"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:Text id="uom"/>
+                </mx:GridItem>
+            </mx:GridRow>
+        </mx:Grid>
+        <mx:Button click="closeme()" label="Close"/>
+    </mx:HBox>
+</mx:VBox>

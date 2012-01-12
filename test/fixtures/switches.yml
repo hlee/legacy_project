@@ -1,0 +1,56 @@
+sw1:
+  id: 1
+  analyzer_id: 1
+  master_switch_flag: 0
+  switch_name: Switch 1
+  port_count: 16
+  address: 1
+sw2:
+  id: 2
+  analyzer_id: 1
+  master_switch_flag: 0
+  switch_name: Switch 2
+  port_count: 16
+  address: 2
+sw3:
+  id: 3
+  analyzer_id: 1
+  master_switch_flag: 0
+  switch_name: Switch 3
+  port_count: 16
+  address: 3
+sw4:
+  id: 4
+  analyzer_id: 1
+  master_switch_flag: 0
+  switch_name: Switch 4
+  port_count: 16
+  address: 4
+sw5:
+  id: 5
+  analyzer_id: 5
+  switch_name: Switch 0
+  master_switch_flag: 1
+  port_count: 16
+  address: 1
+sw6:
+  id: 6
+  analyzer_id: 1
+  switch_name: Switch 6
+  master_switch_flag: 0
+  port_count: 16
+  address: 5
+sw7:
+  id: 7
+  analyzer_id: 5
+  switch_name: Switch 0
+  master_switch_flag: 0
+  port_count: 16
+  address: 2
+sw8:
+  id: 8
+  analyzer_id: 5
+  switch_name: Switch 0
+  master_switch_flag: 0
+  port_count: 16
+  address: 3

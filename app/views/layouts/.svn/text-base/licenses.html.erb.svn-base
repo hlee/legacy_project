@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-AU">
+<head>
+  <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+  <meta name="author" content="sunrise">
+  <meta name="generator" content="sunrise">
+  <title><%= @page_title = "RealWORX" %> <%= @page_subtitle = "Setup" %></title>
+  <%= javascript_include_tag :defaults %>
+  <%= stylesheet_link_tag 'sinorca-screen' %>
+  <%= stylesheet_link_tag 'sinorca-print', :media => 'print' %>
+</head>
+<body>
+  <% @sel=7%>
+  <%= render "shared/header" %>
+  <div id="center">
+  <!-- ##### Side Bar ##### -->
+  <div id="side-bar">
+    <%= render "shared/setup_side_bar" %>
+  </div>
+  <!-- ##### Main Copy ##### -->
+  <div id="main-copy">
+    <div class="error">
+      <%= flash[:error] %>
+    </div>
+    <div class="warning">
+      <%= flash[:warning] %>
+    </div>
+    <div class="notice">
+      <%= flash[:notice] %>
+    </div>
+    <%= yield %>
+  </div>
+  </div>
+  <%= render "shared/footer" %>
+</body>
+</html>

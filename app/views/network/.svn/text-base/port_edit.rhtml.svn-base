@@ -1,0 +1,10 @@
+<h2>Port Edit</h2>
+<% form_tag :action => 'port_update', :id => params[:id] do %>
+  <table>
+    <%= render :partial => 'port_form' %>
+    <tr>
+      <td colspan="2"><%= submit_tag 'Save', { :disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10) } %></td>
+    </tr>
+  </table>
+<% end %>
+

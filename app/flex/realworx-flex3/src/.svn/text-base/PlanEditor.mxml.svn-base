@@ -1,0 +1,914 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" applicationComplete="initApp()" xmlns:controls="com.sunrisetelecom.controls.*">  
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[  
+            import com.sunrisetelecom.utils.Utils;
+            import mx.controls.ComboBox; 
+            import com.sunrisetelecom.controls.TestPlanItem;
+            import com.sunrisetelecom.controls.ImportDialog;
+            import com.sunrisetelecom.controls.CopyDialog;
+            import com.sunrisetelecom.controls.DVChannel;
+            import com.sunrisetelecom.controls.AnalyzerPort;
+            import com.sunrisetelecom.controls.AnalyzerDialog; 
+            import mx.events.FlexEvent; 
+            import mx.collections.Sort;
+            import mx.collections.SortField;
+            import mx.events.MenuEvent;
+            import mx.messaging.Channel;
+            import mx.managers.PopUpManager;
+
+            import mx.collections.ArrayCollection; 
+            import mx.controls.Alert;
+            import com.sunrisetelecom.utils.SystemFile;
+            import mx.rpc.events.ResultEvent;
+            import mx.rpc.events.FaultEvent;
+            import mx.rpc.Fault;
+            import mx.managers.CursorManager;
+
+            private var _sysfileList:Array = null;
+            private var copy_dialog:CopyDialog;
+            private var channel_sig:String="";
+            
+            private var copied_row:Object = null;
+            
+            [Bindable] 
+            private var dpFlat:ArrayCollection = new ArrayCollection();
+            
+            [Bindable]
+            private var channelList:ArrayCollection = new ArrayCollection();
+            
+            [Bindable]
+            private var portList:ArrayCollection = new ArrayCollection();
+            
+            private var import_dialog:ImportDialog;
+            private var analyzer_dialog:AnalyzerDialog;
+            private var analyzer_list:Array;
+            [Bindable]
+            private var _selectedAnalyzer:Object = null;
+            private var target_channel:DVChannel;
+            [Bindable]
+            private var view_descr:String = "All Channel Test Plan";
+		 
+            /////////////////////////////////////
+            // useWebService
+            // Trigger the first amf transactions
+            ///////////////////////////////////
+            private function initApp():void
+            {
+            	//messageService.get_sites.send({site_type: 1});
+            	//messageService.get_measures();
+             	messageService.get_analyzer_list();
+            	buildGrid();
+            	testplanbox.addEventListener(FlexEvent.SHOW, refreshData);
+            	//step_list.addEventListener("show",refreshData);
+                CursorManager.setBusyCursor();
+                tabs.selectedIndex = 0;
+            }
+
+            private function refreshData(ev:FlexEvent):void
+            {
+            	channelList.refresh();
+            	dpFlat.refresh();
+            	//step_list.validateNow();
+            }
+
+            public function pasteOKed(event:Event):void
+            {
+                _menu.enabled = true;
+                
+            	//Here We Set the values.
+            	var idx:int;
+            	var merged_attributes:Object = {};
+            	var attr:String;
+            	var measures:Array=step_list.get_measures();
+            	for (idx=0;idx<measures.length;idx++)
+            	{
+            		if (copy_dialog.selection_copy[idx].selected == true)
+            		{
+            			attr=measures[idx].ENABLE_FLAG;
+            			merged_attributes[attr]=copied_row[attr];
+            		}
+            		if (copy_dialog.nominal_copy[idx].selected == true)
+            		{
+            			attr=measures[idx].MEAS;
+            			merged_attributes[attr]=copied_row[attr];
+            		}
+            		if (copy_dialog.minor_copy[idx].selected == true)
+            		{
+            			attr=measures[idx].MEAS_MINOR;
+            			merged_attributes[attr]=copied_row[attr];
+            		}
+            		if (copy_dialog.major_copy[idx].selected == true)
+            		{
+            			attr=measures[idx].MEAS_MAJOR;
+            			merged_attributes[attr]=copied_row[attr];
+            		}
+            	}
+            
+            	for (idx=0;idx<step_list.selectedIndices.length;idx++)
+            	{
+            		
+            		for (var key:Object in merged_attributes)
+            		{
+            			dpFlat[step_list.selectedIndices[idx]][key]=merged_attributes[key];
+            		}
+            
+            	}
+            	dpFlat.refresh();
+            }
+            
+            private function buildGrid():void
+            {
+            	messageService.get_system_file_list();
+            	CursorManager.setBusyCursor();
+            
+            }
+            
+            private function addMeasures():void
+            {
+            	// ANALOG MEASUREMENTS
+            	step_list.addMeasure("VIDEO_LVL", "Video Level", true, true, true); 
+            	step_list.addMeasure("VARATIO", "V/A Ratio", true, true, true);
+            	step_list.addMeasure("MEASURED_VIDEO_FREQ", "Measured Video Freq", true, true, true);
+            	step_list.addMeasure("MEASURED_AUDIO_FREQ", "Measured Audio Freq", true, true, true);
+            	
+            	//step_list.addMeasure("VA_RATIO2","VA_RATIO2_MINOR","VA_RATIO2_MAJOR","V/A Ratio 2",true,true,true);
+            	//step_list.addMeasure("DOM","DOM_MINOR","DOM_MAJOR","DOM",true,true,true);
+            	//step_list.addMeasure("CTN","CTN_MINOR","CTN_MAJOR","CTN",true,true,true);
+            	//step_list.addMeasure("CSO","CSO_MINOR","CSO_MAJOR","CSO",true,true,true);
+            	//step_list.addMeasure("CTB","CTB_MINOR","CTB_MAJOR","CTB",true,true,true);
+
+            	//DIGITAL MEASUREMENTS
+            	step_list.addMeasure("MER", "MER", true, false, false);
+            	step_list.addMeasure("PRE_BER", "PRE BER", false, false, false);
+            	step_list.addMeasure("POST_BER", "POST BER", false, false, false);
+            	step_list.addMeasure("DCP", "DCP", true, true, false);
+            
+            	step_list.addMeasure("ENM", "ENM", true, false, false);
+            	step_list.addMeasure("EVM", "EVM", false, true, false);
+            	//step_list.addMeasure("S_N","S_N_MINOR","S_N_MAJOR","S/N",false,true,false);
+            
+            	step_list.updateNow();
+            }
+
+            private function createStep():void 
+            {
+                if(channelList.length == 0)
+                {
+                    Alert.show("There is no channel in Channel Plan.");
+                    return;
+                }
+
+            	var port:AnalyzerPort = null;
+            	if(portList.length != 0)
+            	{
+            		port = portList[0];
+            	}
+            	dpFlat.addItem(new TestPlanItem(channelList[0],port));
+            	tabs.selectedIndex = 1;
+            	copied_row = null;
+            }
+            
+            private function measureStep():void
+            {
+            	var idx:int = 0;
+            	if((step_list == null) || (step_list.selectedIndices.length == 0))
+            	{
+            		Alert.show("No Steps in the Test Plan tab have been selected.");
+            		return;
+            	}
+            	var step_idxs:Array = step_list.selectedIndices;
+            	step_idxs.sort(Array.NUMERIC);
+            	
+            	for(idx = 0; idx < step_idxs.length; idx++)
+            	{
+            		var data:Object = new Object();
+            		var orig:Object = dpFlat[step_idxs[idx]];
+            		
+            		data.analyzer_id = _selectedAnalyzer.analyzer_id;
+            		data.port=orig.port;
+            		data.audio_offset = orig.channel.audio1_offset;
+            		data.bandwidth = orig.channel.bandwidth;
+            		data.freq = orig.channel.frequency;
+            		data.modulation = orig.channel.modulation;
+            		data.annex = orig.channel.annex;
+            		data.idx = step_idxs[idx];
+            		if(orig.port != null)
+            		{
+            			data.switch_port_id = orig.port.port_id;	 
+            		}
+            		messageService.measure_command(data);
+            		CursorManager.setBusyCursor();
+            	}
+            }
+            
+            private function copyTestData():void
+            {
+            	if((step_list == null) || (step_list.selectedIndices.length == 0))
+            	{
+            		Alert.show("No steps in the Test Plan have been selected.");
+            		return;
+            	}
+            	if(step_list.selectedIndices.length > 1)
+            	{
+            		Alert.show("Only select one row when copying test data.")
+            		return;
+            	}
+            	
+            	copied_row = step_list.selectedItem;
+            }
+            
+            private function pasteTestData():void
+            {
+                if(!_menu.enabled) return;
+                
+            	if((step_list == null) || (step_list.selectedIndices.length == 0))
+            	{
+            		Alert.show("No steps in the Test Plan have been selected to paste data into.");
+            		return;
+            	}		
+            	if(copied_row == null)
+            	{
+            		Alert.show("No row has been copied");
+            		return;
+            	}
+            	copy_dialog = CopyDialog(PopUpManager.createPopUp(Application.application as DisplayObject,CopyDialog));
+            		
+            	var measures:Array = step_list.get_measures();
+            	copy_dialog.loadData(measures);
+            	_menu.enabled = false;
+            	PopUpManager.centerPopUp(copy_dialog);
+            	copy_dialog["okButton"].addEventListener("click", pasteOKed);
+            	copy_dialog["cancelButton"].addEventListener("click", cancelDialog);
+            }
+            
+            private function deleteStep():void
+            {
+            	var idx:int = 0;
+            	if((step_list == null) || (step_list.selectedIndices.length == 0))
+            	{
+            		Alert.show("No step in the Test Plan tab have been selected");
+            		return;
+            	}
+            	copied_row = -1;
+            	tabs.selectedIndex = 1;
+            	var del_idxs:Array = step_list.selectedIndices;
+            	del_idxs.sort(Array.NUMERIC|Array.DESCENDING);
+            	for(idx = 0;idx < del_idxs.length; idx++)
+            	{
+            		dpFlat.removeItemAt(del_idxs[idx]);
+            	}
+            }
+            
+            private function createChannel():void
+            {
+            	var ch:int = channelList.length + 2;
+            	channelList.addItem(new DVChannel("CUSTOM", ch.toString(),"CHL - " + ch.toString(), 55000000, "QAM256", 6000000));
+            	tabs.selectedIndex=0;
+            }
+            
+            private function deleteChannel():void
+            {
+            	if((channel_list == null) || (channel_list.selectedIndex == -1))
+            	{
+            		Alert.show("No channel in Channel Plan has been selected");
+            		return;
+            	}
+            	var tests_for_channel:ArrayCollection = new ArrayCollection(dpFlat.source);
+            	target_channel = channelList[channel_list.selectedIndex];
+            	tests_for_channel.filterFunction = findChannel;
+            	tests_for_channel.refresh();
+            	if(tests_for_channel.length > 0)
+            	{
+            		Alert.show("Unable to delete channel, currently used in test plan.");
+            	}
+            	else
+            	{
+            		channelList.removeItemAt(channel_list.selectedIndex);
+            		tabs.selectedIndex = 0;
+            	}
+            }
+            
+            private function findChannel(item:Object):Boolean
+            {
+            	if(target_channel == item.channel as DVChannel)
+            	{
+            		return true;
+            	}
+            	return false;
+            }
+            
+            private function deleteAll():void
+            {
+                dpFlat.removeAll();
+                channelList.removeAll();
+                
+                dpFlat.refresh();
+                channelList.refresh();
+            }
+            
+            private function saveData():void
+            {
+            	var duplicate_tests:ArrayCollection = new ArrayCollection(dpFlat.source);
+            	var save_data:ArrayCollection = new ArrayCollection();
+            	var i:int;
+            	var j:int;
+            	duplicate_tests.filterFunction = findChannel;
+                var meas_cfg:Array = step_list.get_measures();
+            	for(i=0; i<dpFlat.length; i++)
+            	{
+            	    var tp:TestPlanItem = dpFlat[i] as TestPlanItem;
+            		if(!tp.validate(meas_cfg)) 
+            		{
+            			Alert.show("Found Error for channel " + tp.channel_name + ": {" + tp.errorString+ "}");
+            			return;
+            		}
+            	}
+            	for(i = 0; i < channelList.length; i++)
+            	{
+            		var obj:Object= {channel:channelList[i], tests:new ArrayCollection()};
+            		target_channel = channelList[i];
+            		duplicate_tests.filterFunction = findChannel;
+            		duplicate_tests.refresh();
+            		
+            		for(j = 0; j < duplicate_tests.length; j++)
+            		{
+            			var key_pattern:RegExp = /^([A-Z_])+$/;
+            			var test_obj:Object = {};
+            			test_obj["port"] = duplicate_tests[j]["port"];
+            			for(var key:String in duplicate_tests[j])
+            			{
+            				if(key_pattern.test(key))
+            				{
+            					test_obj[key] = duplicate_tests[j][key];
+            				}
+            			}
+            			
+            			obj.tests.addItem(test_obj);
+            		}
+            		save_data.addItem(obj);
+            	}
+            	
+            	messageService.save_test_plan({testplan:save_data, analyzer:_selectedAnalyzer.analyzer_id});
+            	CursorManager.setBusyCursor();
+            }
+            
+            private function loadData():void
+            {
+            	messageService.load_test_plan({analyzer_id:_selectedAnalyzer.analyzer_id});
+            	CursorManager.setBusyCursor();
+            }
+
+            private function menuClick(event:MenuEvent):void
+            {
+                var id:String = (event.item.@id).toString();
+                
+                switch(id)
+                {
+                	case "switch_analyzer":
+                    	{
+                            messageService.get_analyzer_list();
+                    	}
+                    	break;
+                	case "save":
+                    	{
+                    		saveData();
+                    	}
+                	   break;
+                	case "load":
+                    	{
+                    		loadData();
+                    	}
+                    	break;
+                	case "add_step":
+                    	{
+                    		createStep();
+                    	}
+                    	break;
+                    case "measure_step":
+                    	{
+                    		measureStep();
+                    	}
+                        break;
+                	case "delete_step":
+                    	{
+                    		deleteStep();
+                    	}
+                    	break;
+                	case "add_channel":
+                    	{
+                    		createChannel();
+                    	}
+                    	break;
+                	case "delete_channel":
+                    	{
+                    		deleteChannel();
+                    	}
+                    	break;
+                	case "delete_all":
+                    	{
+                    	    deleteAll();
+                    	}
+                    	break;
+                	case "copy_tests":
+                    	{
+                    		copyTestData();
+                    	}
+                    	break;
+                	case "paste_tests":
+                    	{
+                    		pasteTestData();
+                    	}
+                    	break;
+                	case "analog_view":
+                    	{
+                    		dpFlat.filterFunction = isAnalog;
+                    		dpFlat.refresh();
+                    		tabs.selectedIndex = 1;
+                    		step_list.view_mode(true, false);
+                    		view_descr="Analog Test Plan";
+                    	}
+                    	break;
+                	case "digital_view":
+                    	{
+                    		dpFlat.filterFunction = isDigital;
+                    		tabs.selectedIndex = 1;
+                    		dpFlat.refresh();
+                    		step_list.view_mode(false, true);
+                    		view_descr="Digital Test Plan";
+                    	}
+                    	break;
+                	case "all_view":
+                    	{
+                    		dpFlat.filterFunction = null;
+                    		tabs.selectedIndex = 1;
+                    		dpFlat.refresh();
+                    		step_list.view_mode(true, true);
+                    		view_descr="All Channel Test Plan";
+                    	}
+                    	break;
+                	case "import_sf":
+                    	{
+                    	    _menu.enabled = false;
+                            import_dialog = ImportDialog(PopUpManager.createPopUp(this, ImportDialog));
+                            import_dialog["okButton"].addEventListener("click", importData);
+                            import_dialog["cancelButton"].addEventListener("click", cancelDialog);
+                            import_dialog.loadData(_sysfileList, portList.source);
+                            PopUpManager.centerPopUp(import_dialog);            
+                    	}
+                    	break;
+                }
+            }
+            
+            private function isAnalog(item:Object):Boolean
+            {
+            	var dv:DVChannel = (item as TestPlanItem).channel;
+
+            	return dv.is_analog;
+            }
+            
+            private function isDigital(item:Object):Boolean
+            {
+            	var dv:DVChannel=(item as TestPlanItem).channel;
+
+            	return !dv.is_analog;			
+            }
+            
+            private function importData(event:Event = null):void
+            {
+                _menu.enabled = true;
+                
+                var id:Object = import_dialog.test_plan_list.selectedItem.test_plan_id;
+                if(id == null) return;
+
+            	messageService.get_test_plan_data({test_plan_id:id});
+            	CursorManager.setBusyCursor();
+            }
+            
+            private function cancelDialog(event:Event = null):void
+            {
+                _menu.enabled = true;
+            }
+            
+            private function buildPortList(event:Event = null):void
+            {
+                _selectedAnalyzer = analyzer_dialog.selectedAnalyzer;
+                
+            	messageService.get_port_list.send({analyzer_id:_selectedAnalyzer.analyzer_id});
+            	CursorManager.setBusyCursor();
+            }
+            
+            /////////////////////////////
+            // onWebServiceFault
+            // If an error occurs show an alert message
+            ////////////////////////////
+            private function onWebServiceFault(event:FaultEvent):void
+            {
+            	var fault:Fault = event.fault;
+                var message:String = "An error occurred." + fault.message + "|" + fault.faultString;
+                Alert.show(message);
+                CursorManager.removeBusyCursor();
+            }
+            
+            private function onGetSystemFileList(event:ResultEvent):void
+            {
+            	_sysfileList = Utils.convertArray(event.result as Array);
+            	CursorManager.removeBusyCursor();
+            }
+            
+            private function onGetAnalyzerList(event:ResultEvent):void
+            {
+                if(!_menu.enabled) return;
+                
+                _menu.enabled = false;
+                
+            	analyzer_dialog = AnalyzerDialog(PopUpManager.createPopUp(this, AnalyzerDialog));
+
+              	analyzer_dialog["okButton"].addEventListener("click", buildPortList);
+              	analyzer_dialog["cancelButton"].addEventListener("click", cancelDialog);
+              	
+              	if(!_selectedAnalyzer)
+              	{
+              		analyzer_dialog.cancel_enabled = false;
+              	}
+              	else
+              	{
+              		analyzer_dialog.cancel_enabled = true;
+              	}
+              	
+            	analyzer_list = Utils.convertArray(event.result as Array);
+            	
+            	analyzer_dialog.loadData(analyzer_list);
+            	PopUpManager.centerPopUp(analyzer_dialog);
+            	CursorManager.removeBusyCursor();
+            }
+            
+            private function onGetPortList(event:ResultEvent):void
+            {
+            	var portarr:Array = new Array();
+            	var analyzer_ports:Array = event.result as Array;
+            	var i:int;
+            	for(i = 0; i < analyzer_ports.length; i++)
+            	{
+            		var port:Object = analyzer_ports[i];
+            		portarr.push(new AnalyzerPort(port.port_id, port.port_name, port.site));
+            	}
+            	portList = new ArrayCollection(portarr);	
+            	_menu.enabled = true;
+            	CursorManager.removeBusyCursor();
+            	loadData();
+            }
+            private function canidateFilter(item:Object):Boolean
+            {
+               if (channel_sig == item.label)
+               {
+                  return true;
+               }
+               trace(channel_sig +"," + item.label);
+               return false;
+            }
+            
+            private function onGetTestPlanData(event:ResultEvent):void
+            {
+            	var channel_count:int = event.result.channels.length;
+            	var i:int = 0;
+            	for(i = 0; i < channel_count; i++)
+            	{
+            		var chobj:Object = event.result.channels[i];
+            		var dv:DVChannel;
+            		var systemFileCombo:ComboBox = import_dialog.system_file_list;
+                        var canidates:ArrayCollection=channelList;
+                        ////////////////////////////////
+                        /////////////////////////////////
+                        /////////////////////////////////
+            		if(chobj.channel_type == DVChannel.DIGITAL)
+            		{
+                        dv = new DVChannel(systemFileCombo.selectedItem["display_name"], chobj.channel_nbr, chobj.channel_name, chobj.frequency, chobj.modulation, chobj.bandwidth);
+                        dv.symbol_rate = chobj.symbol_rate;
+                        dv.annex = chobj.annex;
+                        dv.polarity = chobj.polarity;
+            		}
+            		else
+            		{
+            			dv = new DVChannel(systemFileCombo.selectedItem["display_name"], chobj.channel_nbr, chobj.channel_name, chobj.frequency, chobj.modulation, chobj.bandwidth, chobj.va1, chobj.va2);
+            		}
+            		
+                    channel_sig = dv.label;
+                    canidates.filterFunction = canidateFilter;
+                    canidates.refresh();
+                    if(canidates.length > 0)
+                    { // Use existing channel
+                        dv = channelList.getItemAt(0) as DVChannel;
+                        canidates.filterFunction = null;
+                        canidates.refresh();
+                    }
+                    else
+                    { // Add new channel
+                        canidates.filterFunction = null;
+                        canidates.refresh();
+                        channelList.addItem(dv);
+                    }
+                    
+                    var count:int = import_dialog.selectedPortList.length;
+                    
+                    if(count > 0)
+                    {
+                        for each(var obj:Object in import_dialog.selectedPortList)
+                        {
+                            updateTestPlan(dv, chobj, obj, event.result.tests);
+                        }
+                    }
+                    else
+                    {
+                        updateTestPlan(dv, chobj, null, event.result.tests);
+                    }
+            	}
+            	
+            	CursorManager.removeBusyCursor();
+            }
+            
+            private function updateTestPlan(dv:DVChannel, chobj:Object, obj:Object, tests:Object):void
+            {
+                var port:AnalyzerPort = null;
+                
+                if(obj != null)
+                {
+                    port = new AnalyzerPort(obj.data, obj.label, obj.site);
+                }
+                
+                var tpi:TestPlanItem = new TestPlanItem(dv, port);
+                
+                if(chobj.channel_type == DVChannel.DIGITAL)
+                {
+                    if(chobj.modulation == "QAM256")
+                    {
+                        tpi["PRE_BER"] = tests["BER_PRE_256"];
+                        tpi["PRE_BER_ENABLE_FLAG"] = tests["BER_PRE_256_ENABLE_FLAG"];
+                        if(tpi["PRE_BER_ENABLE_FLAG"] != null) tpi["PRE_BER_ENABLE_FLAG"] = false;
+                        tpi["PRE_BER_MAJOR"] = tests["BER_PRE_256_MAJOR"];
+                        tpi["PRE_BER_MINOR"] = tests["BER_PRE_256_MINOR"];
+                        
+                        tpi["POST_BER"] = tests["BER_POST_256"];
+                        tpi["POST_BER_ENABLE_FLAG"] = tests["BER_POST_256_ENABLE_FLAG"];
+                        if(tpi["BER_POST_256_ENABLE_FLAG"] != null) tpi["BER_POST_256_ENABLE_FLAG"] = false;
+                        tpi["POST_BER_MAJOR"] = tests["BER_POST_256_MAJOR"];
+                        tpi["POST_BER_MINOR"] = tests["BER_POST_256_MINOR"];
+                        
+                        tpi["MER"] = tests["MER_256"];
+                        tpi["MER_ENABLE_FLAG"] = tests["MER_256_ENABLE_FLAG"];
+                        if(tpi["MER_256_ENABLE_FLAG"] != null) tpi["MER_256_ENABLE_FLAG"] = false;
+                        tpi["MER_MAJOR"] = tests["MER_256_MAJOR"];
+                        tpi["MER_MINOR"] = tests["MER_256_MINOR"];
+                    }
+        
+                    if(chobj.modulation == "QAM64")
+                    {
+                        tpi["PRE_BER"] = tests["BER_PRE_64"];
+                        tpi["PRE_BER_ENABLE_FLAG"] = tests["BER_PRE_64_ENABLE_FLAG"];
+                        if(tpi["BER_PRE_64_ENABLE_FLAG"] != null) tpi["BER_PRE_64_ENABLE_FLAG"] = false;
+                        tpi["PRE_BER_MAJOR"] = tests["BER_PRE_64_MAJOR"];
+                        tpi["PRE_BER_MINOR"] = tests["BER_PRE_64_MINOR"];
+                        
+                        tpi["POST_BER"] = tests["BER_POST_64"];
+                        tpi["POST_BER_ENABLE_FLAG"] = tests["BER_POST_64_ENABLE_FLAG"];
+                        if(tpi["BER_POST_64_ENABLE_FLAG"] != null) tpi["BER_POST_64_ENABLE_FLAG"] = false;
+                        tpi["POST_BER_MAJOR"] = tests["BER_POST_64_MAJOR"];
+                        tpi["POST_BER_MINOR"] = tests["BER_POST_64_MINOR"];
+                        
+                        tpi["MER"] = tests["MER_64"];
+                        tpi["MER_ENABLE_FLAG"] = tests["MER_64_ENABLE_FLAG"];
+                        if(tpi["MER_64_ENABLE_FLAG"] != null) tpi["MER_64_ENABLE_FLAG"] = false;
+                        tpi["MER_MAJOR"] = tests["MER_64_MAJOR"];
+                        tpi["MER_MINOR"] = tests["MER_64_MINOR"];
+                    }
+                    
+                    tpi["ENM"] = tests["ENM"];
+                    tpi["ENM_ENABLE_FLAG"] = tests["ENM_ENABLE_FLAG"];
+                    if(tpi["ENM_ENABLE_FLAG"] != null) tpi["ENM_ENABLE_FLAG"] = false;
+                    tpi["ENM_MAJOR"] = tests["ENM_MAJOR"];
+                    tpi["ENM_MINOR"] = tests["ENM_MINOR"];
+                    
+                    tpi["EVM"] = tests["EVM"];
+                    tpi["EVM_ENABLE_FLAG"] = tests["EVM_ENABLE_FLAG"];
+                    if(tpi["EVM_ENABLE_FLAG"] != null) tpi["EVM_ENABLE_FLAG"] = false;
+                    tpi["EVM_MAJOR"] = tests["EVM_MAJOR"];
+                    tpi["EVM_MINOR"] = tests["EVM_MINOR"];
+                    
+                    tpi["DCP"] = tests["DCP"];
+                    tpi["DCP_ENABLE_FLAG"] = tests["DCP_ENABLE_FLAG"];
+                    if(tpi["DCP_ENABLE_FLAG"] != null) tpi["DCP_ENABLE_FLAG"] = false;
+                    tpi["DCP_MAJOR"] = tests["DCP_MAJOR"];
+                    tpi["DCP_MINOR"] = tests["DCP_MINOR"];             
+                }
+                else /*Analog Channel */
+                {
+                    tpi["VIDEO_LVL"] = tests["VIDEO_LVL"];
+                    tpi["VIDEO_LVL_ENABLE_FLAG"] = tests["VIDEO_LVL_ENABLE_FLAG"];
+                    if(tpi["VIDEO_LVL_ENABLE_FLAG"] != null) tpi["VIDEO_LVL_ENABLE_FLAG"] = false;
+                    tpi["VIDEO_LVL_MAJOR"] = tests["VIDEO_LVL_MAJOR"];
+                    tpi["VIDEO_LVL_MINOR"] = tests["VIDEO_LVL_MINOR"];
+
+                    tpi["VARATIO"] = tests["VARATIO"];
+                    tpi["VARATIO_ENABLE_FLAG"] = tests["VARATIO_ENABLE_FLAG"];
+                    if(tpi["VARATIO_ENABLE_FLAG"] != null) tpi["VARATIO_ENABLE_FLAG"] = false;
+                    tpi["VARATIO_MAJOR"] = tests["VARATIO_MAJOR"];
+                    tpi["VARATIO_MINOR"] = tests["VARATIO_MINOR"];
+                    
+                    tpi["MEASURED_VIDEO_FREQ"] = tests["MEASURED_VIDEO_FREQ"];
+                    tpi["MEASURED_VIDEO_FREQ_ENABLE_FLAG"] = tests["MEASURED_VIDEO_FREQ_ENABLE_FLAG"];
+                    if(tpi["MEASURED_VIDEO_FREQ_ENABLE_FLAG"] != null) tpi["MEASURED_VIDEO_FREQ_ENABLE_FLAG"] = false;
+                    tpi["MEASURED_VIDEO_FREQ_MAJOR"] = tests["MEASURED_VIDEO_FREQ_MAJOR"];
+                    tpi["MEASURED_VIDEO_FREQ_MINOR"] = tests["MEASURED_VIDEO_FREQ_MINOR"];
+                    
+                    tpi["MEASURED_AUDIO_FREQ"] = tests["MEASURED_AUDIO_FREQ"];
+                    tpi["MEASURED_AUDIO_FREQ_ENABLE_FLAG"] = tests["MEASURED_AUDIO_FREQ_ENABLE_FLAG"];
+                    if(tpi["MEASURED_AUDIO_FREQ_ENABLE_FLAG"] != null) tpi["MEASURED_AUDIO_FREQ_ENABLE_FLAG"] = false;
+                    tpi["MEASURED_AUDIO_FREQ_MAJOR"] = tests["MEASURED_AUDIO_FREQ_MAJOR"];
+                    tpi["MEASURED_AUDIO_FREQ_MINOR"] = tests["MEASURED_AUDIO_FREQ_MINOR"];
+                }
+                
+                dpFlat.addItem(tpi);
+            }
+            
+            private function onMeasure(event:ResultEvent):void
+            {
+            	if(event.result.hasOwnProperty("status") && (event.result["status"] == "FAIL")) 
+            	{
+            		Alert.show(event.result["message"]);
+            		CursorManager.removeBusyCursor();
+            	}
+            	else
+            	{
+            		var idx:int = parseInt(event.result["idx"].toString());
+            		var result:Object = event.result;
+            		
+            		if(result.hasOwnProperty("video_lvl"))
+                        dpFlat[idx]["VIDEO_LVL"] = event.result["video_lvl"];
+                        
+            		if(result.hasOwnProperty("audio_lvl"))
+                        dpFlat[idx]["VARATIO"] = event.result["varatio"];
+                        
+            		if(result.hasOwnProperty("dcp"))
+                        dpFlat[idx]["DCP"] = event.result["dcp"];
+
+            		CursorManager.removeBusyCursor();
+            		dpFlat.refresh();
+            	}
+            }
+		
+            private function onSaveData(event:ResultEvent):void
+            {
+            	CursorManager.removeBusyCursor();
+            }
+            
+            private function onLoadTestPlanData(event:ResultEvent):void
+            {
+            	dpFlat.removeAll();
+            	channelList.removeAll();
+            	
+            	var i:int;
+            	for(i = 0; i < event.result.length; i++)
+            	{
+            		var ch:Object = event.result[i]["channel"];
+            		var dvc:DVChannel = new DVChannel(ch["system_file"],ch["channel"],ch["name"],
+            		   ch["freq"],DVChannel.modNameByNumber(ch["modulation"]),ch["bandwidth"],ch["audio1_offset"],ch["audio2_offset"]);
+            		if(!dvc.is_analog)
+            		{
+            		   dvc.symbol_rate = ch["symbol_rate"];
+            		   dvc.annex = ch["annex"]; 
+            		   dvc.polarity = ch["polarity"];
+            		}
+            		channelList.addItem(dvc);
+            		var tests:Array = event.result[i]["tests"] as Array;
+            		var j:int;
+            		for(j = 0; j < tests.length; j++)
+            		{
+            			var port:AnalyzerPort;
+            			var k:int;
+            			for(k = 0; k < portList.length; k++)
+            			{
+            				if(tests[j].port_id == portList[k].port_id)
+            				{
+            				   port = portList[k];
+            				   k = portList.length; //End the k loop.
+            				}
+            			}
+            			
+            			var tp:TestPlanItem = new TestPlanItem(dvc,port);
+            			for(var key:Object in tests[j])
+            			{
+            				tp[key] = tests[j][key];
+            			}
+            			
+                        tp["VIDEO_LVL"] = tests[j]["VIDEO_LVL"];
+                        tp["VIDEO_LVL_ENABLE_FLAG"] = tests[j]["VIDEO_LVL_ENABLE_FLAG"];
+                        tp["VIDEO_LVL_MAJOR"] = tests[j]["VIDEO_LVL_MAJOR"];
+                        tp["VIDEO_LVL_MINOR"] = tests[j]["VIDEO_LVL_MINOR"];
+            			
+            			tp["VARATIO"] = tests[j]["VARATIO"];
+            			tp["VARATIO_ENABLE_FLAG"] = tests[j]["VARATIO_ENABLE_FLAG"];
+            			tp["VARATIO_MAJOR"] = tests[j]["VARATIO_MAJOR"];
+            			tp["VARATIO_MINOR"] = tests[j]["VARATIO_MINOR"];
+            			
+                        tp["MEASURED_VIDEO_FREQ"] = tests[j]["MEASURED_VIDEO_FREQ"];
+                        tp["MEASURED_VIDEO_FREQ_ENABLE_FLAG"] = tests[j]["MEASURED_VIDEO_FREQ_ENABLE_FLAG"];
+                        tp["MEASURED_VIDEO_FREQ_MAJOR"] = tests[j]["MEASURED_VIDEO_FREQ_MAJOR"];
+                        tp["MEASURED_VIDEO_FREQ_MINOR"] = tests[j]["MEASURED_VIDEO_FREQ_MINOR"];
+                        
+                        tp["MEASURED_AUDIO_FREQ"] = tests[j]["MEASURED_AUDIO_FREQ"];
+                        tp["MEASURED_AUDIO_FREQ_ENABLE_FLAG"] = tests[j]["MEASURED_AUDIO_FREQ_ENABLE_FLAG"];
+                        tp["MEASURED_AUDIO_FREQ_MAJOR"] = tests[j]["MEASURED_AUDIO_FREQ_MAJOR"];
+                        tp["MEASURED_AUDIO_FREQ_MINOR"] = tests[j]["MEASURED_AUDIO_FREQ_MINOR"];
+            			
+                        tp["PRE_BER"] = tests[j]["PRE_BER"];
+                        tp["PRE_BER_ENABLE_FLAG"] = tests[j]["PRE_BER_ENABLE_FLAG"];
+                        tp["PRE_BER_MAJOR"] = tests[j]["PRE_BER_MAJOR"];
+            			tp["PRE_BER_MINOR"] = tests[j]["PRE_BER_MINOR"];
+            			
+            			tp["POST_BER"] = tests[j]["POST_BER"];
+                        tp["POST_BER_ENABLE_FLAG"] = tests[j]["POST_BER_ENABLE_FLAG"];
+            			tp["POST_BER_MAJOR"] = tests[j]["POST_BER_MAJOR"];
+            			tp["POST_BER_MINOR"] = tests[j]["POST_BER_MINOR"];
+            			
+            			tp["MER"] = tests[j]["MER"];
+            			tp["MER_ENABLE_FLAG"] = tests[j]["MER_ENABLE_FLAG"];
+            			tp["MER_MAJOR"] = tests[j]["MER_MAJOR"];
+            			tp["MER_MINOR"] = tests[j]["MER_MINOR"];
+
+            			tp["ENM"] = tests[j]["ENM"];
+            			tp["ENM_ENABLE_FLAG"] = tests[j]["ENM_ENABLE_FLAG"];
+            			tp["ENM_MAJOR"] = tests[j]["ENM_MAJOR"];
+            			tp["ENM_MINOR"] = tests[j]["ENM_MINOR"];
+            			
+            			tp["EVM"] = tests[j]["EVM"];
+            			tp["EVM_ENABLE_FLAG"] = tests[j]["EVM_ENABLE_FLAG"];
+            			tp["EVM_MAJOR"] = tests[j]["EVM_MAJOR"];
+            			tp["EVM_MINOR"] = tests[j]["EVM_MINOR"];
+            			
+            			tp["DCP"] = tests[j]["DCP"];
+            			tp["DCP_ENABLE_FLAG"] = tests[j]["DCP_ENABLE_FLAG"];
+            			tp["DCP_MAJOR"] = tests[j]["DCP_MAJOR"];
+            			tp["DCP_MINOR"] = tests[j]["DCP_MINOR"];
+            			
+            			dpFlat.addItem(tp);
+            		}
+            	}
+            	
+            	CursorManager.removeBusyCursor();
+            }
+        ]]>
+    </mx:Script>
+    <mx:RemoteObject id="messageService" fault="onWebServiceFault(event)" source="AmfServicesController" destination="rubyamf">
+        <mx:method name="get_system_file_list" result="onGetSystemFileList(event)" />
+        <mx:method name="get_analyzer_list" result="onGetAnalyzerList(event)"/>   
+        <mx:method name="get_port_list" result="onGetPortList(event)"/>	
+        <mx:method name="get_test_plan_data" result="onGetTestPlanData(event)"/> <!-- This is for importing data from a system file -->
+        <mx:method name="load_test_plan" result="onLoadTestPlanData(event)"/>
+        <mx:method name="save_test_plan" result="onSaveData(event)"/>
+        <mx:method name="measure_command" result="onMeasure(event)"/>
+    </mx:RemoteObject>
+    <mx:VBox styleName="normal" width="100%" height="100%" backgroundColor="#FFFFFF">
+        <mx:MenuBar id="_menu" enabled="true" width="100%" labelField="@label" itemClick="menuClick(event);">
+            <mx:XMLList id="menu_xml">
+                <menuitem label="File">
+                    <menuitem id="switch_analyzer" label="Switch Analyzer" />
+                    <menuitem id="save" label="Save" />
+                    <menuitem id="load" label="Load"/>
+                </menuitem>
+                <menuitem label="View">
+                    <menuitem id="analog_view" enabled="{tabs.selectedIndex==1}" label="Analog View" type="radio" groupName="view"/>
+                    <menuitem id="digital_view" enabled="{tabs.selectedIndex==1}" label="Digital View" type="radio" groupName="view"/>
+                    <menuitem id="all_view" enabled="{tabs.selectedIndex==1}" label="View All" type="radio" groupName="view" toggled="true"/>
+                </menuitem>
+                <menuitem label="Edit">
+                    <menuitem id="add_step" label="Add Step" enabled="{tabs.selectedIndex==1}"/>
+                    <menuitem id="measure_step" label="Get Nominals" enabled="{tabs.selectedIndex==1}"/>
+                    <menuitem id="delete_step" label="Delete Step" enabled="{tabs.selectedIndex==1}"/>
+                    <menuitem id="copy_tests" label="Copy Test" enabled="{tabs.selectedIndex==1}"/>
+                    <menuitem id="paste_tests" label="Paste Test" enabled="{tabs.selectedIndex==1}"/>
+                    <menuitem id="add_channel" label="Add Channel" enabled="{tabs.selectedIndex!=1}"/>
+                    <menuitem id="delete_channel" label="Delete Channel" enabled="{tabs.selectedIndex!=1}"/>
+                    <menuitem id="delete_all" label="Delete All" enabled="true"/>
+                </menuitem>
+                <menuitem label="Import" enabled="true">
+                    <menuitem id="import_sf" label="System File Data" />
+                </menuitem>
+            </mx:XMLList>
+        </mx:MenuBar>
+        <mx:HBox>
+            <mx:Label text="ANALYZER:" styleName="subtitleLabel"/>
+            <mx:Text styleName="normalText" text="{_selectedAnalyzer ? _selectedAnalyzer.analyzer_name : ''}"/>
+            <mx:Label text="TEST PLAN VIEW:" styleName="subtitleLabel" visible="{tabs.selectedIndex == 1}"/>
+            <mx:Text styleName="normalText" text="{view_descr}" visible="{tabs.selectedIndex == 1}"/>
+        </mx:HBox>
+        <mx:TabNavigator id="tabs" borderStyle="solid" width="100%" height="100%" creationPolicy="all">
+            <mx:VBox label="Channel Plan" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+                <controls:ChannelPlanGrid id="channel_list" dp="{channelList}" width="{tabs.width - 2}" height="100%"/>
+            </mx:VBox>
+            <mx:VBox id="testplanbox" label="Test Plan" creationComplete="addMeasures()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+                <controls:TestPlanGrid id="step_list" width="{tabs.width - 2}" height="100%" dataProvider="{dpFlat}" channels="{channelList}" ports="{portList}" allowMultipleSelection="true" />
+            </mx:VBox>
+        </mx:TabNavigator>
+    </mx:VBox>
+</mx:Application>

@@ -1,0 +1,20 @@
+<h2>Network</h2>
+<style>   
+	.buttonup {border:5px solid black; border-top:5px solid silver; border-left: 5px solid silver;}   
+	.buttondown {border:5px solid silver; border-top:5px solid black; border-left: 5px solid black;}
+	.noborder {border:0px; cursor:default;}
+</style>
+<table>
+	<tr>
+		<td><%=link_to(image_tag('analyzer/new.png', :alt=>'Create Analyzer', :class=>'buttonup', :onmouseover=>"this.className='buttondown'", :onmouseout=>"this.className='buttonup'"), {:action=>'analyzer_new', :controller=>'network'}, :title=>'Create Analyzer')%></td>
+	</tr>
+</table>
+	<%= periodically_call_remote(
+			:update => 'analyzer_list',
+			:frequency => 5,
+			:url => {:action => 'update_analyzer_list'})
+	%>
+<div id='analyzer_list'>
+  <%= render :partial => 'analyzer_list' %>
+</div>
+

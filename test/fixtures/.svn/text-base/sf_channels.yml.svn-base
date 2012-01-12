@@ -1,0 +1,46 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+one:
+  id: 1
+  sf_system_file_id: 1
+  channel_number: 1
+  channel_name: ABC
+  channel_type: 0
+  channel_dtls: |
+    videofreq: 55250000
+    modulation: 100
+two:
+  id: 2
+  sf_system_file_id: 1
+  channel_number: 2
+  channel_name: CBS
+  channel_type: 1
+  channel_dtls: |
+    centerfreq: 75250000
+    modulation: 100
+three:
+  id: 3
+  sf_system_file_id: 2
+  channel_number: 3
+  channel_name: NBC
+  channel_type: 1
+  channel_dtls: |
+    centerfreq: 75250000
+    modulation: 100
+four:
+  id: 4
+  channel_number: 4
+  sf_system_file_id: 1
+  channel_name: XPN
+  channel_type: 1
+  channel_dtls: |
+    centerfreq: 61250000
+    modulation: 100
+five:
+  id: 5
+  channel_number: 5
+  sf_system_file_id: 1
+  channel_name: ZYX
+  channel_type: 1
+  channel_dtls: |
+    centerfreq: 67250000
+    modulation: 100

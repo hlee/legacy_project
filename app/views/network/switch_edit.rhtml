@@ -1,0 +1,72 @@
+<% if @switch.master_switch_flag %>
+  <%=button_to('Add Switch',:action=>'switch_new',:controller=>'network',:id=>@switch.analyzer_id)%>
+<% end %>
+<h2>Editing switch on <%= link_to(@analyzer.name, :action => 'switch_list', :id => @analyzer.id) %></h2>
+
+<% form_tag :action => 'switch_update', :id => @switch do %>
+  <table>
+    <%= render :partial => 'switch_form' %>
+    <tr>
+      <td><%= submit_tag 'Save', { :disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10) } %></td>
+<% end %>
+	  <td><%=button_to 'Reset Profile',{:action=>'reset_profile',:controller=>'network',:id=>@switch.id},:disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10),:confirm => "Are you sure?"%></td>
+    </tr>
+  </table>
+
+<p>
+<% if @switch.switch_ports.length > 0 %>
+  <table class="datatable">
+  <tr>
+    <th class="datatable"> Port Name </th>
+    <th class="datatable">Site</th>
+    <th class="datatable">Purpose</th>
+    <th class="datatable">Alarm Profile</th>
+    <th class="datatable" colspan="2">Edit</th>
+  </tr>
+ <% @switch.switch_ports.each { |swp| %>
+  <% @switch_port = swp %>
+  <% @site = @switch_port.site %>
+  <tr>
+    <td>
+      <% if !@analyzer.status.nil? && !@analyzer.status.eql?(10) %>
+        <%= swp.name %>
+      <% else %>
+        <%= in_place_editor_field :switch_port, :name %>
+      <% end %>
+    </td>
+    <td>
+      <% if !@analyzer.status.nil? && !@analyzer.status.eql?(10) %>
+        <%= swp.site.name %>
+      <% else %>
+        <%= in_place_editor_field :site, :name %>
+      <% end %>
+    </td>
+    <td>
+      <span id=<%="purpose_#{swp.id}"%>><%= swp.purpose_label %></span>
+      <% if !@analyzer.status.nil? && !@analyzer.status.eql?(10) %>
+      <% else %>
+        <%= in_place_collection_editor_field 'switch_port', 'purpose', @port_purpose, swp.id %>
+      <% end %>
+    </td>
+    <td>
+      <span id=<%="profile_#{swp.id}"%>><%= swp.profile.nil? ? "Use Analyzer Setting" : swp.profile.name %></span>
+      <% if !@analyzer.status.nil? && !@analyzer.status.eql?(10) %>
+      <% else %>
+        <%= in_place_collection_editor_field 'switch_port', 'profile', @profile_list, swp.id %>
+      <% end %>
+    </td>
+    <td>
+      <%= button_to(
+          'Edit', {
+            :action=>'port_edit',
+            :id=>swp.id
+          }, {
+            :disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10)
+          }
+        )
+      %>
+    </td>
+  </tr>
+ <% } %>
+  </table>
+<% end %>

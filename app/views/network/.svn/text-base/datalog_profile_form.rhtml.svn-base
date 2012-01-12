@@ -1,0 +1,98 @@
+  <script>
+    function disable_count() 
+    {
+      var trigger_type=document.getElementById("trigger_type").value;
+      if (trigger_type== 1)
+      {
+        document.getElementById('freq_count').disabled=true;
+      }
+      if (trigger_type == 2)
+      {
+        document.getElementById('freq_count').disabled=false;
+      }
+    }
+    if (window.addEventListener){ 
+       window.addEventListener('load', disable_count, true);
+     }
+   </script>
+<%= error_messages_for 'datalog_profile' %>
+<form name="datalog_entry" action="/network/datalog_profile_save">
+<%=hidden_field 'datalog_profile','analyzer_id'%>
+<%=hidden_field 'datalog_profile','id'%>
+<% analyzer=Analyzer.find(@datalog_profile.analyzer_id) %>
+<table  class="datatable" width=100%>
+  <tr ><th colspan="2">A Datalog Profile for analyzer  <%=analyzer.name %></th></tr>
+  <tr>
+    <td><label for="datalog_profile_name">Datalog Profile Name</label></td>
+    <td><%= text_field 'datalog_profile', 'name', {:size => 20}  %> <div class="help">Name of the alarm that will be triggered by this profile.</div></td>
+  </tr>
+  <tr>
+    <td><label for="Alarm Trace">Datalog Trace</label></td>
+    <td>
+      <select name="datalog_profile[datalog_trace]">
+        <%=options_for_select([
+          ["Max", 1], 
+          ["Average", 2],
+          ["Min", 3] 
+          ], 
+          @datalog_profile.datalog_trace.to_i)
+        %>
+      </select>
+ <div class="help">Which trace from the datalog to alarm against.</div>
+    </td>
+  </tr>
+  <tr>
+    <td><label for="Alarm Type">Trigger Type</label></td>
+    <td>
+      <select id="trigger_type" name="datalog_profile[trigger_type]" onchange="disable_count()">
+        <%=options_for_select([
+          ["Average", 1], 
+          ["Max", 2] 
+          ], 
+          @datalog_profile.trigger_type.to_i)
+        %>
+      </select>
+ <div class="help">Do you want to alarm against the average of all 4 levels or max of a subset of the levels.</div>
+    </td>
+  </tr>
+  <tr>
+    <td><label>Frequency Count</label></td>
+    <td><%= text_field 'datalog_profile', 'freq_count', {:size => 1, :id=>"freq_count", :disabled=> ((@datalog_profile.trigger_type != 2) ? "false" : "true") }%> 
+ <div class="help">The number of levels that must be above limit to alarm when trigger type = max.</div></td>
+  </tr>
+  <tr>
+    <td><label for="freq">Freq 1</label></td>
+    <td><%= text_field 'datalog_profile', 'freq1_disp', {:size => 8}  %> MHz
+ <div class="help">A frequency to alarm against.</div></td>
+</td>
+  </tr>
+  <tr>
+    <td><label for="freq">Freq 2</label></td>
+    <td><%= text_field 'datalog_profile', 'freq2_disp', {:size => 8}  %> MHz
+ <div class="help">A frequency to alarm against.</div></td>
+  </tr>
+  <tr>
+    <td><label for="freq">Freq 3</label></td>
+    <td><%= text_field 'datalog_profile', 'freq3_disp', {:size => 8}  %> MHz
+ <div class="help">A frequency to alarm against.</div></td>
+  </tr>
+  <tr>
+    <td><label for="freq">Freq 4</label></td>
+    <td><%= text_field 'datalog_profile', 'freq4_disp', {:size => 8}  %> MHz
+ <div class="help">A frequency to alarm against.</div></td>
+  </tr>
+  <tr>
+    <td><label>Bandwidth</label></td>
+    <td><%= text_field 'datalog_profile', 'bandwidth_disp', {:size => 8}  %> kHz
+ <div class="help">The frequency space around frequencies to get the level value</div></td>
+  </tr>
+  <tr>
+    <td><label>Limit</label></td>
+    <td><%= text_field 'datalog_profile', 'limit_val', {:size => 4}  %> dbmv
+ <div class="help">The level that triggers the alarm.</div></td>
+  </tr>
+  <tr>
+    <td colspan="2"><input type="submit" value="Save Profile"/></td>
+  </tr>
+</table>
+</form>

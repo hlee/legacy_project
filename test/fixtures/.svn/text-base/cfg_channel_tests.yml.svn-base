@@ -1,0 +1,128 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+# one:
+#   column: value
+#
+# two:
+#   column: value
+
+one:
+  id: 1
+  cfg_channel_id: 1
+  mer_flag: 1
+  preber_flag: 1
+  postber_flag: 1
+  video_lvl_flag: 1
+  varatio_flag: 1
+  enm_flag: 1
+  evm_flag: 1
+  dcp_flag: 1
+
+two:
+  id: 2
+  cfg_channel_id: 1
+  mer_flag: 0
+  preber_flag: 0
+  postber_flag: 0
+  video_lvl_flag: 0
+  varatio_flag: 0
+  enm_flag: 0
+  evm_flag: 0
+  dcp_flag: 0
+
+three:
+  id: 3
+  cfg_channel_id: 1
+  mer_flag: 0
+  preber_flag: 0
+  postber_flag: 0
+  video_lvl_flag: 0
+  varatio_flag: 0
+  enm_flag: 0
+  evm_flag: 0
+  dcp_flag: 1
+
+four:
+  id: 4
+  cfg_channel_id: 1
+  mer_flag: 1
+  preber_flag: 0
+  postber_flag: 0
+  video_lvl_flag: 0
+  varatio_flag: 0
+  enm_flag: 0
+  evm_flag: 0
+  dcp_flag: 0
+
+five:
+  id: 5
+  cfg_channel_id: 1
+  mer_flag: 0
+  preber_flag: 0
+  postber_flag: 0
+  video_lvl_flag: 1
+  varatio_flag: 0
+  enm_flag: 0
+  evm_flag: 0
+  dcp_flag: 0
+
+six:
+  id: 6
+  cfg_channel_id: 1
+  mer_flag: 0
+  preber_flag: 0
+  postber_flag: 0
+  video_lvl_flag: 0
+  varatio_flag: 1
+  enm_flag: 0
+  evm_flag: 0
+  dcp_flag: 0
+
+
+seven:
+  id: 7
+  cfg_channel_id: 1
+  mer_flag: 0
+  preber_flag: 1
+  postber_flag: 0
+  video_lvl_flag: 0
+  varatio_flag: 0
+  enm_flag: 0
+  evm_flag: 0
+  dcp_flag: 0
+
+eight:
+  id: 8
+  cfg_channel_id: 1
+  mer_flag: 0
+  preber_flag: 0
+  postber_flag: 1
+  video_lvl_flag: 0
+  varatio_flag: 0
+  enm_flag: 0
+  evm_flag: 0
+  dcp_flag: 0
+
+nine:
+  id: 9
+  cfg_channel_id: 1
+  mer_flag: 0
+  preber_flag: 0
+  postber_flag: 0
+  video_lvl_flag: 0
+  varatio_flag: 0
+  enm_flag: 1
+  evm_flag: 0
+  dcp_flag: 0
+
+ten:
+  id: 10
+  cfg_channel_id: 1
+  mer_flag: 0
+  preber_flag: 0
+  postber_flag: 0
+  video_lvl_flag: 0
+  varatio_flag: 0
+  enm_flag: 0
+  evm_flag: 1
+  dcp_flag: 0

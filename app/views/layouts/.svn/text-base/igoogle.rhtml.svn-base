@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-AU">
+	<head>
+	  <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+	  <meta name="author" content="sunrise">
+	  <meta name="generator" content="sunrise">
+	 	<%= stylesheet_link_tag 'sinorca-screen' %>
+	 	<%= stylesheet_link_tag 'sinorca-print', :media => 'print' %>
+		<link href="/igoogle/css/inettuts.css" rel="stylesheet" type="text/css" />
+		<link href="/igoogle/css/widgets.css" rel="stylesheet" type="text/css" />
+		<title><%= @page_title = "RealWORX"%> <%= @page_subtitle = "Dashboard" %></title>
+	</head>	
+	<body onload="dashboardloaded()">
+		<script type="text/javascript">
+			var customEditBoxContent = [];
+		</script>
+		<script type="text/javascript" src="/igoogle/javascripts/jquery-1.2.6.min.js"></script>
+		<script type="text/javascript" src="/igoogle/javascripts/jquery-ui-personalized-1.6rc2.min.js"></script>
+		<script type="text/javascript" src="/igoogle/javascripts/inettuts.js"></script>
+		<script type="text/javascript" src="/igoogle/javascripts/widgets.js"></script>		
+	   <% @sel=0%>
+	   <%= render "shared/header" %>
+	<!-- ##### Main Copy ##### -->
+	<div style="color: black; background-color:white; text-align:justify;"><!--margin: auto;-->
+		<p style="color: green"><%= flash[:notice] %></p>
+		<p style="color: red"><%= flash[:error] %></p>
+	   <%= @content_for_layout %>
+	</div>
+		<%= render "shared/footer" %>
+	</body>
+
+<script language="javascript">
+	iNettuts.init(customEditBoxContent);
+	
+	    $(function() {
+	        $("#save").click(function() {
+	            //$(this).parents(settings.widgetSelector).find('h3').text( $(this).val().length>20 ? $(this).val().substr(0,20)+'...' : $(this).val() );
+	            var wg_data = "";
+				var boxes = $("div.edit-box");
+
+				if(boxes) {
+					for(var i = 0; i < boxes.length; i++) {
+						if(boxes[i].style["display"] != "none") {
+							alertWindow("Warning", "Please save edit first");
+							return false;
+						}
+					}
+				}
+	            wg_data = $("div#work_container>ul").map(function() {
+	                return $(this).find("li[class^=widget]").map(function() {
+	                    return $(this).attr("class").substring(13) + "|" + $(this).find("input.wg_id").val();
+	                    //return "wig-abc".substring(4,7)
+	                }).get().join("-");
+	
+	                //return $(this).find("input.wg_id").val();
+	                //return $(this).find("input.wg_id").val()+"-"+$(this).attr("class").substring(13);
+	                //return "wig-abc".substring(4,7)
+	            }).get().join("+");
+				//$.get("http://172.31.3.9/dashboard/save",{name:wg_data})
+				//$.get("http://172.31.3.9/dashboard/save");
+				head_data = $("#li_header").attr("class").substring(13);
+				$.get("/dashboard/save",{data:wg_data,h_data:head_data},function(data){
+				  alertWindow("Infomation", data);
+				});
+	            //alert("ddd" + wg_data);
+				return false;
+	        })
+			$("#save_main").click(function() {
+				var boxes = $("div.edit-box");
+
+				if(boxes) {
+					for(var i = 0; i < boxes.length; i++) {
+						if(boxes[i].style["display"] != "none") {
+							alertWindow("Warning", "Please save edit first");
+							return false;
+						}
+					}
+				}
+
+				
+	            //$(this).parents(settings.widgetSelector).find('h3').text( $(this).val().length>20 ? $(this).val().substr(0,20)+'...' : $(this).val() );
+	            var wg_data = "";
+	            wg_data = $("div#work_container>ul").map(function() {
+	                return $(this).find("li[class^=widget]").map(function() {
+					       return $(this).attr("class").substring(13) + "|" + $(this).find("div.widget-content").attr("id").substring(7)+"|"+$(this).find("div.widget-content").attr("style")+"|"+$(this).find("input.max_count").val();
+	                    //return "wig-abc".substring(4,7)
+	                }).get().join("-");
+	
+	                //return $(this).find("input.wg_id").val();
+	                //return $(this).find("input.wg_id").val()+"-"+$(this).attr("class").substring(13);
+	                //return "wig-abc".substring(4,7)
+	            }).get().join("+");
+				//$.get("http://172.31.3.9/dashboard/save",{name:wg_data})
+				//$.get("http://172.31.3.9/dashboard/save");
+				head_data = $("#li_header").attr("class").substring(13);
+				//alert(head_data);
+				$.get("/dashboard/save_main",{data:wg_data,h_data:head_data},function(data){
+				  alertWindow("Infomation", data);
+				});
+	            //alert("ddd" + wg_data);
+				return false;
+	        })
+			
+			//$("#radio1").one("click", function(){
+			//  alert( $(this).text() );
+			//});
+			for(var count=0; count < 6; count++)
+            $("#radio"+count).click(function(){ 
+			//for(var wg_num=1; wg_num < 9; wg_num++)
+//alert(this.id.substring(5));
+            var tcount=this.id.substring(5);
+			$.get("/dashboard/widget_1",{time_r:tcount},function(data){
+			    //alert("Loaded:"+ data);
+				//$("div#widget_4").replaceWith(data);
+				re = /widget_+\d+\?/ig;
+				var ac=data.replace(re,"index?");				
+                $("div#widget_1").empty();
+				$("div#widget_1").append(ac);	
+                //alert("wg_num"+wg_num+" count"+count);				
+			});
+			$.get("/dashboard/widget_2",{time_r:tcount},function(data){
+
+				//alert(tcount);
+				re = /widget_+\d+\?/ig;
+				var ac=data.replace(re,"index?");
+				//alert(data.replace(re,"main?"));
+				$("div#widget_2").empty();
+				$("div#widget_2").append(ac);	
+			});
+			$.get("/dashboard/widget_3",{time_r:tcount},function(data){
+				re = /widget_+\d+\?/ig;
+				var ac=data.replace(re,"index?");			
+                $("div#widget_3").empty();
+				$("div#widget_3").append(ac);	
+			});
+			$.get("/dashboard/widget_4",{time_r:tcount},function(data){
+				re = /widget_+\d+\?/ig;
+				var ac=data.replace(re,"index?");
+                $("div#widget_4").empty();
+				$("div#widget_4").append(ac);	
+			});	
+			//alert($(this).attr("id"));
+			});
+			
+			
+		    $("li#li_header .edit").click(function() {
+			    //alert($(this).attr("style").search(/background/i));
+				//alert($(this).attr("style"));return false;
+				if($(this).attr("style").search(/background/i)!=-1)
+				{
+				    head_data=$("#li_header").attr("class").substring(13);
+					$.get("/dashboard/save_head",{h_data:head_data},function(data){
+				        //alert(data);
+				    });
+				}
+			});
+	    })
+		
+
+</script>
+
+</html>

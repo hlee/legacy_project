@@ -1,0 +1,22 @@
+<h2>Upgrade Firmware </h2>
+<% if flash[:notice]%> <div class="notice"><%=flash[:notice]%></div><%end%>
+<% if flash[:error]%> <div class="error"><%=flash[:error]%></div><%end%>
+<%
+   anl=Analyzer.find(@id)
+   if anl.nil?
+      firmware_ref=nil
+   else
+      firmware_ref=anl.firmware_ref
+   end
+   %>
+    <% form_tag :action => 'start_firmware_upgrade', :id => @id do %>
+
+      <p>Instrument: <%=Analyzer.find(@id).name %>
+      <p><label for="Firmware_Select">Select Firmware</label><br/>
+      <select name="firmware_ref">
+      <%=options_for_select(Firmware.find(:all).collect{ |s| [s.filename,s.filename]}.sort {|a,b| b<=>a},firmware_ref)%>
+      </select>
+      <p>
+      <%= submit_tag 'Upgrade' %>
+    <% end %>
+

@@ -1,0 +1,466 @@
+--- 
+static_permissions_077: 
+  updated_at: 2007-09-21 07:07:20
+  id: "77"
+  identifier: profile_mgr/create
+  created_at: 2007-09-21 07:07:20
+static_permissions_035: 
+  updated_at: 2007-09-21 07:07:19
+  id: "35"
+  identifier: roles/show
+  created_at: 2007-09-21 07:07:19
+static_permissions_056: 
+  updated_at: 2007-09-21 07:07:20
+  id: "56"
+  identifier: config_params/destroy
+  created_at: 2007-09-21 07:07:20
+static_permissions_014: 
+  updated_at: 2007-09-21 07:07:19
+  id: "14"
+  identifier: network/switch_new
+  created_at: 2007-09-21 07:07:19
+static_permissions_080: 
+  updated_at: 2007-09-21 07:07:20
+  id: "80"
+  identifier: profile_mgr/destroy
+  created_at: 2007-09-21 07:07:20
+static_permissions_078: 
+  updated_at: 2007-09-21 07:07:20
+  id: "78"
+  identifier: profile_mgr/edit
+  created_at: 2007-09-21 07:07:20
+static_permissions_057: 
+  updated_at: 2007-09-21 07:07:20
+  id: "57"
+  identifier: roles/new
+  created_at: 2007-09-21 07:07:20
+static_permissions_015: 
+  updated_at: 2007-09-21 07:07:19
+  id: "15"
+  identifier: network/switch_create
+  created_at: 2007-09-21 07:07:19
+static_permissions_036: 
+  updated_at: 2007-09-21 07:07:19
+  id: "36"
+  identifier: static_permissions/index
+  created_at: 2007-09-21 07:07:19
+static_permissions_081: 
+  updated_at: 2007-09-21 07:07:20
+  id: "81"
+  identifier: config_params/index
+  created_at: 2007-09-21 07:07:20
+static_permissions_079: 
+  updated_at: 2007-09-21 07:07:20
+  id: "79"
+  identifier: profile_mgr/update
+  created_at: 2007-09-21 07:07:20
+static_permissions_016: 
+  updated_at: 2007-09-21 07:07:19
+  id: "16"
+  identifier: network/switch_edit
+  created_at: 2007-09-21 07:07:19
+static_permissions_037: 
+  updated_at: 2007-09-21 07:07:19
+  id: "37"
+  identifier: static_permissions/list
+  created_at: 2007-09-21 07:07:19
+static_permissions_060: 
+  updated_at: 2007-09-21 07:07:20
+  id: "60"
+  identifier: roles/update
+  created_at: 2007-09-21 07:07:20
+static_permissions_058: 
+  updated_at: 2007-09-21 07:07:20
+  id: "58"
+  identifier: roles/create
+  created_at: 2007-09-21 07:07:20
+static_permissions_082: 
+  updated_at: 2007-09-21 07:07:20
+  id: "82"
+  identifier: config_params/list
+  created_at: 2007-09-21 07:07:20
+static_permissions_017: 
+  updated_at: 2007-09-21 07:07:19
+  id: "17"
+  identifier: network/switch_update
+  created_at: 2007-09-21 07:07:19
+static_permissions_038: 
+  updated_at: 2007-09-21 07:07:19
+  id: "38"
+  identifier: static_permissions/show
+  created_at: 2007-09-21 07:07:19
+static_permissions_061: 
+  updated_at: 2007-09-21 07:07:20
+  id: "61"
+  identifier: roles/destroy
+  created_at: 2007-09-21 07:07:20
+static_permissions_059: 
+  updated_at: 2007-09-21 07:07:20
+  id: "59"
+  identifier: roles/edit
+  created_at: 2007-09-21 07:07:20
+static_permissions_083: 
+  updated_at: 2007-09-21 07:07:20
+  id: "83"
+  identifier: config_params/show
+  created_at: 2007-09-21 07:07:20
+static_permissions_018: 
+  updated_at: 2007-09-21 07:07:19
+  id: "18"
+  identifier: network/switch_delete
+  created_at: 2007-09-21 07:07:19
+static_permissions_040: 
+  updated_at: 2007-09-21 07:07:19
+  id: "40"
+  identifier: static_permissions/create
+  created_at: 2007-09-21 07:07:19
+static_permissions_039: 
+  updated_at: 2007-09-21 07:07:19
+  id: "39"
+  identifier: static_permissions/new
+  created_at: 2007-09-21 07:07:19
+static_permissions_020: 
+  updated_at: 2007-09-21 07:07:19
+  id: "20"
+  identifier: network/analyzer_edit
+  created_at: 2007-09-21 07:07:19
+static_permissions_019: 
+  updated_at: 2007-09-21 07:07:19
+  id: "19"
+  identifier: network/analyzer_create
+  created_at: 2007-09-21 07:07:19
+static_permissions_041: 
+  updated_at: 2007-09-21 07:07:19
+  id: "41"
+  identifier: static_permissions/edit
+  created_at: 2007-09-21 07:07:19
+static_permissions_062: 
+  updated_at: 2007-09-21 07:07:20
+  id: "62"
+  identifier: setup/site_form
+  created_at: 2007-09-21 07:07:20
+static_permissions_084: 
+  updated_at: 2007-09-21 07:07:20
+  id: "84"
+  identifier: config_params/edit
+  created_at: 2007-09-21 07:07:20
+static_permissions_021: 
+  updated_at: 2007-09-21 07:07:19
+  id: "21"
+  identifier: network/analyzer_new
+  created_at: 2007-09-21 07:07:19
+static_permissions_042: 
+  updated_at: 2007-09-21 07:07:19
+  id: "42"
+  identifier: static_permissions/update
+  created_at: 2007-09-21 07:07:19
+static_permissions_063: 
+  updated_at: 2007-09-21 07:07:20
+  id: "63"
+  identifier: setup/site_new
+  created_at: 2007-09-21 07:07:20
+static_permissions_085: 
+  updated_at: 2007-09-21 07:07:20
+  id: "85"
+  identifier: config_params/update
+  created_at: 2007-09-21 07:07:20
+static_permissions_001: 
+  updated_at: 2007-09-21 07:07:19
+  id: "1"
+  identifier: network/switch_list
+  created_at: 2007-09-21 07:07:19
+static_permissions_022: 
+  updated_at: 2007-09-21 07:07:19
+  id: "22"
+  identifier: network/analyzer_update
+  created_at: 2007-09-21 07:07:19
+static_permissions_043: 
+  updated_at: 2007-09-21 07:07:19
+  id: "43"
+  identifier: static_permissions/destroy
+  created_at: 2007-09-21 07:07:19
+static_permissions_064: 
+  updated_at: 2007-09-21 07:07:20
+  id: "64"
+  identifier: setup/site_delete
+  created_at: 2007-09-21 07:07:20
+static_permissions_086: 
+  updated_at: 2007-09-21 07:07:20
+  id: "86"
+  identifier: profile/new
+  created_at: 2007-09-21 07:07:20
+static_permissions_002: 
+  updated_at: 2007-09-21 07:07:19
+  id: "2"
+  identifier: network/start_ingress
+  created_at: 2007-09-21 07:07:19
+static_permissions_023: 
+  updated_at: 2007-09-21 07:07:19
+  id: "23"
+  identifier: network/analyzer_delete
+  created_at: 2007-09-21 07:07:19
+static_permissions_044: 
+  updated_at: 2007-09-21 07:07:19
+  id: "44"
+  identifier: users/index
+  created_at: 2007-09-21 07:07:19
+static_permissions_065: 
+  updated_at: 2007-09-21 07:07:20
+  id: "65"
+  identifier: setup/site_list
+  created_at: 2007-09-21 07:07:20
+static_permissions_087: 
+  updated_at: 2007-09-21 07:07:20
+  id: "87"
+  identifier: profile/edit
+  created_at: 2007-09-21 07:07:20
+static_permissions_024: 
+  updated_at: 2007-09-21 07:07:19
+  id: "24"
+  identifier: network/port_edit
+  created_at: 2007-09-21 07:07:19
+static_permissions_045: 
+  updated_at: 2007-09-21 07:07:20
+  id: "45"
+  identifier: users/list
+  created_at: 2007-09-21 07:07:20
+static_permissions_066: 
+  updated_at: 2007-09-21 07:07:20
+  id: "66"
+  identifier: demo/index
+  created_at: 2007-09-21 07:07:20
+static_permissions_003: 
+  updated_at: 2007-09-21 07:07:19
+  id: "3"
+  identifier: network/start_performance
+  created_at: 2007-09-21 07:07:19
+static_permissions_088: 
+  updated_at: 2007-09-21 07:07:20
+  id: "88"
+  identifier: profile/delete
+  created_at: 2007-09-21 07:07:20
+static_permissions_067: 
+  updated_at: 2007-09-21 07:07:20
+  id: "67"
+  identifier: demo/redirect
+  created_at: 2007-09-21 07:07:20
+static_permissions_046: 
+  updated_at: 2007-09-21 07:07:20
+  id: "46"
+  identifier: users/show
+  created_at: 2007-09-21 07:07:20
+static_permissions_004: 
+  updated_at: 2007-09-21 07:07:19
+  id: "4"
+  identifier: network/stop_monitor
+  created_at: 2007-09-21 07:07:19
+static_permissions_025: 
+  updated_at: 2007-09-21 07:07:19
+  id: "25"
+  identifier: network/port_update
+  created_at: 2007-09-21 07:07:19
+static_permissions_070: 
+  updated_at: 2007-09-21 07:07:20
+  id: "70"
+  identifier: network/debug
+  created_at: 2007-09-21 07:07:20
+static_permissions_068: 
+  updated_at: 2007-09-21 07:07:20
+  id: "68"
+  identifier: g_reports/show
+  created_at: 2007-09-21 07:07:20
+static_permissions_005: 
+  updated_at: 2007-09-21 07:07:19
+  id: "5"
+  identifier: network/reset_analyzer
+  created_at: 2007-09-21 07:07:19
+static_permissions_026: 
+  updated_at: 2007-09-21 07:07:19
+  id: "26"
+  identifier: setup/upload_firmware
+  created_at: 2007-09-21 07:07:19
+static_permissions_047: 
+  updated_at: 2007-09-21 07:07:20
+  id: "47"
+  identifier: users/new
+  created_at: 2007-09-21 07:07:20
+static_permissions_071: 
+  updated_at: 2007-09-21 07:07:20
+  id: "71"
+  identifier: network/update_schedule_dtls
+  created_at: 2007-09-21 07:07:20
+static_permissions_069: 
+  updated_at: 2007-09-21 07:07:20
+  id: "69"
+  identifier: maintenance/index
+  created_at: 2007-09-21 07:07:20
+static_permissions_006: 
+  updated_at: 2007-09-21 07:07:19
+  id: "6"
+  identifier: network/syslog_list
+  created_at: 2007-09-21 07:07:19
+static_permissions_027: 
+  updated_at: 2007-09-21 07:07:19
+  id: "27"
+  identifier: setup/start_firmware_upload
+  created_at: 2007-09-21 07:07:19
+static_permissions_050: 
+  updated_at: 2007-09-21 07:07:20
+  id: "50"
+  identifier: users/roles
+  created_at: 2007-09-21 07:07:20
+static_permissions_048: 
+  updated_at: 2007-09-21 07:07:20
+  id: "48"
+  identifier: users/create
+  created_at: 2007-09-21 07:07:20
+static_permissions_072: 
+  updated_at: 2007-09-21 07:07:20
+  id: "72"
+  identifier: network/maintenance
+  created_at: 2007-09-21 07:07:20
+static_permissions_007: 
+  updated_at: 2007-09-21 07:07:19
+  id: "7"
+  identifier: network/set_scheduled_sources_switch_port_id
+  created_at: 2007-09-21 07:07:19
+static_permissions_028: 
+  updated_at: 2007-09-21 07:07:19
+  id: "28"
+  identifier: setup/firmware_delete
+  created_at: 2007-09-21 07:07:19
+static_permissions_049: 
+  updated_at: 2007-09-21 07:07:20
+  id: "49"
+  identifier: users/edit
+  created_at: 2007-09-21 07:07:20
+static_permissions_008: 
+  updated_at: 2007-09-21 07:07:19
+  id: "8"
+  identifier: network/set_scheduled_sources_stat_trace_flag
+  created_at: 2007-09-21 07:07:19
+static_permissions_030: 
+  updated_at: 2007-09-21 07:07:19
+  id: "30"
+  identifier: setup/system_file_list
+  created_at: 2007-09-21 07:07:19
+static_permissions_029: 
+  updated_at: 2007-09-21 07:07:19
+  id: "29"
+  identifier: alarm/set_alarms_acknowledged
+  created_at: 2007-09-21 07:07:19
+static_permissions_051: 
+  updated_at: 2007-09-21 07:07:20
+  id: "51"
+  identifier: users/permissions
+  created_at: 2007-09-21 07:07:20
+static_permissions_073: 
+  updated_at: 2007-09-21 07:07:20
+  id: "73"
+  identifier: profile_mgr/index
+  created_at: 2007-09-21 07:07:20
+static_permissions_010: 
+  updated_at: 2007-09-21 07:07:19
+  id: "10"
+  identifier: network/delete_from_sched
+  created_at: 2007-09-21 07:07:19
+static_permissions_009: 
+  updated_at: 2007-09-21 07:07:19
+  id: "9"
+  identifier: network/init_schedule
+  created_at: 2007-09-21 07:07:19
+static_permissions_031: 
+  updated_at: 2007-09-21 07:07:19
+  id: "31"
+  identifier: setup/system_file_delete
+  created_at: 2007-09-21 07:07:19
+static_permissions_052: 
+  updated_at: 2007-09-21 07:07:20
+  id: "52"
+  identifier: users/update
+  created_at: 2007-09-21 07:07:20
+static_permissions_074: 
+  updated_at: 2007-09-21 07:07:20
+  id: "74"
+  identifier: profile_mgr/list
+  created_at: 2007-09-21 07:07:20
+static_permissions_011: 
+  updated_at: 2007-09-21 07:07:19
+  id: "11"
+  identifier: network/add_to_schedule
+  created_at: 2007-09-21 07:07:19
+static_permissions_032: 
+  updated_at: 2007-09-21 07:07:19
+  id: "32"
+  identifier: setup/upload_system_file
+  created_at: 2007-09-21 07:07:19
+static_permissions_053: 
+  updated_at: 2007-09-21 07:07:20
+  id: "53"
+  identifier: users/destroy
+  created_at: 2007-09-21 07:07:20
+static_permissions_075: 
+  updated_at: 2007-09-21 07:07:20
+  id: "75"
+  identifier: profile_mgr/show
+  created_at: 2007-09-21 07:07:20
+static_permissions_012: 
+  updated_at: 2007-09-21 07:07:19
+  id: "12"
+  identifier: network/schedule_edit
+  created_at: 2007-09-21 07:07:19
+static_permissions_033: 
+  updated_at: 2007-09-21 07:07:19
+  id: "33"
+  identifier: roles/index
+  created_at: 2007-09-21 07:07:19
+static_permissions_054: 
+  updated_at: 2007-09-21 07:07:20
+  id: "54"
+  identifier: config_params/new
+  created_at: 2007-09-21 07:07:20
+static_permissions_076: 
+  updated_at: 2007-09-21 07:07:20
+  id: "76"
+  identifier: profile_mgr/new
+  created_at: 2007-09-21 07:07:20
+static_permissions_013: 
+  updated_at: 2007-09-21 07:07:19
+  id: "13"
+  identifier: network/schedule_port
+  created_at: 2007-09-21 07:07:19
+static_permissions_034: 
+  updated_at: 2007-09-21 07:07:19
+  id: "34"
+  identifier: roles/list
+  created_at: 2007-09-21 07:07:19
+static_permissions_055: 
+  updated_at: 2007-09-21 07:07:20
+  id: "55"
+  identifier: config_params/create
+  created_at: 2007-09-21 07:07:20
+static_permissions_089: 
+  updated_at: 2009-01-09 07:07:20
+  id: "89"
+  identifier: setup/maintain_db
+  created_at: 2009-01-09 07:07:20
+static_permissions_090: 
+  updated_at: 2009-01-09 07:07:20
+  id: "90"
+  identifier: setup/validate_sys
+  created_at: 2009-01-09 07:07:20
+static_permissions_091: 
+  updated_at: 2009-05-07 07:07:20
+  id: "91"
+  identifier: link/index
+  created_at: 2009-05-07 07:07:20  
+static_permissions_092: 
+  updated_at: 2009-05-07 07:07:20
+  id: "92"
+  identifier: link/customer
+  created_at: 2009-05-07 07:07:20
+static_permissions_093: 
+  updated_at: 2009-07-16 15:07:20
+  id: "93"
+  identifier: network/reason_entry
+  created_at: 2009-07-16 15:07:20

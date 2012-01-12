@@ -1,0 +1,30 @@
+<h2>Network</h2>
+<%=button_to('Analyzer List',:action=>'index',:controller=>'network')%>
+<% if flash[:notice]%> <div class="notice"><%=flash[:notice]%></div><%end%>
+<% if !@analyzer.nil? %>
+<form method="get" action="">
+ <input type="hidden" name="id" value="<%=@analyzer.id%>" />
+ <select name="msg_type" onchange="submit()">
+   <option value=8 <%=(@msg_type==SystemLog::MESSAGE)?'selected':''%>>MESSAGES</option>
+   <option value=16 <%=(@msg_type==SystemLog::WARNING)?'selected':''%>>WARNINGS</option>
+   <option value=128 <%=(@msg_type==SystemLog::ERROR)?'selected':''%>>ERRORS</option>
+ </select>
+</form>
+Analyzer: <b><%=@analyzer[:name]%></b><p>
+Analyzer IP: <b><%=@analyzer[:ip]%></b><p>
+Analyzer Status: <b><%=Analyzer.status_to_str(@analyzer.get_status())%></b><p>
+<% end %>
+<%= render "shared/paging" %>
+<table class="datatable">
+<tr class="datatable"><th class="datatable">Short Description</th>
+<th class="datatable">Time</th>i
+<th class="datatable">Message Type</th>i
+</tr>
+<% @sys_log_list.each { |msg| %>
+<tr class="datatable">
+<td class="datatable"><%=msg.short_descr%></td>
+<td class="datatable"><%=msg.ts%></td>
+<td class="datatable"><%=msg.msg_type()%></td>
+</tr>
+<% } %>
+</table>

@@ -1,0 +1,9 @@
+--- 
+user_00003: 
+  password_hash_type: sha1
+  updated_at: 2007-09-21 10:16:56 -04:00
+  password_salt: a2/cOdcT4M
+  id: 1
+  password: 64c2438fbf6bb1855ff289a968f2b7ebfbf54bef
+  email: admin
+  created_at: 2007-09-21 10:16:56 -04:00

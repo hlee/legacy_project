@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalGap="1">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import mx.events.ListEvent;
+            import com.sunrisetelecom.events.SelectChangeEvent;
+            import mx.collections.ArrayCollection;
+            
+            [Embed(source="./asset/moveLeftAll.png")]
+            [Bindable]
+            private var _moveLeftAllIco:Class;
+            
+            [Embed(source="./asset/moveRightAll.png")]
+            [Bindable]
+            private var _moveRightAllIco:Class;
+            
+            [Embed(source="./asset/moveLeft.png")]
+            [Bindable]
+            private var _moveLeftIco:Class;
+            
+            [Embed(source="./asset/moveRight.png")]
+            [Bindable]
+            private var _moveRightIco:Class;
+            
+            [Embed(source="./asset/moveLeftAllDisable.png")]
+            [Bindable]
+            private var _moveLeftAllDisableIco:Class;
+            
+            [Embed(source="./asset/moveRightAllDisable.png")]
+            [Bindable]
+            private var _moveRightAllDisableIco:Class;
+            
+            [Embed(source="./asset/moveLeftDisable.png")]
+            [Bindable]
+            private var _moveLeftDisableIco:Class;
+            
+            [Embed(source="./asset/moveRightDisable.png")]
+            [Bindable]
+            private var _moveRightDisableIco:Class;
+            
+            [Bindable]
+            private var _leftList:Array = new Array();
+            
+            [Bindable]
+            private var _rightList:Array = new Array();
+            
+            [Bindable]
+            private var _leftTitle:String = "Left Items";
+            
+            [Bindable]
+            private var _rightTitle:String = "Right Items";
+            
+            private var _toolTipFieldName:String = null;
+            
+            public function get toolTipFieldName():String
+            {
+                return _toolTipFieldName;
+            }
+            public function set toolTipFieldName(name:String):void
+            {
+                _toolTipFieldName = name;
+            }
+            
+            public function get leftList():Array
+            {
+                return _leftList;
+            }
+            public function set leftList(list:Array):void
+            {
+                if(list == null) return;
+                
+                _leftList = list;
+            }
+            
+            public function get rightList():Array
+            {
+                return _rightList;
+            }
+            public function set rightList(list:Array):void
+            {
+                if(list == null) return;
+                
+                _rightList = list;
+            }
+            
+            public function get leftTitle():String
+            {
+                return _leftTitle;
+            }
+            public function set leftTitle(title:String):void
+            {
+                _leftTitle = title;
+            }
+            
+            public function get rightTitle():String
+            {
+                return _rightTitle;
+            }
+            public function set rightTitle(title:String):void
+            {
+                _rightTitle = title;
+            }
+            
+            public function set rightListTextColor(color:int):void
+            {
+                _rightListCtrl.setStyle("color", color);
+            }
+            
+            public function set leftListTextColor(color:int):void
+            {
+                _leftListCtrl.setStyle("color", color);
+            }
+            
+            private function updateList():void
+            {
+                _leftListCtrl.invalidateList();
+                _rightListCtrl.invalidateList();
+                
+                var lEvent:SelectChangeEvent = new SelectChangeEvent(SelectChangeEvent.LEFT_CHANGE);
+                lEvent.count = _leftList.length;
+                this.dispatchEvent(lEvent);
+                
+                var rEvent:SelectChangeEvent = new SelectChangeEvent(SelectChangeEvent.RIGHT_CHANGE);
+                rEvent.count = _rightList.length;
+                this.dispatchEvent(rEvent);
+            }
+            
+            private function moveToRight():void
+            {
+                if(_leftListCtrl.selectedItems.length == 0) return;
+                
+                var collection:ArrayCollection = new ArrayCollection(_leftList);
+                
+                var newList:Array = new Array();
+
+                for each(var obj:Object in _leftListCtrl.selectedItems)
+                {
+                    var index:int = collection.getItemIndex(obj);
+                    if(index >= 0)
+                    {
+                        collection.removeItemAt(index);
+                    }
+                    
+                    newList.unshift(obj);
+                }
+                
+                _rightList = _rightList.concat(newList);
+                
+                if(collection.source.length == 0)
+                {
+                    _leftList = new Array();
+                }
+                else
+                {
+                    _leftList = collection.source;
+                }
+                _leftListCtrl.selectedIndices = new Array();
+
+                updateList();
+            }
+            
+            private function moveToRightAll():void
+            {
+                _rightList = _rightList.concat(_leftList);
+                
+                _leftList = new Array();
+                _leftListCtrl.selectedIndices = new Array();
+                
+                updateList();
+            }
+            
+            private function moveToLeft():void
+            {
+                if(_rightListCtrl.selectedItems.length == 0) return;
+                
+                var collection:ArrayCollection = new ArrayCollection(_rightList);
+                
+                var newList:Array = new Array();
+
+                for each(var obj:Object in _rightListCtrl.selectedItems)
+                {
+                    var index:int = collection.getItemIndex(obj);
+                    if(index >= 0)
+                    {
+                        collection.removeItemAt(index);
+                    }
+                    
+                    newList.unshift(obj);
+                }
+                
+                _leftList = _leftList.concat(newList);
+                
+                if(collection.source.length == 0)
+                {
+                    _rightList = new Array();
+                }
+                else
+                {
+                    _rightList = collection.source;
+                }
+                _rightListCtrl.selectedIndices = new Array();
+
+                updateList();
+            }
+            
+            private function moveToLeftAll():void
+            {
+                _leftList = _leftList.concat(_rightList);
+                
+                _rightList = new Array();
+                _rightListCtrl.selectedIndices = new Array();
+                
+                updateList();
+            }
+            
+            private function leftFocusIn(event:ListEvent):void
+            {
+                if(_toolTipFieldName == null || event.rowIndex < 0 || event.rowIndex >= _leftList.length)
+                {
+                    _leftListCtrl.toolTip = null;
+                    return;
+                }
+                
+                var item:Object = _leftList[event.rowIndex];
+                
+                if(item == null || !item.hasOwnProperty(_toolTipFieldName))
+                {
+                    _leftListCtrl.toolTip = null;
+                    return;
+                }
+                
+                _leftListCtrl.toolTip = item[_toolTipFieldName];
+            }
+            
+            private function leftFocusOut(event:ListEvent):void
+            {
+                _leftListCtrl.toolTip = null;
+            }
+            
+            private function rightFocusIn(event:ListEvent):void
+            {
+                if(_toolTipFieldName == null || event.rowIndex < 0 || event.rowIndex >= _rightList.length)
+                {
+                    _rightListCtrl.toolTip = null;
+                    return;
+                }
+                
+                var item:Object = _rightList[event.rowIndex];
+                
+                if(item == null || !item.hasOwnProperty(_toolTipFieldName))
+                {
+                    _rightListCtrl.toolTip = null;
+                    return;
+                }
+                
+                _rightListCtrl.toolTip = item[_toolTipFieldName];
+            }
+            
+            private function rightFocusOut(event:ListEvent):void
+            {
+                _rightListCtrl.toolTip = null;
+            }
+            
+        ]]>
+    </mx:Script>
+    <mx:VBox verticalGap="1" height="100%" width="{(this.width - 26) / 2}">
+        <mx:Label styleName="subtitleLabel" text="{_leftTitle}" />
+        <mx:List id="_leftListCtrl" styleName="normalList" dataProvider="{_leftList}" itemRollOver="leftFocusIn(event)" itemRollOut="leftFocusOut(event)" width="100%" height="100%" allowMultipleSelection="true" />
+    </mx:VBox>
+    <mx:VBox width="24" height="100%" verticalGap="0">
+        <mx:Label width="24" height="26" />
+        <mx:VBox width="24" height="100%" verticalAlign="middle" verticalGap="5">
+            <mx:Button enabled="{_leftListCtrl.selectedItems.length > 0}" icon="{_moveRightIco}" disabledIcon="{_moveRightDisableIco}" width="24" height="24" label=">>" click="moveToRight()" />
+            <mx:Button enabled="{_leftList.length > 0}" icon="{_moveRightAllIco}" disabledIcon="{_moveRightAllDisableIco}" width="24" height="24" label=">" click="moveToRightAll()" />
+            <mx:Button enabled="{_rightListCtrl.selectedItems.length > 0}" icon="{_moveLeftIco}" disabledIcon="{_moveLeftDisableIco}" width="24" height="24" label="&lt;" click="moveToLeft()" />
+            <mx:Button enabled="{_rightList.length > 0}" icon="{_moveLeftAllIco}" disabledIcon="{_moveLeftAllDisableIco}" width="24" height="24" label="&lt;&lt;" click="moveToLeftAll()" />
+        </mx:VBox>
+    </mx:VBox>
+    <mx:VBox verticalGap="1" height="100%" width="{(this.width - 26) / 2}">
+        <mx:Label styleName="subtitleLabel" text="{_rightTitle}" />
+        <mx:List id="_rightListCtrl" styleName="normalList" dataProvider="{_rightList}" itemRollOver="rightFocusIn(event)" itemRollOut="rightFocusOut(event)" width="100%" height="100%" allowMultipleSelection="true" />
+    </mx:VBox>
+</mx:HBox>

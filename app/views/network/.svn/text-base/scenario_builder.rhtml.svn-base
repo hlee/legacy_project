@@ -1,0 +1,75 @@
+<% switch_port=SwitchPort.find(params[:id]) %>
+<h2>Scenario Builders for Site: <%=switch_port.site.name %></h2>
+<% form_tag :action => 'generate_scenario', :id => @switch do %>
+  <table>
+    <tr><td>
+      <%= collection_select(:tplan,:tplan_id, SfTestPlan.find(:all), :id, :full_name) %>
+      <%=hidden_field_tag( :site_id, SwitchPort.find(params[:id]).site_id)%>
+      <%=hidden_field_tag( :switch_port_id, params[:id])%>
+    </td> </tr>
+    <tr><td>
+      <input type="submit" value="Generate Test Scenario"/>
+    </td> </tr>
+  </table>
+   <h2>Digital Measurements</h2>
+  <table class="datatable">
+  <tr>
+    <th>Channel</th>
+    <th>Channel Freq. (MHz)</th>
+    <th>Mod.</th>
+    <th>Testplan</th>
+<% mid_list=[] %>
+    <% Measure.find(:all,:conditions => ["measurement_mode <> 'ANALOG'"]).each { |measure| %>
+      <%next if measure.measure_name =~ /lock/%>
+      <%mid_list.push(measure.id)%>
+    <th><%=measure.measure_label%></th>
+    <% } %>
+    <%switch_port.site.channels.find(:all, :conditions => "channel_type = 1").each { |channel|%>
+     <%sf_test_plan=SfTestPlan.find(channel.sf_test_plan_id)%></td>
+      <tr>
+        <td><%=channel.channel_name%></td>
+        <td><%=channel.channel_freq.to_f/1000000%></td>
+        <td><%=Channel.modstr(channel.modulation)%></td>
+        <td><%=channel.sf_test_plan.full_name%></td>
+       <% mid_list.each {|mid|
+         nom=channel.nominals.find(:first, :conditions => ["measure_id=?",mid])
+         if (nom.nil?)
+            raise ("No Nominal found for channel id #{channel.id} and measure id #{mid}")
+         end
+       %>
+          <td><%=nom.val%></td>
+        <%} %>
+      </tr>
+    <%}%>
+  </table>
+   <h2>Analog Measurements</h2>
+  <table class="datatable">
+  <tr>
+    <th>Channel</th>
+    <th>Channel Freq.(MHz)</th>
+    <th>Mod.</th>
+    <th>Testplan</th>
+<% mid_list=[] %>
+    <% Measure.find(:all,:conditions => ["measurement_mode = 'ANALOG'"]).each { |measure| %>
+       
+      <%next if measure.measure_name =~ /lock/%>
+      <%mid_list.push(measure.id)%>
+    <th><%=measure.measure_label%></th>
+    <% } %>
+    <%switch_port.site.channels.find(:all, :conditions => "channel_type = 0").each { |channel|%>
+      <tr>
+        <td><%=channel.channel_name%></td>
+        <td><%=channel.channel_freq.to_f/1000000%></td>
+        <td><%=Channel.modstr(channel.modulation)%></td>
+        <td><%=SfTestPlan.find(channel.sf_test_plan_id).full_name%></td>
+       <% mid_list.each {|mid|
+         nom=channel.nominals.find(:first, :conditions => ["measure_id=?",mid])%>
+          <td>
+            <%= nom.nil? ? " " : nom.val %>
+          </td>
+        <%} %>
+         
+      </tr>
+    <%}%>
+  </table>
+<% end %>

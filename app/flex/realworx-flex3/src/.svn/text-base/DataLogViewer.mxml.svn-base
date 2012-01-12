@@ -1,0 +1,1108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application styleName="mainForm" xmlns:mx="http://www.adobe.com/2006/mxml" applicationComplete="initService()" creationPolicy="all" width="978" height="600" horizontalScrollPolicy="off" layout="absolute" verticalScrollPolicy="off" xmlns:utils="com.sunrisetelecom.utils.*" xmlns:controls="com.sunrisetelecom.controls.*">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import com.sunrisetelecom.utils.Utils;
+            import com.sunrisetelecom.utils.Unit;
+            import mx.events.NumericStepperEvent;
+            import com.sunrisetelecom.events.LinkLossEvent;
+            import com.sunrisetelecom.events.BooleanChangeEvent;
+            import mx.managers.CursorManager;
+            import com.sunrisetelecom.events.TimeChangeEvent;
+            import com.sunrisetelecom.events.SiteChangeEvent;
+            import mx.charts.chartClasses.IChartElement2;
+            import mx.formatters.NumberFormatter;
+            import mx.controls.sliderClasses.Slider;
+            import mx.charts.chartClasses.IAxis;
+            import mx.charts.HitData;
+            import mx.charts.series.ColumnSeries;
+            import mx.utils.URLUtil;
+            import mx.rpc.soap.LoadEvent;
+            import mx.rpc.Fault;
+            import mx.rpc.events.ResultEvent;
+            import mx.rpc.events.FaultEvent;
+            import mx.controls.Alert;
+            import mx.collections.ArrayCollection;
+            import mx.controls.CheckBox;
+            import flash.events.MouseEvent;
+            import flash.events.Event;
+
+            [Bindable]
+            private var _defaultUom:String = Unit.DBMV;
+
+            public static const MAINCHART_SPEC:String = "MAINCHART_SPEC";
+            public static const NAVCHART_TIME:String = "NAVCHART_TIME";
+            public static const MAINCHART_FLAG:int = 1;
+            public static const NAVCHART_FLAG:int = 2;
+            public static const PROFCHART_FLAG:int = 4;
+            [Bindable]
+            private var _selectedSiteId:int = 0;
+            private var _transactionIds:Object = {};
+            [Bindable]
+            private var _siteList:Array;
+            
+            [Bindable]
+            private var _inloadCounter:int;
+            
+            [Bindable]
+            private var _traces:ArrayCollection = new ArrayCollection();
+
+            [Bindable]
+            private var _profileMode:Boolean = false;
+            
+            [Bindable]
+            private var _overtimeTraces:ArrayCollection = new ArrayCollection();
+            [Bindable]
+            public var start_freq:Number = 0;
+            [Bindable]
+            public var stop_freq:Number = 0;
+            [Bindable]
+            private var docsis_channels:Object = [];
+            
+            [Bindable]
+            private var _noiseFloor:Number = NaN;
+            
+            private var target_seconds:Number = 0;
+            
+            private var _linkLossValue:Number = NaN;
+            private var _profileName:String = null;
+
+            public function get defaultUom():String
+            {
+                return _defaultUom;
+            }
+
+            //////////
+            // getDomain
+            // Takes the source of the application url and retrieves the domain
+            //////////
+            public function getDomain():String
+            {
+                var str:String = Application.application.url;
+                return str.substring(str.indexOf('//') + 2, str.indexOf('/', str.indexOf('//') + 2));
+            }
+            
+            public function get profilePanel():ProfilePanel
+            {
+                return _profilePanel;
+            }
+            
+            public function get profileCreator():ProfileCreator
+            {
+                return _profileCreator;
+            }
+
+            public function initService():void
+            {
+                _inloadCounter = 0;
+                initialData();
+                
+                _transactionIds[MAINCHART_SPEC] = 0;
+                _transactionIds[NAVCHART_TIME] = 0;
+
+                _profilePanel.addEventListener(BooleanChangeEvent.BOOLEAN_CHANGE, linkLossVisibleChange);
+                _profilePanel.addEventListener(LinkLossEvent.LINKLOSS_CHANGE, linkLossValueChange);
+                //profile_panel.addEventListener(LinkLossEvent.LINKLOSS_SAVE, linkLossValueSave);
+            }
+ /*           
+            private function linkLossValueSave(event:LinkLossEvent):void
+            {
+                if(isNaN(event.Value) || (event.profileName == null)) return;
+                
+                if(event.profileName == _profileName)
+                {
+                    _linkLossValue = event.Value;
+                }
+            }
+*/            
+            private function linkLossValueChange(event:LinkLossEvent):void
+            {
+                var value:Number = event.Value;
+                
+                if(isNaN(value)) return;
+                
+                if(_profileMode)
+                {
+                    for each(var point:Object in _traces)
+                    {
+                        point.link_loss = value;
+                    }
+                    
+                    _traces.refresh();
+                }
+            }
+            
+            private function linkLossVisibleChange(event:BooleanChangeEvent):void
+            {
+                if(_profileMode)
+                {
+                    if(_lineChart.series[6].visible != event.Value)
+                    {
+                        _lineChart.series[6].visible = event.Value;
+                    }
+                }
+            }
+            
+            public function displayFreq(value:Number):String
+            {
+                var numberFormatter:NumberFormatter = new NumberFormatter();
+                numberFormatter.precision = 2;
+                var formattedValue:String = numberFormatter.format(value / 1000000);
+                return formattedValue + " MHz";
+            }
+
+            public function dtFunc(hd:HitData):String
+            {
+                var numberFormatter:NumberFormatter = new NumberFormatter();
+                numberFormatter.precision = 2;
+                return hd.chartItem.element["displayName"] + "\n" 
+                    + "Frequency: " + displayFreq(hd.item.freq) 
+                    + "\nLevel: " + numberFormatter.format(hd.chartItem["yNumber"]) + " " + _defaultUom;
+            }
+            
+            public function getDataRange():void
+            {
+                messageService.get_datalog_range(_selectedSiteId);
+                report_button.enabled = false;
+            }
+
+            public function getDatalogTrace():void
+            {
+                startLoading(MAINCHART_FLAG);
+                _transactionIds[MAINCHART_SPEC]++;
+                   
+                messageService.get_datalog_trace(_transactionIds[MAINCHART_SPEC],
+                    MAINCHART_SPEC, _selectedSiteId, freq_range.minimum, freq_range.maximum,
+                    _timeNavigator.startDate(), _timeNavigator.stopDate(), 1, 1, false);
+            }
+            
+            public function getOvertimeTrace(start_dt:Date, stop_dt:Date):void
+            {
+                _noiseFloor = NaN;
+                
+                if (_overtimeTraces != null)
+                {
+                    _overtimeTraces.removeAll();
+                }
+                //chartStack.selectedChild=dataload
+                startLoading(NAVCHART_FLAG);
+                _transactionIds[NAVCHART_TIME]++;
+                
+                messageService.get_datalog_trace(_transactionIds[NAVCHART_TIME],
+                    NAVCHART_TIME,_selectedSiteId, freq_range.values[0], freq_range.values[1],
+                    start_dt, stop_dt, 1, 1, true);
+            }
+            
+            //Run when a port is selected
+            public function siteSelected(event:SiteChangeEvent):void
+            {
+                _selectedSiteId = event.selectedSiteId;
+
+                getDataRange();
+                _profilePanel.loadProfile();
+            }
+            
+            public function onTimeChange(event:TimeChangeEvent):void
+            {
+                _lineChart.alpha = .25;
+                //getDatalogTrace();
+                //getOvertimeTrace();
+                //updateMainTimeChart();
+            }
+            
+            public function onGetUpstreamChannels(event:ResultEvent):void
+            {
+                if (event.result != null)
+                {
+                    docsis_channels = event.result;
+                    docsis_channels.unshift({name: "NONE", bandwidth:-999, freq:-999})
+                    cbDocsis.selectedIndex = 0;
+                    //cbDocsis.dataProvider=docsis_channels;
+                }
+            }
+            
+            public function onGetDatalogRange(event:ResultEvent):void
+            {
+                if (event.result == null)
+                {
+                    freq_range.maximum = 0;
+                    freq_range.minimum = 0;
+                    _timeNavigator.minimum = new Date();
+                    _timeNavigator.maximum = new Date();
+                }
+                else
+                {
+                    freq_range.maximum = event.result.max_freq;
+                    freq_range.minimum = event.result.min_freq;
+            
+                    _timeNavigator.setRange(event.result.min_ts, event.result.max_ts);
+            
+                    freq_range.values[0] = event.result.min_freq;
+                    freq_range.values[1] = event.result.max_freq;
+                    getOvertimeTrace(event.result.min_ts, event.result.max_ts);
+                }
+            }
+
+            // RECEIPT from SOAP SERVER event handlers.
+            // Receipt of Datalog
+            public function onRunReport(event:ResultEvent):void
+            {
+                var recv_traces:ArrayCollection = new ArrayCollection();
+                if(_traces == null)
+                {
+                    _traces = new ArrayCollection();
+                }
+                _traces.removeAll();
+                
+                if(event.result == null || _transactionIds == null)
+                {
+                    return;
+                }
+                
+                if(event.result.transaction_id != _transactionIds[event.result.trace_label])
+                {
+                    return;
+                }
+                
+                if(event.result.avg != null)
+                {
+                    var len:int = event.result.avg.length;
+                    if(event.result.profile_name != null)
+                    {
+                        _profileName = event.result.profile_name;
+                        _profilePanel.profileName = event.result.profile_name;
+                    }
+                    else
+                    {
+                        _profilePanel.profileName = "";    
+                    }
+
+                    var avgArray:ArrayCollection = new ArrayCollection();
+                    for(var i:int = 0; i < len; i++)
+                    {
+                        var avg:Number = event.result.avg[i];
+                        var max:Number = event.result.max[i];
+                        var min:Number = event.result.min[i];
+                        
+                        if(_defaultUom == Unit.DBUV)
+                        {
+                            avg += 60;
+                            max += 60;
+                            min += 60;
+                        }
+
+                        if(isNaN(avg) || isNaN(max) || isNaN(min)) continue;
+                        
+                        if(avg == 0 && max == -1000 && min == 1000) continue;
+
+                        avg = Utils.convertToFixedNumber(avg, 2);
+                        max = Utils.convertToFixedNumber(max, 2);
+                        min = Utils.convertToFixedNumber(min, 2);
+                        
+                        var datapoint:Object = {
+                            avg:avg,
+                            max:max,
+                            min:min,
+                            time:null,
+                            freq:null,
+                            dev:null,
+                            major:null,
+                            minor:null,
+                            link_loss:null,
+                            recent:null,
+                            noise_floor:null
+                        }
+                        
+                        if(event.result.profile_major != null)
+                        {
+                            var major:Number = event.result.profile_ref[i] + event.result.profile_major;
+                            var minor:Number = event.result.profile_ref[i] + event.result.profile_minor;
+                            
+                            if(_defaultUom == Unit.DBUV)
+                            {
+                                major += 60;
+                                minor += 60;
+                            }
+                            
+                            datapoint.major = major;
+                            datapoint.minor = minor;
+                            if(event.result.profile_loss_flag)
+                            {
+                                _linkLossValue = event.result.profile_loss;
+                                
+                                if(_defaultUom == Unit.DBUV) _linkLossValue += 60;
+                                
+                                datapoint.link_loss = _linkLossValue;
+                            }
+                        }
+
+                        if(event.result.noise_floor != null)
+                        {
+                            var noiseFloor:Number = event.result.noise_floor;
+                            
+                            if(_defaultUom == Unit.DBUV) _noiseFloor += 60;
+                            
+                            datapoint.noise_floor = noiseFloor;
+                            
+                            if(_noiseFloor != noiseFloor)
+                            {
+                                _noiseFloor = noiseFloor;
+                            }
+                        }
+            
+                        if(event.result.trace_label == NAVCHART_TIME)
+                        {
+                            datapoint.time = event.result.time[i];
+
+                            _overtimeTraces.addItem(datapoint);
+                        }
+                        else if(event.result.trace_label == MAINCHART_SPEC)
+                        {
+                            _lineChart.alpha = 1.0;
+                            
+                            if(event.result.recent.length > i)
+                            {
+                                var recent:Number = event.result.recent[i];
+                                
+                                if(_defaultUom == Unit.DBUV) recent += 60;
+                                
+                                datapoint.recent = recent;
+                            }
+                            
+                            datapoint.freq = event.result.freq[i];
+
+                            _traces.addItem(datapoint);
+                        }
+                        else
+                        {
+                            Alert.show("Failed");
+                        }
+                        
+                        avgArray.addItem(datapoint.avg);
+                    } //End point loop
+                    
+                    if(event.result.trace_label == MAINCHART_SPEC)
+                    {
+                        if(len > 0)
+                        {
+                            linechart_haxis.minimum = event.result.freq[0];
+                            linechart_haxis.maximum = event.result.freq[len - 1];
+                        }
+                        else
+                        {
+                            linechart_haxis.minimum = 0;
+                            linechart_haxis.maximum = 0;
+                        }
+                    }
+                } // End if statement
+            
+                if(event.result.trace_label == MAINCHART_SPEC)
+                {
+                    //traces_spec=recv_traces;
+                    doneLoading(MAINCHART_FLAG);
+                    report_button.enabled = true;
+                    
+                }
+                else if(event.result.trace_label == NAVCHART_TIME)
+                {
+                    getDatalogTrace();
+                    doneLoading(NAVCHART_FLAG);
+                    if(target_seconds != 0)
+                    {
+                        var target_start:Date = new Date(target_seconds - 480000);
+                        var target_stop:Date = new Date(target_seconds + 480000);
+        
+                        _timeNavigator.select_range(target_start, target_stop);
+                        target_seconds = 0;
+                    }
+                }
+                adjustFreqDisplayed(freq_range);
+            }
+
+            public function startLoading(flag:int):void
+            {
+                if (_inloadCounter <= 0)
+                {
+                    _inloadCounter = 0;
+                }
+
+                _inloadCounter |= flag;
+
+                CursorManager.setBusyCursor();
+            }
+            
+            public function doneLoading(flag:int):void
+            {
+                _inloadCounter &= (255 - flag);
+                if (_inloadCounter <= 0)
+                {
+                    _inloadCounter = 0;
+                    CursorManager.removeAllCursors();
+                }
+            }
+
+            // Receipt of Sites
+            public function onGetSites(event:ResultEvent):void
+            {
+                _siteList = event.result as Array;
+                if(_siteList.length > 0 && !this.parameters.hasOwnProperty("site_id"))
+                {
+                    _selectedSiteId = _siteList[0].site_id;
+                }
+                
+                siteBar.enabled = true;
+                siteBar.addEventListener(SiteChangeEvent.SITE_CHANGE, siteSelected);
+
+                messageService.get_upstream_channels();
+                messageService.get_datalog_range(_selectedSiteId);
+            }
+
+            //Receipt of web services error
+            public function onMessageFault(event:FaultEvent):void
+            {
+                var fault:Fault = event.fault;
+                var message:String = "An error occurred." + fault.message + "|" + fault.faultString;
+            }
+            
+            //Trigger loading initial data
+            public function initialData():void
+            {
+                report_button.enabled = false;
+             
+                _profilePanel.defaultProfileId = this.parameters["profile_id"];
+                if (this.parameters.hasOwnProperty("site_id"))
+                {
+                    _selectedSiteId = this.parameters["site_id"];
+                }
+                if (this.parameters.hasOwnProperty("target_date"))
+                {
+                	target_seconds = parseFloat(this.parameters["target_date"]) * 1000;
+                }
+                
+                messageService.get_uom.send();
+                messageService.get_sites.send({site_type: 2});
+            }
+
+            public function onFreqChanged(event:Event):void
+            {
+                adjustFreqDisplayed(event.target)
+                linechart_haxis.minimum = event.target.values[0];
+                linechart_haxis.maximum = event.target.values[1];
+            }
+            
+            public function adjustFreqDisplayed(slider:Object):void
+            {
+                linechart_haxis.minimum = slider.values[0];
+                linechart_haxis.maximum = slider.values[1];
+                var selected:Object = cbDocsis.selectedItem;
+                //TODO put an if statement to check if a frequency is selected.
+                //harmonic_display.set_frequency(selected["freq"],selected["bandwidth"],linechart);
+            }
+            
+            public function runReport():void
+            {
+                report_button.enabled = false;
+                getDatalogTrace();
+            }
+            
+            public function initTimeNavigator():void
+            {
+                _timeNavigator.addEventListener(TimeChangeEvent.TIME_CHANGE, onTimeChange);
+            }
+            
+            public function onChartMouseDown(event:MouseEvent):void
+            {
+                //Alert.show(" "+linechart.localToData(new Point(event.localX,event.localY)))
+                //For Flex 3
+                var pt:Array = (_lineChart as IChartElement2).localToData(new Point(event.localX, event.localY));
+                //var pt:Array = linechart.localToData(new Point(event.localX, event.localY));
+                var tmp:ArrayCollection = _traces;
+                for(var i:int = 10; i < 300; i++)
+                {
+                   tmp[i].dev = pt[1];    
+                }
+                _traces = tmp;
+                //Alert.show(traces_spec[22].dev);
+            }
+            
+            public function onChartMouseUp(event:MouseEvent):void
+            {
+            }
+
+            public function switchMode():void
+            {
+                if (modenav.selectedChild == dataview)
+                {
+                    dataviewMode();
+                }
+                else
+                {
+                    _profileCreator.clearProfileData();
+                    profileMode();
+                }
+            }
+            
+            public function dataviewMode():void
+            {
+                for each(var point:Object in _traces)
+                {
+                    point.link_loss = _linkLossValue;
+                }
+                
+                _traces.refresh();
+                
+                _profileMode = false;
+                _profileCreator.stopListening();
+                _lineChart.showDataTips = true;
+                linechart_haxis.minimum = freq_range.values[0];
+                linechart_haxis.maximum = freq_range.values[1];
+                _lineChart.series[4].visible = major_chbox.selected;
+                _lineChart.series[5].visible = minor_chbox.selected;
+                _lineChart.series[6].visible = link_chbox.selected;
+                freq_range.enabled = true;
+            }
+
+            public function profileMode():void
+            {
+                _profileMode = true;
+                _lineChart.series[4].visible = false;
+                _lineChart.series[5].visible = false;
+                linechart_haxis.minimum = freq_range.minimum;
+                linechart_haxis.maximum = freq_range.maximum;
+            
+                _profileCreator.startListening();
+                _lineChart.showDataTips = false;
+                _profilePanel.reload();
+                freq_range.enabled = false;
+            }
+            
+            public function axisLabel(labelValue:Number, prevValue:Object,axis:IAxis):String
+            {
+                return (labelValue / 1000000).toString() + " MHz";
+            }
+
+            public function display_label(item:Object):String
+            {
+                var str:String = new String(item.label);
+                var result:String;
+                var len:int=str.length;
+                result=str;
+                if (len > 17)
+                {
+                    result = str.substr(0, 8) + "*" + str.substr(len - 8, 8);
+                }
+                return result;
+            }
+            
+            public function update_harmonic_display(event:Event):void
+            {
+                var selected:Object = event.target.selectedItem;
+                harmonic_display.start_freq = freq_range.minimum;
+                harmonic_display.stop_freq = freq_range.maximum;
+        
+                harmonic_display.set_frequency(selected["freq"], selected["bandwidth"], _lineChart);
+            }
+
+            public function onClick(event:MouseEvent):void
+            {
+                var checkbox_lookup:Object = new Object();
+                var target_visible:Boolean = false;
+                if (event.currentTarget.selected)
+                {
+                    target_visible = true;
+                }
+                checkbox_lookup["major_chbox"] = major_series;
+                checkbox_lookup["minor_chbox"] = minor_series;
+                checkbox_lookup["max_chbox"] = max_series;
+                checkbox_lookup["avg_chbox"] = avg_series;
+                checkbox_lookup["min_chbox"] = min_series;
+                checkbox_lookup["recent_chbox"] = recent_series;
+                checkbox_lookup["link_chbox"] = loss_series;
+
+                checkbox_lookup[event.currentTarget.id].visible = target_visible;
+
+                //Alert.show("click");
+                _lineChart.invalidateDisplayList();
+            }
+            
+            private function highLevelChange(event:NumericStepperEvent):void
+            {
+                if(_highChartLvl.value <= _lowChartLvl.value)
+                {
+                    _highChartLvl.value = _lowChartLvl.value + 5;
+                }
+            }
+            
+            private function lowlevelChange(event:NumericStepperEvent):void
+            {
+                if(_highChartLvl.value <= _lowChartLvl.value)
+                {
+                    _lowChartLvl.value = _highChartLvl.value - 5;
+                }
+            }
+            
+            private function onGetUom(event:ResultEvent):void
+            {
+                var uom:int = event.result as int;
+                if(uom == 1)
+                {
+                    _defaultUom = Unit.DBUV;
+                    
+                    _highChartLvl.value += 60;
+                    _lowChartLvl.value += 60;
+                }
+                else
+                {
+                    _defaultUom = Unit.DBMV;
+                }
+                
+                _timeNavigator.uom = _defaultUom;
+            }
+        ]]>
+    </mx:Script>
+    <!--   <mx:SeriesInterpolate id="interpolateIn" duration="100"/>-->
+    <mx:RemoteObject id="messageService" fault="onMessageFault(event)" source="AmfServicesController" destination="rubyamf">
+        <mx:method name="get_sites" result="onGetSites(event)" />
+        <mx:method name="get_datalog_range" result="onGetDatalogRange(event)" />
+        <mx:method name="get_datalog_trace" result="onRunReport(event)" />
+        <mx:method name="get_upstream_channels" result="onGetUpstreamChannels(event)" />
+        <mx:method name="get_uom" result="onGetUom(event)" />
+    </mx:RemoteObject>
+    <mx:Fade id="fading_hide" alphaFrom="1.0" alphaTo="0"/>
+    <mx:Fade id="fading_show" alphaFrom="0" alphaTo="1.0"/>
+    <mx:Fade id="fadeIn" alphaTo="1.0" duration="500"/>
+    <mx:Fade id="fadeOut" alphaTo="0.1" duration="500"/>
+    <mx:SeriesInterpolate id="updatedata" duration="300" minimumElementDuration="20" elementOffset="0"/>
+    <mx:HBox horizontalGap="0" paddingLeft="1" paddingTop="1" paddingRight="1" paddingBottom="1" horizontalScrollPolicy="off" verticalScrollPolicy="off" height="566" x="17" y="16">    
+        <mx:VBox width="180" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+            <controls:SiteBar id="siteBar" selectedSiteId="{_selectedSiteId}" siteList="{_siteList}" enabled="false" />
+            <mx:TabNavigator id="modenav" styleName="normal" width="169" height="100%" change="switchMode()">
+                <mx:VBox paddingLeft="5" paddingRight="5" id="dataview" label="Data View" x="0" y="0" width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+                    <mx:HBox verticalAlign="middle" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+                        <mx:Label styleName="subtitleLabel" text="Level Range" />
+                    </mx:HBox>
+                    <mx:Grid horizontalGap="1">
+                        <mx:GridRow width="100%" height="100%">
+                            <mx:GridItem width="57" height="100%">
+                                <mx:Label text="High Level"/>
+                            </mx:GridItem>
+                            <mx:GridItem width="60" height="100%">
+                                <mx:NumericStepper change="highLevelChange(event)" id="_highChartLvl" value="10" minimum="-100" maximum="100" stepSize="5"/>
+                            </mx:GridItem>
+                            <mx:GridItem width="100%" height="100%">
+                                <mx:Label text="{_defaultUom}"/>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                        <mx:GridRow width="100%" height="100%">
+                            <mx:GridItem width="57" height="100%">
+                                <mx:Label text="Low Level"/>
+                            </mx:GridItem>
+                            <mx:GridItem width="60" height="100%">
+                                <mx:NumericStepper change="lowlevelChange(event)" id="_lowChartLvl" value="-65" minimum="-100" maximum="100" stepSize="5"/>
+                            </mx:GridItem>
+                            <mx:GridItem width="100%" height="100%">
+                                <mx:Label text="{_defaultUom}"/>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                    </mx:Grid>
+                    <mx:Button label="Run Report" click="runReport()" id="report_button" toggle="false"/>
+                    <mx:VBox width="100%" verticalGap="-1">
+                        <mx:CheckBox id="major_chbox" label="Major" click="onClick(event)" selected="true"/>
+                        <mx:CheckBox id="minor_chbox" label="Minor" click="onClick(event)" selected="true"/>
+                        <mx:CheckBox id="max_chbox" label="Max" click="onClick(event)" selected="true"/>
+                        <mx:CheckBox id="avg_chbox" label="Average" click="onClick(event)" selected="true"/>
+                        <mx:CheckBox id="recent_chbox" label="Most Recent" click="onClick(event)" selected="true"/>
+                        <mx:CheckBox id="min_chbox" label="Min" click="onClick(event)" selected="true"/>
+                        <mx:CheckBox id="link_chbox" label="Link Loss" click="onClick(event)" selected="true"/>
+                    </mx:VBox>
+                    <mx:Label styleName="subtitleLabel" text="Harmonic Viewer"/>
+                    <mx:ComboBox id="cbDocsis" width="136" selectedIndex="0" dataProvider="{docsis_channels}" labelField="name" change="update_harmonic_display(event)"/>
+                </mx:VBox>
+                <controls:ProfilePanel label="Profile Edit" width="100%" height="100%" id="_profilePanel" visible="{_profileMode}" profileData="{_profileCreator.getProfileData()}" traceRef="{_traces}" traceKey="max" traceXKey="freq" x="0" y="0"/>
+            </mx:TabNavigator>
+        </mx:VBox>  
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+            <mx:TabNavigator styleName="normal" height="100%" width="761">
+                <mx:VBox label="Graphs" backgroundColor="#ffffff" horizontalScrollPolicy="off" verticalScrollPolicy="off" width="100%">
+                    <mx:VBox borderThickness="1" borderStyle="solid" horizontalScrollPolicy="off" verticalScrollPolicy="off" verticalGap="-1" width="100%">
+	                    <mx:Legend fontSize="20" direction="horizontal" dataProvider="{_lineChart}" legendItemClass="com.sunrisetelecom.controls.ExtendedLegendItem"/>
+	                    <mx:LineChart id="_lineChart" height="321" width="100%" paddingLeft="5" showDataTips="true" dataProvider="{_traces}" dataTipFunction="dtFunc">
+	                        <mx:seriesFilters>
+	                            <mx:Array/>
+	                        </mx:seriesFilters>
+	                        <mx:horizontalAxis>
+	                            <mx:LinearAxis title="Frequency (MHz)" id="linechart_haxis" labelFunction="axisLabel"/>
+	                        </mx:horizontalAxis>
+	                        <mx:verticalAxis>
+	                            <mx:LinearAxis title="{'Level (' + _defaultUom + ')'}" minimum="{_lowChartLvl.value}" maximum="{_highChartLvl.value}" />
+	                        </mx:verticalAxis>
+	                        <mx:series>
+                                <controls:ExtendedLineSeries filterData="false" id="max_series" yField="max" xField="freq" form="curve" displayName="Max">
+	                                <controls:lineStroke>
+	                                    <mx:Stroke color="0x00FF00" weight="1" alpha="1"/>
+	                                </controls:lineStroke>
+	                            </controls:ExtendedLineSeries>
+	                            <controls:ExtendedLineSeries filterData="false" id="avg_series" yField="avg" xField="freq" form="curve" displayName="Average">
+	                                <controls:lineStroke>
+	                                    <mx:Stroke color="0x00C000" weight="1" alpha="1"/>
+	                                </controls:lineStroke>
+	                            </controls:ExtendedLineSeries>
+	                            <controls:ExtendedLineSeries filterData="false" id="recent_series" yField="recent" xField="freq" form="curve" displayName="Most Recent Max Hour">
+	                                <controls:lineStroke>
+	                                    <mx:Stroke color="0x808080" weight="1" alpha="1"/>
+	                                </controls:lineStroke>
+	                            </controls:ExtendedLineSeries>
+	                            <controls:ExtendedLineSeries filterData="false" id="min_series" yField="min" xField="freq" form="curve" displayName="Min" >
+	                                <controls:lineStroke>
+	                                    <mx:Stroke color="0x008000" weight="1" alpha="1"/>
+	                                </controls:lineStroke>
+	                            </controls:ExtendedLineSeries>
+	                            <controls:ExtendedLineSeries filterData="false" yField="major" xField="freq" form="curve" displayName="Major" id="major_series">
+	                                <controls:lineStroke>
+	                                    <mx:Stroke color="0xFF0000" weight="1" alpha="1"/>
+	                                </controls:lineStroke>
+	                            </controls:ExtendedLineSeries>
+	                            <controls:ExtendedLineSeries filterData="false" yField="minor" xField="freq" form="curve" displayName="Minor" id="minor_series" >
+	                                <controls:lineStroke>
+	                                    <mx:Stroke color="0x0000FF" weight="1" alpha="1"/>
+	                                </controls:lineStroke>
+	                            </controls:ExtendedLineSeries>
+	                            <controls:ExtendedLineSeries filterData="false" yField="link_loss" xField="freq" form="curve" displayName="Link Loss" id="loss_series">
+	                                <controls:lineStroke>
+	                                    <mx:Stroke color="0xe0e000" weight="1" alpha="1"/>
+	                                </controls:lineStroke>
+	                            </controls:ExtendedLineSeries>
+	                        </mx:series>     
+	                        <mx:annotationElements>
+	                            <controls:HarmonicDisplay id="harmonic_display" visible="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"/>
+	                            <controls:ProfileCreator id="_profileCreator"/>
+	                        </mx:annotationElements>
+	                    </mx:LineChart>                    
+	                    <mx:HBox horizontalGap="0" horizontalAlign="right" width="100%" paddingLeft="60" paddingRight="5" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	                        <mx:HSlider id="freq_range" thumbCount="2" height="20" 
+	                            allowTrackClick="true" values="{[start_freq,stop_freq]}"
+	                            dataTipFormatFunction="displayFreq" liveDragging="true" snapInterval="1" enabled="true"
+	                            thumbRelease="onFreqChanged(event)" change="onFreqChanged(event)"
+	                            showTrackHighlight="true" width="100%"/>
+	                    </mx:HBox>
+                    </mx:VBox>
+                    <controls:TimeNavigator borderThickness="1" borderStyle="solid" id="_timeNavigator" noiseFloor="{_noiseFloor}" dataProvider="{_overtimeTraces}" initialize="initTimeNavigator()" width="100%" height="100%"/>
+                </mx:VBox>
+        <!-- Needed for a later feature -->
+        <!--
+        <mx:Canvas label="Entry" visible="false" enabled="false"> 
+            <mx:Grid x="10" y="10">
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:Label text="Start Freq (MHz)"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:Label text="Stop Freq (MHz)"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:Label text="Level (db)"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:Label text="Profile Type"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow width="100%" height="100%">
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="40.345"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:TextInput width="49" text="7"/>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                        <mx:HBox width="100%" height="30">
+                            <mx:ComboBox></mx:ComboBox>
+                            <mx:Button width="22">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/plus-sign.png')</mx:icon>
+                            </mx:Button>
+                            <mx:Button width="25">
+                                <mx:icon>@Embed(source='file:C:/Documents and Settings/Tommie/My Documents/My Pictures/pencil.png')</mx:icon>
+                            </mx:Button>
+                        </mx:HBox>
+                    </mx:GridItem>
+                    <mx:GridItem width="100%" height="100%">
+                    </mx:GridItem>
+                </mx:GridRow>
+    
+            </mx:Grid>
+        </mx:Canvas>
+        -->
+            </mx:TabNavigator>      
+        </mx:VBox>
+    </mx:HBox>
+
+</mx:Application>

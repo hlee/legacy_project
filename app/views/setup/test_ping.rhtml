@@ -1,0 +1,16 @@
+<h1>Ping Test</h1>
+<br>
+<table class="datatable" align=left>
+<tr><th>Analyzer</th><th>Average</th><th>Minimum</th><th>Maximum</th>
+</tr>
+<% 0.upto(@ping_ana_id.size-1) {|i|%>
+</tr>
+<tr align=center><td><%=anaid2name(@ping_ana_id[i])%></td>
+<%if @flag_time[i]== true%>
+<td><%=@avg[i]%> ms</td><td><%=@min_time[i]%>ms</td><td><%=@max_time[i]%> ms</td>
+<%else%>
+<td colspan=3> Time Out</td>
+<%end%>
+</tr>
+<% } %>
+</table>	

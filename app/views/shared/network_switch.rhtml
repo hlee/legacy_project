@@ -1,0 +1,46 @@
+<% 
+  #anl = @analyzer.nil? ? nil : Analyzer.find(@analyzer_id)
+  unless @analyzer.nil?
+    master_switch = @analyzer.switches.find(:first, :conditions=> " master_switch_flag = 1")
+  end
+%>
+<% unless @analyzer.nil? %>
+  <hr>
+  <div>
+    <p class="sideBarTitle">Network Configuration</p>
+  </div>
+  <form action="/network/analyzer_edit" method="get" >
+    <select name="id" onchange="this.form.submit();">
+      <%
+        analyzer_list=Analyzer.find(:all).collect { |anl_item| 
+          [anl_item.name, anl_item.id]
+        }
+        analyzer_id=@analyzer.id
+      %>
+      <%=
+        options_for_select(analyzer_list, analyzer_id) 
+      %>
+    </select>
+    <input type="submit" value="Edit">
+  </form>
+<p/>
+  <% if master_switch %>
+        Combiner: <%= link_to master_switch.switch_name, :action=>'switch_edit', :id=>master_switch.id %>
+          <ul>
+            <% @analyzer.switches.find(:all,:order=>"address", :conditions => " master_switch_flag =0  ").each { |switch| %>
+            <li >
+              <%=link_to switch.switch_name, :action=>'switch_edit', :id=>switch.id %>
+            </li>
+            <%}%>
+          </ul> <!-- Each Switch -->
+  <% else %>
+          <ul >
+            <% @analyzer.switches.find(:all,:order=>"address", :conditions => " master_switch_flag =0 ").each { |switch| %>
+            <li >
+              <%=link_to switch.short_switch_name, {:action => 'switch_edit', :id => switch[:id]}, {:title => switch[:switch_name]} %>
+            </li>
+            <%}%>
+          </ul> <!-- Each Switch -->
+          
+  <% end %>
+<% end %>

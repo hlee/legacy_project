@@ -1,0 +1,8 @@
+<!--%= submit_tag 'Start switching Test', :disabled => true %-->
+
+<%= periodically_call_remote(
+              :url => {:controller => '/setup', :action => 'show_switch_port',:id => id}, 
+			  :frequency => '2', 
+			  :update => 'nbr_port')%>
+
+<span id='nbr_port'></span>

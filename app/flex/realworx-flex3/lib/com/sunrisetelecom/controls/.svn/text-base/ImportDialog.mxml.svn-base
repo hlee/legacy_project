@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationPolicy="all" styleName="subtitleLabel" layout="vertical" width="400" title="Select Test Plan/ System File to import" xmlns:controls="com.sunrisetelecom.controls.*">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import com.sunrisetelecom.events.SelectChangeEvent;
+        	import mx.collections.ArrayCollection;
+        	import mx.managers.PopUpManager;
+        	
+        	[Bindable]
+        	private var system_file_data:ArrayCollection;
+
+            public function loadData(data:Array, portData:Array):void
+            {
+            	system_file_data = new ArrayCollection(data);
+            	
+            	var portList:Array = new Array();
+            	for each(var obj:AnalyzerPort in portData)
+            	{
+            	    var port:Object = new Object();
+            	    port.label = obj.port_name;
+            	    port.data = obj.port_id;
+            	    port.site = obj.site;
+            	    
+            	    portList.push(port);
+            	}
+            	_portSelecter.toolTipFieldName = "site";
+            	_portSelecter.leftListTextColor = 0x606060;
+            	_portSelecter.leftTitle = "Unselected";
+            	_portSelecter.rightTitle = "Selected";
+            	_portSelecter.leftList = portList;
+            	_portSelecter.addEventListener(SelectChangeEvent.RIGHT_CHANGE, onSelectChange);
+            }
+            
+            private function onSelectChange(event:SelectChangeEvent):void
+            {
+                //okButton.enabled = (event.count > 0);
+            }
+            
+            private function cancelMe():void
+            {
+                PopUpManager.removePopUp(this);
+            }
+            
+            private function okMe():void
+            {
+                PopUpManager.removePopUp(this);
+            }
+            
+            public function get selectedPortList():Array
+            {
+                return _portSelecter.rightList;
+            }
+        ]]>
+    </mx:Script>
+	<mx:Form width="100%">
+		<mx:FormItem styleName="subtitleLabel" label="System File" width="100%">
+			<mx:ComboBox styleName="normalComboBox" id="system_file_list" dataProvider="{system_file_data}" labelField="display_name" data="system_file_id" width="100%"/>
+		</mx:FormItem>
+		<mx:FormItem styleName="subtitleLabel" label="Test Plan" width="100%">
+			<mx:ComboBox styleName="normalComboBox" id="test_plan_list" dataProvider="{system_file_list.selectedItem.test_plans}" labelField="test_plan_name" data="test_plan_id" width="100%"/>
+		</mx:FormItem>
+		<mx:FormItem styleName="subtitleLabel" label="Port" width="100%">
+            <controls:MultiSelecter id="_portSelecter" width="100%" height="150" />
+		</mx:FormItem>
+		<mx:FormItem label="" width="100%">
+            <mx:HBox horizontalAlign="right" width="100%">
+                <mx:Button enabled="true" id="okButton" styleName="normalButton" width="80" label="OK" click="okMe()"/> 
+                <mx:Button id="cancelButton" styleName="normalButton" width="80" label="Cancel" click="cancelMe()"/>
+            </mx:HBox>
+		</mx:FormItem>
+	</mx:Form>
+</mx:TitleWindow>

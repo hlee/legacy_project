@@ -1,0 +1,18 @@
+<h2>Firmware File List</h2>
+<% if flash[:notice]%> <div class="notice"><%=flash[:notice]%></div><%end%>
+<% form_tag({:action=>"start_firmware_upload"},:multipart => true) do %><p>
+   <label for="Firmware_file">Firmware File:</label><%=file_field_tag "firmware[file]" %>
+   <p>
+   <input type="submit" value="Upload File"/>
+<% end %>
+<table class="datatable">
+<tr><th>Firmware</th><th>Functions</th></tr>
+<% Firmware.find(:all).each { |firmware_file| %>
+<tr>
+<td><%= firmware_file.filename %></td>
+<td>
+<%=button_to('Delete',:action=>'firmware_delete',:controller=>'setup',:fname=>firmware_file.filename)%>
+</td>
+</tr>
+<% } %>
+</table>

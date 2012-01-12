@@ -1,0 +1,28 @@
+<h2>Site File List</h2>
+<table class="datatable">
+<tr class="datatable" >
+  <td colspan="2">
+    <%=button_to('Create New Site',:action=>'site_form',:controller=>'setup')%>
+  </td>
+</tr>
+<tr class="datatable" >
+  <td colspan="2">
+	<%=button_to('Show Isolated Site',:action=>'isolated_site',:contoller=>'setup')%>
+  </td>
+</tr>
+<tr class="datatable">
+  <th class="datatable">Site Name</th>
+  <th class="datatable">Functions</th>
+</tr>
+<% @site_list.sort{ |a,b| a.name.casecmp(b.name) }.each { |site| %>
+  <tr class="datatable">
+    <td class="datatable">
+      <%=link_to site.name, {:action => 'site_form', :id => site.id} %>
+    </td>
+    <td class="datatable">
+	<%flag=site.isolated?%>
+      <%=button_to('Delete',{:action=>'site_delete',:controller=>'setup',:id=>site.id}, :disabled => flag )%>
+    </td>
+  </tr>
+<% } %>
+</table>

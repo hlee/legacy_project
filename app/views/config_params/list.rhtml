@@ -1,0 +1,38 @@
+<table class="datatable">
+	<% @config_params.group_by(&:category).each do |category, items| %>
+		<tr class="datatable">
+			<th colspan=3 class="datatable"><%= category %></th>
+		</tr>
+		<% for config_param in items %>
+			<%if config_param.name=="Unit Of Measure"%>
+				<tr class="datatable">
+					<td class="datatable">
+						<%= config_param.name %> 
+						<%= "(#{config_param.uom})" unless config_param.uom.empty? %>
+					</td>
+					<td class="datatable">
+						<% @config_param = config_param %>
+						<%= config_param.val=='1' ? "dBuV":"dBmV"%>
+					</td>
+					<td class="datatable">
+						<%= button_to 'Edit', :action => 'edit', :id => config_param %>
+					</td>
+				</tr>
+			<%else%>
+			<tr class="datatable">
+				<td class="datatable">
+					<%= config_param.name %>
+					<%= "(#{config_param.uom})" unless config_param.uom.empty? %>
+				</td>
+				<td class="datatable">
+					<% @config_param = config_param %>
+					<%= in_place_editor_field :config_param, :val, {}, {:rows => 1} %>
+				</td>
+				<td class="datatable">
+					<%= button_to 'Edit', :action => 'edit', :id => config_param %>
+				</td>
+			</tr>
+			<%end%>
+		<% end %>
+	<% end %>
+</table>

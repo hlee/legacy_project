@@ -1,0 +1,44 @@
+<h1>Editing roles for <%= @user.email %></h1>
+
+<table>
+	<tr>
+		<th colspan=2>Available Roles:</th>
+	</tr>
+	<% @roles = Role.find(:all).sort %>
+	<% form_tag :action => 'permissions', :id => @user do %>
+		<% for role in @roles %>
+      <% 
+        if role.display_name.nil? || role.display_name.empty? 
+          role.display_name = role.identifier
+        end
+      %>
+			<tr>
+				<td>
+					<B><U><%= role.display_name %></U></B>
+          <%= link_to_function '(details)', "ToggleDetails(#{role.id})" %>
+          <BR>
+					<%= role.description %><br>
+          <div class="details" id = "<%= role.id %>" style="display: none">
+            User has access to the following URLs:
+					  <ul>
+					  <% for perm in role.static_permissions %>
+						  <li><%= perm.identifier %></li>
+					  <% end %>
+					  </ul>
+          </div>
+				</td>
+				<td valign="top">
+				<% if @user.has_role?(role.identifier) %>
+					<%= check_box('checkbox', role.id, {:checked => true}) %>
+				<% else %>
+					<%= check_box('checkbox', role.id) %>
+				<% end %>
+				</td>
+			</tr>
+		<% end %>
+		<tr>
+			<td colspan=2><%= submit_tag 'Update Permissions' %></td>
+		</tr>
+	<% end %>
+</table>
+<%= link_to 'Return to list of users', :action => 'list' %>

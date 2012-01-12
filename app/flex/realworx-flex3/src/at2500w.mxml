@@ -1,0 +1,581 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" initialize="init_app()" height="550" width="1024" xmlns:controls="com.sunrisetelecom.controls.*" pageTitle="This Application">
+    <mx:Style>
+        .dataStyle { 
+            fontSize: 15;
+            color: red;
+        }
+    </mx:Style>
+    <mx:XMLListCollection id="menuBarXMLCol" source="{menuBarXML}"/>
+    	<mx:XMLList id="menuBarXML" xmlns="">
+            <menuitem id="connectMenu" label="Connect">
+                <menuitem id="conn" label="Connect" data="Connect"/>
+                <menuitem id="disconn" label="Disconnect" data="Disconnect" enabled="false"/>
+            </menuitem>
+            <menuitem id="modeMenu" label="Mode">
+                <menuitem id="samode" label="Spectrum Analyzer" data="SA" type="radio" groupName="modegrp" enabled="false"/>
+                <menuitem id="analogmode" label="Analog" data="Analog" type="radio" groupName="modegrp" toggled="true"  enabled="false"/>
+                <menuitem id="dcpmode" label="DCP" data="DCP" type="radio" groupName="modegrp" enabled="false"/>
+                <menuitem id="qammode" label="QAM" data="QAM" type="radio" groupName="modegrp" enabled="false"/>
+            </menuitem>
+            <menuitem id="settingsMenu" label="Settings" data="Get Settings" enabled="true">
+                <menuitem id="colorpicker" label="Set Colors" data="COLOR"  enabled="true"/>
+                <menuitem id="portsel" label="Port" data="Port"/>
+            </menuitem>
+        </mx:XMLList>
+	    <mx:Script> 
+        <![CDATA[
+        	import com.sunrisetelecom.events.BusyEvent;
+        	import com.sunrisetelecom.controls.SwitchSelector;
+        	import com.sunrisetelecom.controls.ColorDialog;
+        	import com.sunrisetelecom.controls.BusyBox;
+            import com.sunrisetelecom.events.DialogEntryEvent;
+        	import mx.events.FlexEvent;
+        	import com.sunrisetelecom.avantron.BusyProtocolEvent;
+
+        	import mx.utils.URLUtil;
+        	import com.sunrisetelecom.avantron.RecvProtocolEvent;
+        	import com.sunrisetelecom.avantron.SettingsObj;
+        	import mx.collections.ArrayCollection;
+            // Data includes URL to album cover.
+             import mx.events.MenuEvent;
+            import mx.controls.Alert;
+            import mx.managers.PopUpManager;
+            import com.sunrisetelecom.avantron.Protocol;
+
+//////////////////////////////////////////////////////////////////////////////
+            public var avantron:Protocol;
+            private var connected:Boolean=false;
+            public var settings:SettingsObj=null;
+            private var host:String="216.77.98.243";
+            private var port:String="3001";
+            private var hmid:String="1";
+            private var busyprogress:BusyBox;
+            private var target_mode:String="";
+
+            [Bindable] private var version_info:String=CONFIG::version_string;
+            [Bindable] private var satitle:String="Spectrum Analyzer [NO PORT]";
+            [Bindable] private var qamtitle:String="QAM [NO PORT]";
+            [Bindable] private var bkg_color:uint=0x000080;
+            [Bindable] private var graph_bkg_color:uint=0x000000;
+            [Bindable] private var gridline_color:uint=0xffffff;
+            [Bindable] private var txt_color:uint=0xffffff;
+            [Bindable] private var trace_color:uint=0x00c0c0;
+            [Bindable] private var trace2_color:uint=0x00ff00;
+            [Bindable] private var marker_color:uint=0xff0000;
+            [Bindable] private var threshold_color:uint=0x000000;
+            private var color_picker:ColorDialog = new ColorDialog();
+            private var port_picker:SwitchSelector = new SwitchSelector();
+            private var selected_port:uint;
+            //private var portsel_timer:Timer=new Timer(3,1); //A delayed port selection.
+            
+  
+	    private var image_buffer:Array=new Array();
+            [Bindable] private var responses:ArrayCollection=new ArrayCollection();
+            [Bindable] private var portList:ArrayCollection=new ArrayCollection();
+            [Bindable] private var funcs:Array=[
+               {label:"logout",data: 7},
+               {label:"logon",data: 1},
+               {label:"get server info",data: 2},{label:"new mode",data:3},
+               {label:"get settings",data:4},{label:"set settings",data:5},
+               {label:"Get Firmware",data:8}];
+
+		// Trace Functions
+	          private function dbToPixel(img_hgt:Number, vscale:Number,db:Number):Number
+		  {
+		    var result:Number=0;
+		    result=img_hgt+db*vscale
+		    return result;
+		  }
+
+			public function busy_notify(event:BusyProtocolEvent):void
+			{
+				start_busy(event.msg);
+			}
+			public function next_state(event:RecvProtocolEvent):void
+			{
+				var event_str:String=event.event;
+				var response_type:String=event.response_type;
+				var obj:Object=event.data;
+				if (event.data != null)
+				{
+					process_response(event_str,response_type,obj);
+				}
+				else if (event.response_type != null)
+				{
+					process_response(event_str,response_type);
+				}
+				else
+				{
+					process_response(event_str);
+				}
+
+			}
+			private function getRPTP():void
+			{
+				start_busy("Getting selected port and settings");
+				avantron.getRPTP();
+				stop_busy();
+			}
+            public function process_response(... args):void
+            {
+               var event:String=args[0];
+               var response_type:String;
+               if (args.length > 1)
+               {
+                  response_type=args[1];
+               }	
+               var obj:Object={};
+               obj["event"]=event;
+               if (args.length > 1)
+               {
+   	            obj["response_type"]=args[1]
+   	            obj["data"]=args[2]
+               }
+               obj[data]="";
+               switch (event)
+               {
+                case "ack":
+                  break;
+               	case "close":
+               	  disconnectMenu();
+               	  break;
+
+                case "getRPTP": //getRPTP and RPTPSelected do the same thing
+               	case "RPTPSelected":
+               	  selected_port=Number(args[2]);
+               	  var portname:String="NONE";
+               	  if ((selected_port > 0) && (portList.length > 0))
+               	  {
+               	  	portname=portList[selected_port-1].label;
+               	  }
+               	  
+               	  satitle="Spectrum Analyzer ["+portname+"]";
+               	  //portList[selected_port-1];
+                  qamtitle="QAM ["+portname+"]";
+                  trace("RPTPSelected");
+                  stop_busy();
+                  
+               	  break;
+   	        case "connect":
+   	               trace("connect");
+   	               obj["response_type"]="connect event";
+   	              avantron.logon();
+                  avantron.getSettings();
+
+   	               obj["data"]=""
+   	               break;
+   	        case "getServerInfo":
+   	               obj["data"]=args[2].toString();
+   	               break;		
+   	        case "getSettings":
+   	               obj["data"]=args[2].toString();
+   	               settings=args[2];
+   	               
+
+
+                   //settingsGrid.dataProvider=settings.generateCollection();
+                       if (target_mode == "")
+                       {
+                          target_mode = settings.mode;
+                       }
+                       
+		       if (settings.mode == "SA")
+		       {
+		          avantron.trigger(0);
+		       	  if (sa_window != null)
+		       	  {
+		       	     sa_window.update_settings(settings);
+		       	  }		       
+		       }
+		       if (settings.mode == "QAM")
+		       {
+		       	  avantron.trigger(0);
+		       	  if (qam_window != null)
+		       	  {
+		       	     qam_window.update_settings(settings);
+		       	  }
+
+		       }
+		       port_selected(selected_port);
+
+		       setModeMenu(settings.mode);
+   	               break;		
+   	        case "setSettings":
+
+   	            	
+   	        case "newMode":
+   	               if (qam_window != null )
+   	               {
+   	                  qam_window.reset_display_values();
+   	               }
+		       avantron.getSettings();
+		           //port_selected(selected_port);
+		           //avantron.trigger(0);
+		           
+   	               break;		
+                case "listNodes":
+		           buildNodeList(args);
+		       break;
+                case "availRPTPS":
+		       trace(args.toString());
+		       break;
+                case "logon":
+		       avantron.listNodes(1);
+		       getRPTP();
+		       break;
+                case "selectRPTP":
+		       trace(args[2].toString());
+		       
+		       break;
+	        case "constellation":
+		      var const_obj:Array=args[2]["const_points"];
+		      if (target_mode == "QAM")
+                      {
+                         trace("QAM Mode/constellation");
+                         stop_busy();
+                      }
+		      if (qam_window != null)
+		      {
+		         qam_window.display_trace(args[2]);
+		      }
+		      break;
+		case "trace":
+		      if (target_mode == "SA")
+                      {
+                         trace("SA Mode/Trace");
+                         stop_busy();
+                      }
+		      image_buffer=args[2].image;
+		      sa_window.display_trace(image_buffer);
+		      break;
+                default:
+   		      trace("Do not Recognize "+event+ "but will attempt to display anyway");
+   		      if (args.length > 2)
+   		      {
+   		          obj["data"]=args[2].toString();
+   		      }
+
+	         }
+	            // MEMORY HOG responses.addItem(obj);
+            }
+            private function buildNodeList(args:Array):void 
+	    	{
+	    	//ignore acks
+     	    var node_count:int=args[2].node_count;
+     	    var node_start:int=args[2].start_node;
+     	    var nodeNames:ArrayCollection=new ArrayCollection(args[2].node_list);
+			if (node_count > 0)
+     	    {
+     	    	for(var i:int=1;i<nodeNames.length;i++)
+     	      	{
+		  			if (nodeNames[i].length > 0)
+		  			{
+	       				portList.addItem({label:nodeNames[i],data:portList.length+1})
+		    
+		  			}
+     			}
+	     		avantron.listNodes(node_count+node_start);
+     	    }
+     	    else
+     	    {
+     			//ports.enabled=true;
+     			//switchsel.enabled=true;
+				port_picker.load_data(portList,selected_port);
+				port_selected(1);
+
+     			//menuBarXML.menuitem.(@id=="portsel").menuitem[0].@label="A";
+     			
+
+     	      }
+            }     
+            private function changeMode(mode:int):void
+            {
+                trace("new mode request");
+            	avantron.trigger(1);
+            	avantron.newMode(mode);
+            	avantron.getSettings();
+            	//port_selected(selected_port);
+
+            	
+            }
+            private function menuHandler(event:MenuEvent):void  {
+                if (event.item.@data == "Connect")
+                {
+                  event.item.@enabled="false";
+                  var url:String=Application.application.url
+                  if (url.indexOf("file:") != 0)
+                  {
+                  	host=URLUtil.getServerName(Application.application.url);
+                  }
+                  Alert.show (" Connecting to "+host+":"+port.toString()+".");
+                  
+                  avantron=new Protocol(host,parseInt(port),process_response);
+                  avantron.addEventListener(RecvProtocolEvent.RECV,next_state,false,-5,true);
+
+		  		  
+                  avantron.start();
+
+                  connectMenu();
+                  
+                }
+                if (event.item.@data == "Disconnect")
+                {
+                  avantron.logoff();
+                  avantron.close();
+                  disconnectMenu();
+                }
+                if (event.item.@data == "SA")
+                {
+               	    changeMode(0);
+		    start_busy("Switching to Spectrum Analyzer");
+                    target_mode="SA";
+                    trace("Changing to SA Mode");
+		  			//avantron.removeEventListener(RecvProtocolEvent.RECV,next_state,false);
+
+
+                }
+                if (event.item.@data == "Analog")
+                {
+		  			changeMode(6);
+                    trace("Changing to Analog Mode");
+		  			start_busy("Switching to Analog Mode");
+                }
+                if (event.item.@data == "DCP")
+                {
+		  			changeMode(3);
+                    trace("Changing to DCP Mode");
+		  			start_busy("Switching to DCP Mode");
+                }
+                if (event.item.@data == "QAM")
+                {
+                    target_mode="QAM";
+		    changeMode(15);
+                    trace("Changing to QAM Mode");
+		  			start_busy("Switching to QAM");
+                }
+                if (event.item.@data == "Disconnect")
+                {
+                  avantron.logoff();
+                  avantron.close();
+                  disconnectMenu();
+                }
+                if (event.item.@data == "COLOR")
+                {
+                	var colors:Object=new Object;
+                	colors.bkg=bkg_color;
+            		colors.trace1=trace_color;
+            		colors.trace2=trace2_color;
+            		colors.graph_bkg=graph_bkg_color;
+            		colors.txt=txt_color;
+            		colors.grid_line=gridline_color;
+            		colors.marker=marker_color;
+            		colors.threshold=threshold_color;
+
+                	color_picker=ColorDialog(PopUpManager.createPopUp(this,ColorDialog));
+                	            		color_picker.load(colors);
+                	PopUpManager.centerPopUp(color_picker);
+                	color_picker.addEventListener("COLOR",close_color_picker,false,0,true);
+                	color_picker.addEventListener("CANCEL",close_color_picker,false,0,true);
+
+                }
+                if (event.item.@data == "Port")
+                {
+                	port_picker=SwitchSelector(PopUpManager.createPopUp(this,SwitchSelector));
+                	port_picker.load_data(portList,selected_port);
+                	port_picker.addEventListener("PORT",close_port_picker, false,0,true);
+                	port_picker.addEventListener("CANCEL",close_port_picker,false,0,true);
+                }
+
+            }
+            
+            private function populate_port_picker():void
+            {
+            	port_picker.load_data(portList,selected_port);
+            }
+            
+            public function close_color_picker(event:DialogEntryEvent):void
+            {
+            	
+            	var colors:Object=event.m_data;
+            	PopUpManager.removePopUp(color_picker);
+            	if (event.type == "CANCEL")
+            	{
+            		return;
+            	}
+            	bkg_color=colors.bkg;
+            	trace_color=colors.trace1;
+            	trace2_color=colors.trace2;
+            	graph_bkg_color=colors.graph_bkg;
+            	txt_color=colors.txt;
+            	gridline_color=colors.grid_line;
+            	marker_color=colors.marker;
+            	threshold_color=colors.threshold;
+            	sa_window.update_colors();
+            	qam_window.update_colors();
+            }
+            private function close_port_picker(event:DialogEntryEvent):void
+            {
+            	PopUpManager.removePopUp(port_picker);
+            	if (event.type == "CANCEL")
+            	{
+            		return;
+            	}
+				selected_port=Number(event.m_data)
+            	
+            	port_selected(selected_port);
+            	return;
+            }
+            
+            public function start_busy(lbl:String):void
+            {
+                trace("Start Busy");
+            	if (busyprogress == null)
+            	{
+            	  busyprogress=BusyBox(PopUpManager.createPopUp(this, BusyBox,true));
+            	  PopUpManager.centerPopUp(busyprogress);
+            	}
+
+            		busyprogress.msg=lbl;
+            	
+            }
+            
+            public function stop_busy():void
+	    {
+            	if (busyprogress != null)
+            	{
+            	  PopUpManager.removePopUp(busyprogress);
+            	}
+            	busyprogress=null;
+            }
+            private function connectMenu():void {
+               menuBarXMLCol.source.menuitem.(@id=="disconn").@enabled="true";
+               menuBarXML.menuitem.(@id=="conn").@enabled="false";
+               menuBarXML.menuitem.(@id=="samode").@enabled="true";
+               //menuBarXML.menuitem.(@id=="analogmode").@enabled="true";
+               //menuBarXML.menuitem.(@id=="dcpmode").@enabled="true";
+               menuBarXML.menuitem.(@id=="qammode").@enabled="true";
+               
+	       menuBarXML.menuitem.(@id=="updateSettings").@enabled="true";
+	       menuBarXML.menuitem.(@id=="changeSettings").@enabled="true";
+            }
+	    private function setModeMenu(mode:String):void {
+               menuBarXML.menuitem.(@id=="samode").@toggled="false";
+               menuBarXML.menuitem.(@id=="analogmode").@toggled="false";
+               menuBarXML.menuitem.(@id=="dcpmode").@toggled="false";
+               menuBarXML.menuitem.(@id=="qammode").@toggled="false";
+               menuBarXML.menuitem.(@id=="samode").@enabled="true";
+               //menuBarXML.menuitem.(@id=="analogmode").@enabled="true";
+               //menuBarXML.menuitem.(@id=="dcpmode").@enabled="true";
+               menuBarXML.menuitem.(@id=="qammode").@enabled="true";
+	       if (mode == "SA")
+	       {
+                 menuBarXML.menuitem.(@id=="samode").@toggled="true";
+                 menuBarXML.menuitem.(@id=="samode").@enabled="false";
+	         view.selectedChild=saview;
+		 
+	       }
+	       else if (mode == "SM6")
+	       {
+                 menuBarXML.menuitem.(@id=="analogmode").@toggled="true";
+                 menuBarXML.menuitem.(@id=="analogmode").@enabled="false";
+		 view.selectedChild=analogview;
+	       }
+	       else if (mode == "DCP")
+	       {
+                menuBarXML.menuitem.(@id=="dcpmode").@toggled="true";
+                menuBarXML.menuitem.(@id=="dcpmode").@enabled="false";
+		 		view.selectedChild=dcpview;
+	       }
+	       else if (mode == "QAM")
+	       {
+                 menuBarXML.menuitem.(@id=="qammode").@toggled="true";
+                 menuBarXML.menuitem.(@id=="qammode").@enabled="false";
+                 if (view.selectedChild != qamview)
+                 {
+		 		   view.selectedChild=qamview;
+		 		   if (qam_window != null)
+		 		   {
+		 		     qam_window.reset_display_values();
+		 		   }
+                 }
+
+	       }
+	      
+	    }
+
+            private function disconnectMenu():void {
+               menuBarXML.menuitem.(@id=="disconn").@enabled="false";
+               menuBarXML.menuitem.(@id=="conn").@enabled="true";
+               menuBarXML.menuitem.(@id=="modeMenu").@enabled="false";
+               menuBarXML.menuitem.(@id=="samode").@enabled="false";
+               menuBarXML.menuitem.(@id=="analogmode").@enabled="false";
+               menuBarXML.menuitem.(@id=="dcpmode").@enabled="false";
+               menuBarXML.menuitem.(@id=="qammode").@enabled="false";
+	       menuBarXML.menuitem.(@id=="changeSettings").@enabled="false";
+            }
+
+            public function init_app():void
+            {
+               responses.addItem({event:"initialization",response_type:"",data:"Running init_app"});
+               if (Application.application.parameters.hasOwnProperty("port"))
+               {
+                  port=Application.application.parameters.port.toString()
+                  Alert.show("Changing to port (" + port+ ").");
+               }
+               trace("Going, going gone");
+               version_label.setStyle("color","#000000");
+            
+            }
+            
+            public function port_selected(port:int):void
+            {
+            
+               if (port == 0)
+               {
+                 return;
+               }
+               if (portList.length == 0)
+               {
+               	 return;
+               }
+               start_busy("Selecting Port");
+            
+               avantron.selectRPTP(port);
+               getRPTP();
+            }
+            public function cycle_selected(cycle:Object):void
+            {
+               avantron.set_trace_cycle(cycle.data);
+            }
+            public function get_settings():void
+            {
+            	
+            	avantron.getSettings();
+            }
+            public function set_settings(mode:uint,settings:SettingsObj):void
+            {
+            	start_busy("Changing Settings");
+            	trace("Changing Settings");
+            	avantron.setSettings(mode,settings);
+            	avantron.getSettings();
+            }
+        ]]>
+    </mx:Script>
+    <mx:VBox height="100%" width="100%" backgroundColor="{bkg_color}" verticalGap="2">
+        <mx:MenuBar labelField="@label" dataProvider="{menuBarXML}" itemClick="menuHandler(event);" width="100%"/>
+        <!-- <mx:ComboBox id="ports" visible="false" enabled="false" change="port_selected(ComboBox(event.target).selectedItem);" dataProvider="{portList}"/>-->
+	    <mx:ViewStack id="view" height="100%" width="100%">
+            <mx:Panel backgroundAlpha="0" title="{ satitle}" id="saview" height="100%" width="100%">
+                <controls:SAWindow paddingLeft="4" paddingTop="4" text_color="{txt_color}" trace_color="{trace_color}" trace2_color="{trace2_color}" grid_color="{gridline_color}" backgroundColor="{graph_bkg_color}" graph_bkg_color="{graph_bkg_color}" marker_color="{marker_color}" threshold_color="{threshold_color}" id="sa_window" height="100%" width="100%"/>
+            </mx:Panel>
+	     <mx:Panel title="Analog" height="100%" id="analogview" width="100%">
+	     </mx:Panel>
+	     <mx:Panel backgroundAlpha="0" title="DCP" height="100%" id="dcpview" width="100%"/>
+	     <mx:Panel backgroundAlpha="0" title="{qamtitle}" height="100%" id="qamview" width="100%" verticalScrollPolicy="off">
+	     	<controls:QAMWindow startBusy="start_busy(event.msg)" paddingLeft="4" paddingTop="4" text_color="{txt_color}" trace_color="{trace_color}" trace2_color="{trace_color}" grid_color="{gridline_color}" backgroundColor="{graph_bkg_color}" bkg_color="{graph_bkg_color}" marker_color="{marker_color}" threshold_color="{threshold_color}" id="qam_window" width="100%" height="100%"/>		
+	     </mx:Panel>
+	    </mx:ViewStack>
+            <mx:Label id="version_label" text="{version_info}"/>
+      </mx:VBox>
+</mx:Application>

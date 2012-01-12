@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="400" title="Select Test Plan / System File to import" paddingLeft="10">
+    <mx:Script>
+        <![CDATA[
+    	   import mx.collections.ArrayCollection;
+    	   import mx.managers.PopUpManager;
+    
+    	   [Bindable]
+    	   private var array_data:Array;
+    
+    	
+    
+            public function loadData(data:Array):void
+            {
+            	var i:int=0;
+            	array_data=data;
+            
+            }
+            private function cancelMe():void
+            {
+                PopUpManager.removePopUp(this);
+            }
+            private function okMe():void
+            {
+             	PopUpManager.removePopUp(this)
+            }
+        ]]>
+    </mx:Script>
+    <mx:VBox paddingLeft="10" paddingBottom="10" paddingTop="10" paddingRight="10">
+        <mx:Label>
+            <mx:htmlText><![CDATA[ <b>Select fields to be copied</b>]]></mx:htmlText>
+        </mx:Label> 
+        <mx:Grid>
+            <mx:GridRow>
+                <mx:GridItem/>
+    			<mx:GridItem>
+    				<mx:Label text="Test Enabled"/>
+    			</mx:GridItem>
+    			<mx:GridItem>
+    				<mx:Label text="Nominal"/>
+    			</mx:GridItem>
+    			<mx:GridItem>
+    				<mx:Label text="Minor"/>
+    			</mx:GridItem>
+                <mx:GridItem>
+    				<mx:Label text="Major"/>
+    			</mx:GridItem>
+            </mx:GridRow>
+            <mx:Repeater id="rp" dataProvider="{array_data}">
+                <mx:GridRow>
+                    <mx:GridItem>
+                        <mx:Label text="{String(rp.currentItem.LABEL)}"/>
+                    </mx:GridItem>
+                    <mx:GridItem>
+                        <mx:CheckBox id="selection_copy" label=""/>
+                    </mx:GridItem>
+				    <mx:GridItem>
+				        <mx:CheckBox id="nominal_copy" label=""/>
+				    </mx:GridItem>
+				    <mx:GridItem>
+				        <mx:CheckBox id="minor_copy" label=""/>
+				    </mx:GridItem>
+				    <mx:GridItem>
+				        <mx:CheckBox id="major_copy" label=""/>
+				    </mx:GridItem>
+				</mx:GridRow>
+            </mx:Repeater>
+        </mx:Grid>
+		<mx:HBox>
+			<mx:Button id="okButton" label="OK" click="okMe()"/> 
+			<mx:Button id="cancelButton" label="Cancel" click="cancelMe()"/>
+		</mx:HBox>
+    </mx:VBox>
+</mx:TitleWindow>

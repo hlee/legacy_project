@@ -1,0 +1,27 @@
+set :rails_env, "development"
+set :runner, "bob"
+
+set :restart_lighttpd, false
+set :restart_mongrel, false
+set :restart_daemons, false
+
+role :app, "localhost"
+role :web, "localhost"
+role :db,  "localhost", :primary => true
+
+set :deploy_to, "/var/www/#{application}"
+
+# Dev
+set :dev_db_user, "rw"
+set :dev_db_password, ""
+set :dev_database, "realworx"
+
+# Test
+set :test_db_user, "bob"
+set :test_db_password, "builder"
+set :test_database, "realworx_test"
+
+# Production
+set :production_db_user, "rw"
+set :production_db_password, ""
+set :production_database, "realworx"

@@ -1,0 +1,50 @@
+<h1>Criteria: <%= @criteria.join('and') %> </h1>
+<%= stylesheet_link_tag 'redbox' %> <%= javascript_include_tag :defaults %> <%=javascript_include_tag 'redbox' %>
+<div id="hidden_content_graphbox" style="display:none; position: absolute; z-index:100; width:800px; height:600px">
+</div>
+<table class="datatable">
+<tr class="datatable"><th class="datatable">Alarm Level</th><th class="datatable">Alarm Deviation</th>
+<th class="datatable">Port Number</th>
+<th class="datatable">Alarm Date</th>
+<th class="datatable">Trace</th>
+</tr>
+<% @alarms.each { |alarm| %>
+   <tr class="datatable">
+      <td class="datatable">
+      <%= alarm.alarm_level %>
+      </td>
+      <td class="datatable">
+      <%= alarm.alarm_deviation %>
+      </td>
+      <td class="datatable">
+      <%= 
+         if alarm.switch_port.nil?
+            'Unknown'
+         else
+            alarm.switch_port.get_calculated_port() 
+         end
+
+      %>
+      </td>
+      <td class="datatable">
+      <%= alarm.event_time() %>
+      </td>
+      <td class="datatable">
+      <% if alarm.image.nil? %>
+         No Image
+      <% else %>
+        <%= 
+           
+           link_to_remote_redbox(
+                 image_tag(url_for({:controller=>'g_reports',
+                       :action=>'alarm_trace', :id=>alarm.id,
+                       :small=>1}),{:border=>0}),{:url=>
+              {:controller => 'g_reports', :action => 'alarm_trace_tag',
+              :id=>alarm.id}})
+              %>
+      <% end %>
+
+      </td>
+   </tr>
+<% } %>
+</table>

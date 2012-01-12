@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-AU">
+<head>
+  <meta http-equiv="content-type"
+ content="application/xhtml+xml; charset=UTF-8">
+  <meta name="author" content="sunrise">
+  <meta name="generator" content="sunrise">
+ 	<%= stylesheet_link_tag 'sinorca-screen' %>
+ 	<%= stylesheet_link_tag 'sinorca-print', :media => 'print' %>
+  <%= javascript_include_tag :defaults %>
+ <title><%= @page_title = "RealWORX"%> <%= @page_subtitle = "Alarm Summary" %></title>
+</head>
+<body>
+   <% @sel=1%>
+   <%= render "shared/header" %>
+<div id="center">
+<!-- ##### Side Bar ##### -->
+<div id="side-bar">
+  <p class="sideBarTitle">Dashboard Filter</p>
+  <hr>
+  <ul>
+    <% if has_ingress? %>
+      <li>
+        <%=link_to 'Ingress Alarm',{:controller=>'main', :action=>'index'}%>
+      </li>
+    <% end %>
+    <% if has_performance? %>
+      <li>
+        <%=link_to 'Performance Alarm',{:controller=>'main', :action=>'down_alarm_list'}%>
+      </li>
+    <% end %>
+  </ul>
+  <hr>
+  <%= form_tag({:controller=>'main', :action=>params[:action]}) %>
+    <b>Time Range</b><p>
+    <%tr=params['time_range']%>
+    <select name="time_range" onchange="this.form.submit()">
+       <option value="1" <%=(tr.to_i==1)?'selected':''%>>Last 1 day</option>
+       <option value="2" <%=(tr.to_i==2)?'selected':''%>>Last 7 days</option>
+       <option value="3" <%=(tr.to_i==3)?'selected':''%>>Last 30 days</option>
+       <option value="4" <%=(tr.to_i==4)?'selected':''%>>Over All Time</option>
+    </select>
+  </form>
+</div>
+<!-- ##### Main Copy ##### -->
+<div id="main-copy">
+	<p style="color: green"><%= flash[:notice] %></p>
+	<p style="color: red"><%= flash[:error] %></p>
+   <%= @content_for_layout %>
+</div>
+</div>
+	<%= render "shared/footer" %>
+</body>
+</html>

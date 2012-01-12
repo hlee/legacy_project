@@ -1,0 +1,564 @@
+/*************************************
+ * TITLE: Sinorca Screen Stylesheet  *
+ * URI  : sinorca/sinorca-screen.css *
+ * MODIF: 2009-6-18 19:31 +0800    *
+ *************************************/
+
+
+/* ##### Common Styles ##### */
+
+body {
+  color: black;
+  background-color: #fff;
+  font-family: arial, verdana, helvetica, sans-serif;
+  font-size: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+html > body {
+  font-size: 12px;
+}
+
+acronym, .titleTip {
+  border-bottom: 1px dotted rgb(153,153,153);
+  cursor: help;
+  margin: 0;
+  padding: 0 0 0.4px 0;
+}
+
+.tiny {
+  font-size: 12px;
+}
+.help {
+  font-size: 10px;
+  color: blue;
+}
+
+.doNotDisplay {
+  display: none;
+}
+
+.smallCaps {
+  font-size: 110%;
+  font-variant: small-caps;
+}
+
+
+/* ##### Header ##### */
+
+.superHeader {
+  color: white;
+  background-color: rgb(100,135,220);
+  height: 32px;
+}
+
+.superHeader a {
+  color: white;
+  background-color: transparent;
+  text-decoration: none;
+  font-size: 10px;
+  margin: 0;
+  padding: 0 0.4px 0 0.2px;
+}
+
+.superHeader a:hover {
+  text-decoration: underline;
+}
+
+.superHeader .left {
+  position: absolute;
+  left: 2px;
+  top: 10px;
+}
+
+.superHeader .right {
+  position: absolute;
+  right: 2px;
+  top: 10px;
+}
+
+.midHeader {
+  height: 70px;
+  background: url(/images/RealWORXBackgroundBanner.jpg) 0 0 no-repeat;
+  background-color: transparent;
+}
+
+.midHeader img {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.headerTitle {
+  font-size: 32px;
+  font-weight: normal;
+  margin: 0 0 0 4px;
+  padding: 2px 0;
+}
+
+.subHeader {
+  color: blue;
+  margin-left: 180px;
+  margin-top: -18px;
+  border: 0;
+  background-color: transparent;
+  min-width: 844px;
+  white-space: nowrap;
+  height: 18px;
+}
+
+.subHeader a {
+  display: inline-block;
+  color: blue;
+  background-color: #ddd;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 0;
+  padding: 0 10px 0 10px;
+  border-top: 1px solid rgb(100,100,100);
+  border-left: 1px solid rgb(100,100,100);
+  border-right: 1px solid rgb(100,100,100);
+}  
+.subHeader a.selected {
+  color: blue;
+  background-color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 0;
+  padding: 0 10px 0 10px;
+  border-top: 1px solid rgb(50,50,50);
+  border-left: 1px solid rgb(50,50,50);
+  border-right: 1px solid rgb(50,50,50);
+  border-bottom: 0 solid rgb(255,255,255);
+}  
+
+
+.subHeader a:hover {
+  text-decoration: underline;
+}
+
+.superHeader .highlight, .subHeader .highlight {
+  color: rgb(253,160,91);
+  background-color: transparent;
+}
+
+
+/* ##### Side Bar ##### */
+
+#side-bar {
+  width: 178px;
+  height:auto !important;
+  height: 600px;
+  min-height: 600px;
+  float: left;
+  clear: left;
+  border-right: 1px solid rgb(153,153,153);
+  background-color: #fff;
+  padding-left: 2px;
+}
+
+#side-bar div {
+  border-bottom: 1px solid rgb(153,153,153);
+  background-color: #fff;
+}
+
+.sideBarTitle {
+	font-size: 140%;
+  font-weight: bold;
+  margin: 5px 0 5px 5px;
+}
+
+.thisPage {
+  color: black;
+  background-color: white;
+  padding-left: 5px;
+  border-top: 1px solid rgb(153,153,153);
+  border-bottom: 1px solid rgb(153,153,153);
+}
+
+#side-bar a:hover {
+  color: white;
+  background-color: rgb(100,135,220);
+  text-decoration: none;
+}
+
+.sideBarText {
+  line-height: 24px;
+  margin: 0 0 16px 0;
+  padding: 0 2px 0 4px;
+  display: block;
+}
+
+#side-bar .sideBarText a {
+  text-decoration: underline;
+  margin: 0;
+  padding: 0;
+  display: inline;
+}
+
+#side-bar .sideBarText a:hover {
+  color: rgb(0,102,204);
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.lighterBackground {
+  color: inherit;
+  background-color: white;
+}
+#side-bar input {
+   font-size: 12px;
+}
+#side-bar select {
+   font-size: 12px;
+}
+
+
+#datalog {
+  display: inline-block;
+  width: 975px;
+  height: auto;
+  color: black;
+  background-color: white;
+  text-align: justify;
+  line-height: 24px;
+  padding: 10px;
+  margin-left: 0;
+}
+/* ##### Main Copy ##### */
+
+#main-copy {
+  width: 750px;
+  height: auto;
+  color: black;
+  background-color: white;
+  text-align: justify;
+  line-height: 18px;
+  padding: 10px;
+  margin-left: 180px;
+  border-left: 1px solid rgb(153,153,153);
+}
+
+#main-copy p {
+  margin: 8px 2px 8px 1px;
+  padding: 0;
+}
+
+#main-copy a {
+  color: rgb(0,102,204);
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+#main-copy a tiny {
+  color: rgb(255,255,255);
+}
+
+#main-copy a:hover {
+  text-decoration: none;
+}
+
+#main-copy h1 {
+  color: white;
+  background-color: rgb(100,135,220);
+  font-size: 100%;
+  font-weight: bold;
+  margin: 12px 0 0 0;
+  padding: 8px 0 8px 16px;
+}
+
+#main-copy .topOfPage {
+  color: white;
+  background-color: transparent;
+  font-size: 91%;
+  font-weight: bold;
+  text-decoration: none;
+  margin: 20px 10px 0 0;  /* For MSIE */
+  padding: 0;
+  float: right;
+}
+
+#main-copy > .topOfPage {
+	margin: 20px 1px 0 0;  /* For fully standards-compliant user agents */
+}
+
+dl {
+	margin: 1px 1px 2px 1px;
+	padding: 0;
+}
+
+dt {
+	font-weight: bold;
+	margin: 0 0 0 0;
+	padding: 0;
+}
+
+dd {
+	margin: 0 0 2px 2px;
+	padding-left: 12px;
+	padding-bottom: 5px;
+}
+
+
+/* ##### Footer ##### */
+
+#footer {
+	color: white;
+	background-color: rgb(100,135,220);
+	font-size: 91%;
+	margin: 0;
+	padding: 1px 2.5px 2.5px 2.5px;
+	clear: both;
+}
+
+#footer .left {
+	line-height: 16px;
+	float: left;
+	clear: left;
+}
+
+#footer .right {
+	text-align: right;
+	line-height: 16px;
+}
+
+#footer a {
+	color: white;
+	background-color: transparent;
+	text-decoration: underline;
+}
+
+#footer a:hover {
+	text-decoration: none;
+}
+div.error {
+	font-family: arial;
+	font-size: 12px;
+	font-weight: bold;
+	color: #cc0000;
+	background-color: #9e9e9e;
+}
+div.notice {
+	font-family: arial;
+	font-size: 12px;
+	font-weight: bold;
+	color: #000099;
+	background-color: #9e9e9e;
+}
+div.warning {
+	font-family: arial;
+	font-size: 12px;
+	font-weight: bold;
+	color: #ffff00;
+	background-color: #9e9e9e;
+}
+div.portlist {
+   font-family: arial;
+   font-size: 10px;
+}
+/*******************************/
+table.dashboard {
+	border-collapse: collapse;
+	border: 2px solid #3f7c5f;
+	font-size: 12px;
+	color: #000;
+	background: #fff;
+}
+table.dashboard td {
+	border: 1px solid #e0e0e0;
+	font-size: 14px;
+	padding: 8px;
+}
+table.dashboard tr.analyzer {
+	border: 1px solid #e0e0e0;
+	font-size: 12px;
+	padding: 8px;
+	background: #666688;
+	color: #fff;
+}
+table.dashboard td.analyzer_monitoring {
+	background: #666688;
+}
+table.dashboard td.analyzer_disconnected {
+	background: #cc8888;
+}
+table.dashboard td.blank {
+	background: #ffffff;
+	padding: 4px;
+}
+table.dashboard td.alarm_active {
+	background: #ff4444;
+	padding: 4px;
+}
+table.dashboard td.monitored {
+	background: #0000ff;
+}
+table.dashboard tr.switch {
+	border: 1px solid #e0e0e0;
+	font-size: 16px;
+	padding: 0;
+	background: #ccccee;
+}
+table.dashboard tr.switch td{
+	padding: 8px;
+}
+table.dashboard  a {
+	text-decoration: overline;
+}
+table.dashboard td.port {
+	border: 1px solid #e0e0e0;
+	font-size: 18px;
+	padding: 8px;
+}
+/*****************************/
+/* ********************************
+   Project: CSS Table Galery
+   Title: Like Adwords
+   Author: Cleiton Francisco
+   URL: http://www.cleiton.net/
+   Country: Brazil
+   Update: 2005-12-18
+ ****************************** */
+table.datatable {
+	border-collapse: collapse;
+	border: 2px solid #3f7c5f;
+	font: normal 80%/140% arial, verdana, helvetica, sans-serif;
+	color: #000;
+	background: #fff;
+}
+table.datatable caption {
+	padding: 0 6px 8px;
+	font-size: 18px;
+	font-weight: bold;
+	color: #000;
+	background: transparent;
+}
+table.datatable td {
+	border: 1px solid #e0e0e0;
+	font-size: 12px;
+	padding: 8px;
+}
+table.datatable th {
+	border: 1px solid #e0e0e0;
+	text-align: left;
+	font-size: 12px;
+	font-weight: bold;
+	background: #c6d7cf;
+	padding: 8px;
+}
+table.datatable tr.odd td.major {
+	background: #ff8888;
+}
+table.datatable tr.even td.major {
+	background: #ff9999;
+}
+table.datatable tr.odd td.minor {
+	background: #eedd66;
+}
+table.datatable tr.even td.minor {
+	background: #eedd77;
+}
+table.datatable tr.odd td.loss {
+	background: #ff4500;
+}
+table.datatable tr.even td.loss {
+	background: #ff5611;
+}
+
+table.datatable tr.odd td.active {
+	background: #ffff88;
+}
+table.datatable tr.even td.active {
+	background: #ffff99;
+}
+table.datatable tr.odd td {
+	background: #c6d7cf;
+}
+table.datatable td.datatable_red {
+	background: #ff4444;
+}
+table.datatable td a {
+	background: transparent;
+	color: #00c;
+	text-decoration: underline;
+}
+table.datatable td a:hover {
+	background: transparent;
+	color: #00c;
+	text-decoration: underline;
+}
+table.datatable th a {
+	background: transparent;
+	color: #3f7c5f;
+	text-decoration: underline;
+	font-weight: bold;
+}
+table.datatable th a:visited {
+	color: #b98b00;
+}
+table.datatable th, td {
+	vertical-align: top;
+}
+table.datatable tr:hover {
+	background: #ffffd9;
+}
+
+form.button-to div {
+	float: left;
+}
+table.datatable_compact td {
+	font-size: 18px;
+	padding: 0;
+	border: 0;
+}
+#disabled_messages {
+	color: #ff0000;
+	text-decoration: underline;
+	font-weight: bold;
+}
+div.analyzer_status {
+}
+div.analyzer_functions {
+	background :#cacaca;
+	font-weight: bold;
+	padding: 2px;
+}
+.details {
+	background: #cacaca;
+}
+.license {
+}
+.license_warning {
+	font-weight: bold;
+	color: #ff0000;
+	text-decoration: blink;
+}
+.fieldWithErrors input {
+	border: 2px solid #ff0000;
+}
+
+table.functable {
+	border-collapse: collapse;
+	border: 0 solid #3f7c5f;
+	font: normal 80%/140% arial, verdana, helvetica, sans-serif;
+	color: #000;
+	background: #fff;
+	table-layout: fixed;
+	width: 146px;
+}
+
+table.functable tr {
+	border: 0;
+	background: #c6d7cf;
+	padding: 2px;
+}
+
+table.functable td {
+	border: 0;
+	background: #c6d7cf;
+	padding: 2px;
+	width: 137px;
+}
+
+

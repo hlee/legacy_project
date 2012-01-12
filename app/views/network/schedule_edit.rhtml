@@ -1,0 +1,137 @@
+<table class="datatable">
+  <tr>
+    <th class="datatable" colspan="2"><h2>Editing Schedule for <%= link_to(@analyzer.name, :action => 'analyzer_edit', :id => @analyzer.id ) %></h2></td>
+  </tr>
+<% form_for :schedule, @schedule, :url=>{:action => "update_schedule_dtls"} do |f| %>
+  <tr>
+    <td>
+      <%= f.hidden_field :id %>
+      Schedule Comment:
+    </td>
+    <td><%= f.text_field :comment %></td>
+  </tr>
+  <tr>
+    <td>Acquisition Count:</td>
+    <td><%= f.text_field :acquisition_count %></td>
+  </tr>
+  <tr>
+    <td>Sample Time <em>(seconds)</em>:</td>
+    <td><%= f.text_field :sample_time %></td>
+  </tr>
+  <tr>
+    <td>Trace Polling Period <em>(minutes)</em>:</td>
+    <td><%= f.text_field :trace_polling_period %></td>
+  </tr>
+  <tr>
+    <td colspan="2"><%= submit_tag 'Save', { :disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10) } %></td>
+  </tr>
+<% end %>
+</table>
+<table class="datatable">
+  <tr>
+    <th class="datatable" colspan="4"><h2>Port Scan Ordering</h2></td>
+  </tr>
+  <tr>
+  <% schedule = Schedule.find(:first,:conditions=>"analyzer_id=#{@analyzer.id}") %>
+  <% if schedule.acquisition_count.nil? || schedule.acquisition_count < 1 || schedule.comment.empty? %>
+    <td colspan="4">
+      <%=button_to("Init Schedule",{:action=> 'init_schedule', :id=>@analyzer.id}, {:disabled => true}) %>
+    </td>
+  <% else %>
+    <td colspan="4">
+      <%=button_to("Init Schedule",{:action=> 'init_schedule', :id=>@analyzer.id}, {:disabled => false, :confirm => "WARNING: Running Init Schedule will erase any schedule modifications you have made and restore the defaults.\n\nAre you sure you want to continue?"}) %>
+    </td>
+  <% end %>
+  <tr>
+    <th>Select</th>
+    <th>Order Number</th>
+    <th colspan="2">Switch Name / Port Name</th>
+  </tr>
+  <% port_nbr=0 %>
+  <% form_tag({:action => 'delete_from_sched'}, {:id => 'my_form'}) do %>
+    <tr>
+      <td>
+        <input type="checkbox" name="types[]" value="All" 
+          onClick="
+            if (this.checked == true)
+            {
+              $$('input[type=checkbox]').each(function(box){
+              box.checked=true
+              })
+            }
+            else
+            {
+              $$('input[type=checkbox]').each(function(box){
+              box.checked=false
+              })
+            }
+            ">
+      </td>
+      <td colspan="3">
+    <%= submit_tag(
+        'Delete Selected',
+        :disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10)
+      )
+    %>
+      </td>
+    </tr>
+    <% @scheduled_sources.each { |sched_src| %>
+      <tr>
+        <td>
+          <%= check_box('scheduled_sources', sched_src.id, :checked => false) %>
+        </td>
+        <td>
+          <% port_nbr += 1 %>
+          <%= port_nbr %>
+        </td>
+        <td>
+          <span id=<%="switch_port_#{sched_src.id}"%>>
+            <%= sched_src.switch_port.nil? ? "No Port Assigned" : "#{sched_src.switch_port.switch.switch_name}/#{sched_src.switch_port.name}" %>
+            <%= in_place_collection_editor_field 'schedule', "switch_port", @ports, sched_src.id %>
+          </span>
+        </td>
+        <td>
+          <%= link_to(
+              'Edit', {
+                :action=>'scheduled_source_edit',
+                :controller=>'network',
+                :id=>sched_src.id
+              }, {
+                :disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10)
+              }
+            )
+          %>
+        </td>
+
+      </tr>
+    <%}%>
+    <tr>
+      <td colspan="4">
+    <%= submit_tag(
+        'Delete Selected', 
+        :disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10)
+      )
+    %>
+      </td>
+    </tr>
+  <% end %>
+  <form action="<%=url_for(:controller=>'network',:action=>'add_to_schedule')%>" method="post">
+  <tr>
+    <td>
+    </td>
+    <td>
+      <%=port_nbr+1%>
+      <input type="hidden" name="post[schedule_id]" value="<%=@schedule.id%>">
+      <input type="hidden" name="post[order_nbr]" value="<%= ScheduledSource.maximum(:order_nbr, :conditions=>"schedule_id=#{@schedule.id}")%>">
+    </td>
+    <td>
+      <select name="post[switch_port_id]">
+        <%=options_for_select(@ports)%>
+      </select>
+    </td>
+    <td><%= submit_tag 'Create Entry', { :disabled => !@analyzer.status.nil? && !@analyzer.status.eql?(10) } %></td>
+  </tr>
+  </form>
+</table>
+
+        

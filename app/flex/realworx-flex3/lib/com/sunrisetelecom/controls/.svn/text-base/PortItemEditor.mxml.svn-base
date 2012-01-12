@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" change="onSelectionChange(event)">
+    <mx:Script>
+        <![CDATA[
+            import mx.events.ListEvent;
+            import mx.controls.dataGridClasses.DataGridListData;
+            import mx.collections.XMLListCollection;
+            
+            public var selected_port:AnalyzerPort;
+            
+            override public function set data(value:Object):void
+            {
+                if(value)
+                {
+                    var col:DataGridListData = DataGridListData(listData);
+
+                    var pname:String = value.port_name;
+                    var pvalue:AnalyzerPort = AnalyzerPort(value.port);
+
+                    selectedItem = pvalue;
+                    selected_port = pvalue;
+                }
+            }
+            
+            override public function get data():Object
+            {
+                return selected_port;
+            }
+            
+            private function onSelectionChange(e:ListEvent):void
+            {
+                if(selectedItem && selected_port)
+                {
+                    var col:DataGridListData = DataGridListData(listData);
+                    var pname:String = selectedItem.port_name;
+                    var pvalue:AnalyzerPort = AnalyzerPort(selectedItem);
+
+                    selected_port=pvalue;
+                }
+            }
+        ]]>
+    </mx:Script>    
+</mx:ComboBox>

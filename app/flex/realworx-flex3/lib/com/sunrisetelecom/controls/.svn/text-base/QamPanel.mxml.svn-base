@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel headerHeight="25" title="Constellation" initialize="initPanel()" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:controls="com.sunrisetelecom.controls.*">
+    <mx:Style source="./asset/Sunrise.css" />
+    <mx:Script>
+        <![CDATA[
+            import mx.events.ItemClickEvent;
+        	import mx.collections.ArrayCollection;
+            
+			[Bindable]
+            private var _settings:ArrayCollection = new ArrayCollection([]);
+            
+            private var _matrix:Array = null;
+            private var _qamMode:uint = Constellation.QAM256;
+            
+            private function initPanel():void
+            {
+                if(_matrix != null)
+                {
+                    _constellation.matrix = _matrix;
+                }
+                
+                if(_constellation.qamMode != _qamMode)
+                {
+                    _constellation.qamMode = _qamMode;
+                }
+                
+                _constellation.invalidate();
+            }
+            
+            public function invalidate():void
+            {
+                _constellation.invalidate();
+            }
+            
+            public function get qamMode():uint
+            {
+                return _qamMode;
+            }
+            public function set qamMode(mode:uint):void
+            {
+                _qamMode = mode;
+                
+                if(_constellation != null)
+                {
+                    _constellation.qamMode = mode;
+                }
+            }
+            
+            public function set matrix(data:Array):void
+            {
+                _matrix = data;
+                if(_constellation != null)
+                {
+                    _constellation.matrix = _matrix;
+                }
+            }
+            
+            private function selectMode(event:ItemClickEvent):void
+            {
+                var s:Object = event.currentTarget.selectedValue;
+                
+                _constellation.changeZoomMode(s == "in");
+            }
+            
+            public override function set width(value:Number):void
+            {
+                super.width = value;
+                if(super.height == 0)
+                {
+                    super.height = super.width + 33;
+                }
+            }
+            
+            public override function set height(value:Number):void
+            {
+                super.height = value;
+                if(super.width == 0)
+                {
+                    super.width = Math.max(0, super.height - 33);
+                }
+            }
+
+        ]]>
+    </mx:Script>
+    <mx:RadioButtonGroup id="_modeSelecter" itemClick="selectMode(event)" />
+	<mx:VBox id="_constellationContainer" verticalGap="-1" verticalScrollPolicy="off" horizontalScrollPolicy="off" borderStyle="solid" paddingBottom="5" paddingLeft="5" paddingRight="5" borderColor="#000000">
+        <mx:HBox width="100%" height="22">
+            <mx:RadioButton value="in" styleName="normalButton" groupName="_modeSelecter" label="Zoom In" selected="true"/>
+            <mx:RadioButton value="out" styleName="normalButton" groupName="_modeSelecter" label="Zoom Out"/>
+        </mx:HBox>
+		<controls:Constellation id="_constellation" height="{Math.max(20, Math.min(this.height - 65, this.width - 32))}" />
+	</mx:VBox>
+</mx:Panel>

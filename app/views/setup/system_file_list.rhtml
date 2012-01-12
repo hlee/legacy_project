@@ -1,0 +1,32 @@
+<h2>System File List</h2>
+<% if flash[:notice]%>
+  <div class="notice">
+    <%=flash[:notice]%>
+  </div>
+<%end%>
+<% form_tag({:action=>"upload_system_file"},:multipart => true) do %><p>
+   <label for="System_file">Display Name:</label><input type="text" name="display_name"><p>
+   <label for="System_file">System File:</label><%=file_field_tag "system_file"%>
+   <p>
+   <input type="submit" value="Upload File"/>
+<% end %>
+<p>
+<table class="datatable">
+  <tr>
+    <th>System Files</th>
+    <th>Functions</th>
+  </tr>
+  <% @sf_system_file_list.each { |system_file| %>
+    <tr>
+      <% @sf_system_file=system_file %>
+      <td>
+        <%= in_place_editor_field :sf_system_file,'display_name' %>
+      </td>
+      <td>
+        <%=button_to('Delete',:action=>'system_file_delete',:controller=>'setup',:id=>system_file.id)%>
+        <%=button_to('Download',:action=>'system_file_download',:controller=>'setup',:id=>system_file.id)%>
+        <%=button_to('Test Plans',:action=>'test_plan_list',:controller=>'setup',:id=>system_file.id)%>
+      </td>
+    </tr>
+  <% } %>
+</table>

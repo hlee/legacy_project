@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Class: Datalog</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Class</strong></td>
+          <td class="class-name-in-header">Datalog</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../files/app/models/datalog_rb.html">
+                app/models/datalog.rb
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        <tr class="top-aligned-row">
+            <td><strong>Parent:</strong></td>
+            <td>
+                ActiveRecord::Base
+            </td>
+        </tr>
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000015">image</a>&nbsp;&nbsp;
+      <a href="#M000014">image=</a>&nbsp;&nbsp;
+      <a href="#M000019">max_image</a>&nbsp;&nbsp;
+      <a href="#M000018">max_image=</a>&nbsp;&nbsp;
+      <a href="#M000017">min_image</a>&nbsp;&nbsp;
+      <a href="#M000016">min_image=</a>&nbsp;&nbsp;
+      <a href="#M000020">summarize_datalogs</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+    <div id="includes">
+      <h3 class="section-bar">Included Modules</h3>
+
+      <div id="includes-list">
+        <span class="include-name">ImageFunctions</span>
+      </div>
+    </div>
+
+    <div id="section">
+
+
+    <div id="constants-list">
+      <h3 class="section-bar">Constants</h3>
+
+      <div class="name-list">
+        <table summary="Constants">
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">SAMPLE_SIZE</td>
+          <td>=</td>
+          <td class="context-item-value">500</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">STORED_START_FREQ</td>
+          <td>=</td>
+          <td class="context-item-value">5000000</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">STORED_STOP_FREQ</td>
+          <td>=</td>
+          <td class="context-item-value">45000000</td>
+        </tr>
+        </table>
+      </div>
+    </div>
+
+
+
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Class methods</h3>
+
+      <div id="method-M000020" class="method-detail">
+        <a name="M000020"></a>
+
+        <div class="method-heading">
+          <a href="#M000020" class="method-signature">
+          <span class="method-name">summarize_datalogs</span><span class="method-args">(filter_params, over_time=true)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000020-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000020-source">
+<pre>
+     <span class="ruby-comment cmt"># File app/models/datalog.rb, line 30</span>
+ 30:    <span class="ruby-keyword kw">def</span> <span class="ruby-constant">Datalog</span><span class="ruby-operator">::</span><span class="ruby-identifier">summarize_datalogs</span>(<span class="ruby-identifier">filter_params</span>, <span class="ruby-identifier">over_time</span>=<span class="ruby-keyword kw">true</span>)
+ 31:       <span class="ruby-identifier">raise</span> <span class="ruby-constant">RangeNotSet</span>, <span class="ruby-value str">'switch port required'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-identifier">filter_params</span>.<span class="ruby-identifier">key?</span>(<span class="ruby-identifier">:switch_port_id</span>) 
+ 32:       <span class="ruby-identifier">raise</span> <span class="ruby-constant">RangeNotSet</span>, <span class="ruby-value str">'start ts required'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-identifier">filter_params</span>.<span class="ruby-identifier">key?</span>(<span class="ruby-identifier">:start_ts</span>) 
+ 33:       <span class="ruby-identifier">raise</span> <span class="ruby-constant">RangeNotSet</span>, <span class="ruby-value str">'stop ts required'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-identifier">filter_params</span>.<span class="ruby-identifier">key?</span>(<span class="ruby-identifier">:stop_ts</span>) 
+ 34:       <span class="ruby-identifier">raise</span> <span class="ruby-constant">RangeNotSet</span>, <span class="ruby-value str">'start freq required'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-identifier">filter_params</span>.<span class="ruby-identifier">key?</span>(<span class="ruby-identifier">:start_freq</span>) 
+ 35:       <span class="ruby-identifier">raise</span> <span class="ruby-constant">RangeNotSet</span>, <span class="ruby-value str">'stop freq required'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-identifier">filter_params</span>.<span class="ruby-identifier">key?</span>(<span class="ruby-identifier">:stop_freq</span>) 
+ 36:       <span class="ruby-comment cmt">#Test for nils</span>
+ 37:       <span class="ruby-identifier">raise</span> <span class="ruby-constant">RangeNotSet</span>, <span class="ruby-value str">'switch port nil'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-operator">!</span><span class="ruby-identifier">filter_params</span>[<span class="ruby-identifier">:switch_port_id</span>].<span class="ruby-identifier">nil?</span>
+ 38:       <span class="ruby-identifier">raise</span> <span class="ruby-constant">RangeNotSet</span>, <span class="ruby-value str">'start ts nil'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-operator">!</span><span class="ruby-identifier">filter_params</span>[<span class="ruby-identifier">:start_ts</span>].<span class="ruby-identifier">nil?</span>
+ 39:       <span class="ruby-identifier">raise</span> <span class="ruby-constant">RangeNotSet</span>, <span class="ruby-value str">'stop ts nil'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-operator">!</span><span class="ruby-identifier">filter_params</span>[<span class="ruby-identifier">:stop_ts</span>].<span class="ruby-identifier">nil?</span>
+ 40:       <span class="ruby-identifier">raise</span> <span class="ruby-constant">RangeNotSet</span>, <span class="ruby-value str">'start freq nil'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-operator">!</span><span class="ruby-identifier">filter_params</span>[<span class="ruby-identifier">:start_freq</span>].<span class="ruby-identifier">nil?</span>
+ 41:       <span class="ruby-identifier">raise</span> <span class="ruby-constant">RangeNotSet</span>, <span class="ruby-value str">'stop freq nil'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-operator">!</span><span class="ruby-identifier">filter_params</span>[<span class="ruby-identifier">:stop_freq</span>].<span class="ruby-identifier">nil?</span>
+ 42: 
+ 43:       <span class="ruby-comment cmt">#Build filter</span>
+ 44:       <span class="ruby-identifier">cond_params</span>={}
+ 45:       <span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:switch_port_id</span>]=<span class="ruby-identifier">filter_params</span>[<span class="ruby-identifier">:switch_port_id</span>]
+ 46:       <span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:start_ts</span>]=<span class="ruby-constant">Time</span>.<span class="ruby-identifier">at</span>(<span class="ruby-identifier">filter_params</span>[<span class="ruby-identifier">:start_ts</span>]).<span class="ruby-identifier">strftime</span>(<span class="ruby-value str">&quot;%Y-%m-%d %I:%M:%S&quot;</span>)
+ 47:       <span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:stop_ts</span>]=<span class="ruby-constant">Time</span>.<span class="ruby-identifier">at</span>(<span class="ruby-identifier">filter_params</span>[<span class="ruby-identifier">:stop_ts</span>]).<span class="ruby-identifier">strftime</span>(<span class="ruby-value str">&quot;%Y-%m-%d %I:%M:%S&quot;</span>)
+ 48:       <span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:start_freq</span>]=<span class="ruby-identifier">filter_params</span>[<span class="ruby-identifier">:start_freq</span>]
+ 49:       <span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:stop_freq</span>]=<span class="ruby-identifier">filter_params</span>[<span class="ruby-identifier">:stop_freq</span>]
+ 50:       <span class="ruby-identifier">puts</span> <span class="ruby-constant">Datalog</span>.<span class="ruby-identifier">count</span>()
+ 51:       <span class="ruby-comment cmt">#cnd_str= &quot;switch_port_id=:switch_port_id and ts &gt;= :start_ts and &quot; +</span>
+ 52:       <span class="ruby-comment cmt">#  &quot; ts &lt;= :stop_ts and &quot; +</span>
+ 53:       <span class="ruby-comment cmt">#  &quot; start_freq &lt;= :stop_freq and stop_freq &gt;= :start_freq &quot;</span>
+ 54:       <span class="ruby-identifier">cnd_str</span>=<span class="ruby-value str">&quot;start_freq  &lt;= :stop_freq and stop_freq &gt;= :start_freq &quot;</span>
+ 55:          <span class="ruby-value str">&quot;and ts &gt;= :start_ts and ts &gt; :stop_ts&quot;</span>
+ 56:       <span class="ruby-identifier">collection</span>={<span class="ruby-identifier">:min=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword kw">nil</span>,<span class="ruby-identifier">:max=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword kw">nil</span>,<span class="ruby-identifier">:total=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword kw">nil</span>}
+ 57:       <span class="ruby-keyword kw">if</span> (<span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:stop_freq</span>] <span class="ruby-operator">&lt;</span> <span class="ruby-constant">STORED_START_FREQ</span>)
+ 58:          <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:min</span>]=[<span class="ruby-value">0</span>,<span class="ruby-value">0</span>,<span class="ruby-value">0</span>]
+ 59:          <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:max</span>]=[<span class="ruby-value">0</span>,<span class="ruby-value">0</span>,<span class="ruby-value">0</span>]
+ 60:          <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:total</span>]=[<span class="ruby-value">0</span>,<span class="ruby-value">0</span>,<span class="ruby-value">0</span>]
+ 61:          <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:avg</span>]=[<span class="ruby-value">0</span>,<span class="ruby-value">0</span>,<span class="ruby-value">0</span>]
+ 62:          <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">collection</span>
+ 63:       <span class="ruby-keyword kw">end</span>
+ 64:       <span class="ruby-keyword kw">if</span> (<span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:start_freq</span>] <span class="ruby-operator">&gt;</span> <span class="ruby-constant">STORED_STOP_FREQ</span>)
+ 65:          <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:min</span>]=[<span class="ruby-value">0</span>,<span class="ruby-value">0</span>,<span class="ruby-value">0</span>]
+ 66:          <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:max</span>]=[<span class="ruby-value">0</span>,<span class="ruby-value">0</span>,<span class="ruby-value">0</span>]
+ 67:          <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:total</span>]=[<span class="ruby-value">0</span>,<span class="ruby-value">0</span>,<span class="ruby-value">0</span>]
+ 68:          <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:avg</span>]=[<span class="ruby-value">0</span>,<span class="ruby-value">0</span>,<span class="ruby-value">0</span>]
+ 69:          <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">collection</span>
+ 70:       <span class="ruby-keyword kw">end</span>
+ 71: 
+ 72:       <span class="ruby-comment cmt">#Get Data</span>
+ 73:       <span class="ruby-identifier">datalogs</span>=<span class="ruby-identifier">find</span>(<span class="ruby-identifier">:all</span>,<span class="ruby-identifier">:conditions=</span><span class="ruby-operator">&gt;</span>[
+ 74:       <span class="ruby-value str">&quot;start_freq &lt;= ? and stop_freq &gt;= ? and ts&gt;=? and ts&lt;=?&quot;</span>, 
+ 75:         <span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:stop_freq</span>],
+ 76:         <span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:start_freq</span>], <span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:start_ts</span>],<span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:stop_ts</span>]],
+ 77:          <span class="ruby-identifier">:order=</span><span class="ruby-operator">&gt;</span><span class="ruby-value str">'ts, start_freq'</span>)
+ 78:          <span class="ruby-identifier">puts</span> <span class="ruby-identifier">cnd_str</span>
+ 79:          <span class="ruby-identifier">puts</span> <span class="ruby-identifier">cond_params</span>.<span class="ruby-identifier">inspect</span>()
+ 80:          <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Datalog Count #{datalogs.length}&quot;</span>
+ 81:       <span class="ruby-identifier">max_freq</span>=<span class="ruby-identifier">maximum</span>(<span class="ruby-value str">'stop_freq'</span>,<span class="ruby-identifier">:conditions=</span><span class="ruby-operator">&gt;</span>[ <span class="ruby-identifier">cnd_str</span>, <span class="ruby-identifier">cond_params</span> ])
+ 82:       <span class="ruby-identifier">raise</span> (<span class="ruby-value str">&quot;Max Frequency is nil&quot;</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">max_freq</span>.<span class="ruby-identifier">nil?</span>
+ 83:       <span class="ruby-identifier">min_freq</span>=<span class="ruby-identifier">minimum</span>(<span class="ruby-value str">'start_freq'</span>,<span class="ruby-identifier">:conditions=</span><span class="ruby-operator">&gt;</span>[ <span class="ruby-identifier">cnd_str</span>, <span class="ruby-identifier">cond_params</span> ])
+ 84:       <span class="ruby-identifier">raise</span> (<span class="ruby-value str">&quot;Min Frequency is nil&quot;</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">min_freq</span>.<span class="ruby-identifier">nil?</span>
+ 85:       <span class="ruby-identifier">max_ts</span>=<span class="ruby-identifier">maximum</span>(<span class="ruby-value str">'ts'</span>,<span class="ruby-identifier">:conditions=</span><span class="ruby-operator">&gt;</span>[ <span class="ruby-identifier">cnd_str</span>, <span class="ruby-identifier">cond_params</span> ])
+ 86:       <span class="ruby-identifier">raise</span> (<span class="ruby-value str">&quot;Max Timestamp is nil&quot;</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">max_ts</span>.<span class="ruby-identifier">nil?</span>
+ 87:       <span class="ruby-identifier">min_ts</span>=<span class="ruby-identifier">minimum</span>(<span class="ruby-value str">'ts'</span>,<span class="ruby-identifier">:conditions=</span><span class="ruby-operator">&gt;</span>[ <span class="ruby-identifier">cnd_str</span>, <span class="ruby-identifier">cond_params</span> ])
+ 88:       <span class="ruby-identifier">raise</span> (<span class="ruby-value str">&quot;Min timestamp is nil&quot;</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">min_ts</span>.<span class="ruby-identifier">nil?</span>
+ 89:       <span class="ruby-keyword kw">if</span> (<span class="ruby-operator">!</span><span class="ruby-identifier">over_time</span>) <span class="ruby-comment cmt">#x-axis is over frequency range</span>
+ 90:          <span class="ruby-identifier">freq_interval</span>=(<span class="ruby-identifier">max_freq</span><span class="ruby-operator">-</span><span class="ruby-identifier">min_freq</span>)<span class="ruby-operator">/</span>(<span class="ruby-constant">SAMPLE_SIZE</span><span class="ruby-operator">-</span><span class="ruby-value">1</span>)
+ 91:          <span class="ruby-identifier">ts_interval</span>=<span class="ruby-keyword kw">nil</span>
+ 92:          <span class="ruby-comment cmt">#Build Datasets</span>
+ 93:          <span class="ruby-identifier">collection_count</span>=<span class="ruby-value">0</span>
+ 94:          <span class="ruby-identifier">datalogs</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">dl</span><span class="ruby-operator">|</span>
+ 95:             <span class="ruby-identifier">collection_count</span><span class="ruby-operator">+=</span><span class="ruby-value">1</span>
+ 96:             <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:min</span>]=<span class="ruby-identifier">smallest_image</span>(<span class="ruby-identifier">dl</span>.<span class="ruby-identifier">min_image</span>, <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:min</span>])
+ 97:             <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:max</span>]=<span class="ruby-identifier">largest_image</span>(<span class="ruby-identifier">dl</span>.<span class="ruby-identifier">max_image</span>, <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:max</span>])
+ 98:             <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:total</span>]=<span class="ruby-identifier">total_image</span>(<span class="ruby-identifier">dl</span>.<span class="ruby-identifier">image</span>, <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:total</span>])
+ 99:          }
+100:          <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:avg</span>]=<span class="ruby-identifier">image_division</span>(<span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:total</span>],<span class="ruby-identifier">collection_count</span>)
+101:       <span class="ruby-keyword kw">else</span> <span class="ruby-comment cmt">#x-axis is over time</span>
+102:          <span class="ruby-identifier">collection</span>={<span class="ruby-identifier">:min=</span><span class="ruby-operator">&gt;</span>[],<span class="ruby-identifier">:max=</span><span class="ruby-operator">&gt;</span>[],<span class="ruby-identifier">:avg=</span><span class="ruby-operator">&gt;</span>[],<span class="ruby-identifier">:total=</span><span class="ruby-operator">&gt;</span>[]}
+103:          <span class="ruby-identifier">stored_interval</span>=(<span class="ruby-constant">STORED_STOP_FREQ</span><span class="ruby-operator">-</span><span class="ruby-constant">STORED_START_FREQ</span>)<span class="ruby-operator">/</span><span class="ruby-constant">SAMPLE_SIZE</span>
+104:         <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Start Freq: #{cond_params[:start_freq]} Stop Freq: #{cond_params[:stop_freq]}&quot;</span>
+105:          <span class="ruby-identifier">start_cell</span>=((<span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:start_freq</span>]<span class="ruby-operator">-</span><span class="ruby-constant">STORED_START_FREQ</span>) <span class="ruby-operator">/</span>
+106:             <span class="ruby-identifier">stored_interval</span>).<span class="ruby-identifier">floor</span>()
+107:          <span class="ruby-identifier">stop_cell</span>=((<span class="ruby-identifier">cond_params</span>[<span class="ruby-identifier">:stop_freq</span>]<span class="ruby-operator">-</span><span class="ruby-constant">STORED_START_FREQ</span>)<span class="ruby-operator">/</span>
+108:             <span class="ruby-identifier">stored_interval</span>).<span class="ruby-identifier">ceil</span>()<span class="ruby-operator">-</span><span class="ruby-value">1</span>
+109:          <span class="ruby-identifier">dl_counter</span>=<span class="ruby-value">0</span>
+110:          <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:time</span>]=[]
+111:          <span class="ruby-identifier">datalogs</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">dl</span><span class="ruby-operator">|</span>
+112:             <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;TS #{dl.ts}&quot;</span>
+113:             <span class="ruby-identifier">dl_counter</span> <span class="ruby-operator">+=</span> <span class="ruby-value">1</span>
+114:          <span class="ruby-identifier">benchmark</span>(<span class="ruby-node">&quot;Benchmarking for datalog#{dl_counter}&quot;</span>) {
+115:             <span class="ruby-identifier">max_image</span>=<span class="ruby-identifier">dl</span>.<span class="ruby-identifier">max_image</span>()
+116:             <span class="ruby-identifier">min_image</span>=<span class="ruby-identifier">dl</span>.<span class="ruby-identifier">min_image</span>()
+117:             <span class="ruby-identifier">avg_image</span>=<span class="ruby-identifier">dl</span>.<span class="ruby-identifier">image</span>()
+118:             <span class="ruby-identifier">max_val</span>=<span class="ruby-value">-9999</span>
+119:             <span class="ruby-identifier">min_val</span>=<span class="ruby-value">9999</span>
+120:             <span class="ruby-identifier">total_val</span>=<span class="ruby-value">0</span>
+121:             <span class="ruby-comment cmt">#raise(&quot;#{start_cell.to_s} - #{stop_cell} #{stored_interval} #{STORED_START_FREQ}-#{STORED_STOP_FREQ} #{cond_params[:start_freq]}-#{cond_params[:stop_freq]}&quot;)</span>
+122:             <span class="ruby-identifier">max_val</span>=<span class="ruby-identifier">max_image</span>[<span class="ruby-identifier">start_cell</span><span class="ruby-operator">..</span><span class="ruby-identifier">stop_cell</span>].<span class="ruby-identifier">max</span>()
+123:             <span class="ruby-identifier">min_val</span>=<span class="ruby-identifier">min_image</span>[<span class="ruby-identifier">start_cell</span><span class="ruby-operator">..</span><span class="ruby-identifier">stop_cell</span>].<span class="ruby-identifier">min</span>()
+124:             <span class="ruby-identifier">avg_image</span>[<span class="ruby-identifier">start_cell</span><span class="ruby-operator">..</span><span class="ruby-identifier">stop_cell</span>].<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">val</span><span class="ruby-operator">|</span> 
+125:                <span class="ruby-identifier">total_val</span><span class="ruby-operator">+=</span><span class="ruby-identifier">val</span>
+126:             }
+127:         <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Start Freq: #{STORED_START_FREQ} Stop Freq: #{STORED_STOP_FREQ}&quot;</span>
+128:         <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Start Cell: #{start_cell} Stop Cell: #{stop_cell}&quot;</span>
+129:             <span class="ruby-identifier">avg_val</span>=<span class="ruby-identifier">total_val</span><span class="ruby-operator">/</span>(<span class="ruby-identifier">stop_cell</span><span class="ruby-operator">-</span><span class="ruby-identifier">start_cell</span><span class="ruby-operator">+</span><span class="ruby-value">1</span>)
+130:             <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:min</span>].<span class="ruby-identifier">push</span>(<span class="ruby-identifier">min_val</span>)
+131: 
+132:             <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:max</span>].<span class="ruby-identifier">push</span>(<span class="ruby-identifier">max_val</span>)
+133:             <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:avg</span>].<span class="ruby-identifier">push</span>(<span class="ruby-identifier">avg_val</span>)
+134:             <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:time</span>].<span class="ruby-identifier">push</span>(<span class="ruby-identifier">dl</span>.<span class="ruby-identifier">ts</span>().<span class="ruby-identifier">to_i</span>)
+135:             <span class="ruby-identifier">collection</span>[<span class="ruby-identifier">:total</span>].<span class="ruby-identifier">push</span>(<span class="ruby-identifier">total_val</span>)
+136:          }
+137:       } <span class="ruby-comment cmt"># End benchmark</span>
+138:       <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Datalog Count #{datalogs.length}&quot;</span>
+139:          <span class="ruby-comment cmt">#freq_interval=nil</span>
+140:          <span class="ruby-comment cmt">#ts_interval=max_ts-min_ts/(SAMPLE_SIZE-1)</span>
+141:       <span class="ruby-keyword kw">end</span>
+142:       <span class="ruby-comment cmt">#Assuming over_time is true</span>
+143:       <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">collection</span>
+144:    <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-bar">Public Instance methods</h3>
+
+      <div id="method-M000015" class="method-detail">
+        <a name="M000015"></a>
+
+        <div class="method-heading">
+          <a href="#M000015" class="method-signature">
+          <span class="method-name">image</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000015-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000015-source">
+<pre>
+    <span class="ruby-comment cmt"># File app/models/datalog.rb, line 15</span>
+15:    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">image</span>()
+16:       <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">read_image</span>(<span class="ruby-identifier">:image</span>)
+17:    <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000014" class="method-detail">
+        <a name="M000014"></a>
+
+        <div class="method-heading">
+          <a href="#M000014" class="method-signature">
+          <span class="method-name">image=</span><span class="method-args">(data)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000014-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000014-source">
+<pre>
+    <span class="ruby-comment cmt"># File app/models/datalog.rb, line 12</span>
+12:    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">image=</span>(<span class="ruby-identifier">data</span>)
+13:          <span class="ruby-identifier">write_image</span>(<span class="ruby-identifier">:image</span>, <span class="ruby-identifier">data</span>)
+14:    <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000019" class="method-detail">
+        <a name="M000019"></a>
+
+        <div class="method-heading">
+          <a href="#M000019" class="method-signature">
+          <span class="method-name">max_image</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000019-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000019-source">
+<pre>
+    <span class="ruby-comment cmt"># File app/models/datalog.rb, line 27</span>
+27:    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">max_image</span>()
+28:       <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">read_image</span>(<span class="ruby-identifier">:max_image</span>)
+29:    <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000018" class="method-detail">
+        <a name="M000018"></a>
+
+        <div class="method-heading">
+          <a href="#M000018" class="method-signature">
+          <span class="method-name">max_image=</span><span class="method-args">(data)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000018-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000018-source">
+<pre>
+    <span class="ruby-comment cmt"># File app/models/datalog.rb, line 24</span>
+24:    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">max_image=</span>(<span class="ruby-identifier">data</span>)
+25:          <span class="ruby-identifier">write_image</span>(<span class="ruby-identifier">:max_image</span>, <span class="ruby-identifier">data</span>)
+26:    <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000017" class="method-detail">
+        <a name="M000017"></a>
+
+        <div class="method-heading">
+          <a href="#M000017" class="method-signature">
+          <span class="method-name">min_image</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000017-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000017-source">
+<pre>
+    <span class="ruby-comment cmt"># File app/models/datalog.rb, line 21</span>
+21:    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">min_image</span>()
+22:       <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">read_image</span>(<span class="ruby-identifier">:min_image</span>)
+23:    <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000016" class="method-detail">
+        <a name="M000016"></a>
+
+        <div class="method-heading">
+          <a href="#M000016" class="method-signature">
+          <span class="method-name">min_image=</span><span class="method-args">(data)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000016-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000016-source">
+<pre>
+    <span class="ruby-comment cmt"># File app/models/datalog.rb, line 18</span>
+18:    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">min_image=</span>(<span class="ruby-identifier">data</span>)
+19:          <span class="ruby-identifier">write_image</span>(<span class="ruby-identifier">:min_image</span>, <span class="ruby-identifier">data</span>)
+20:    <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

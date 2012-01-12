@@ -1,0 +1,32 @@
+<h2>Customer Name List</h2>
+<table class="datatable">
+<tr class="datatable" style="text-align:center;">
+  <td colspan='3' style="text-align:center;">
+    <%=button_to('Create New link',:action=>'link_form',:controller=>'link')%>
+  </td>
+</tr>
+<tr class="datatable">
+  <th class="datatable">Link Name</th>
+  <th class="datatable">Link URL</th>
+    <th class="datatable">Link description</th>
+  <th class="datatable">Functions</th>
+</tr>
+<% @links.each { |link| %>
+  <tr class="datatable">
+    <td class="datatable">
+      <%=link_to link.name, {:action => 'link_form', :id => link.id}, {:title => link.name} %>
+    </td>
+    <td class="datatable">
+      <%=link.url%>
+    </td>
+	<td class="datatable">
+      <%=link.description%>
+    </td>
+    <td class="datatable">
+      <%=button_to('Delete',:action=>'link_delete',:controller=>'link',:id=>link.id)%>
+    </td>
+  </tr>
+<% } %>
+
+</table>
+<%= will_paginate @links %>

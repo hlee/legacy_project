@@ -1,0 +1,57 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+one:
+  id: 1
+  site_id: 104
+  measure_id: 3
+two:
+  id: 2
+  site_id: 104
+  measure_id: 3
+three:
+  id: 3
+  site_id: 104
+  measure_id: 3
+four:
+  id: 4
+  site_id: 104
+  measure_id: 3
+five:
+  id: 5
+  site_id: 104
+  measure_id: 3
+six:
+  id: 6
+  site_id: 104
+  measure_id: 4
+seven:
+  id: 7
+  site_id: 104
+  measure_id: 4
+eight:
+  id: 8
+  site_id: 105
+  measure_id: 4
+nine:
+  id: 9
+  site_id: 105
+  measure_id: 4
+ten:
+  id: 10
+  site_id: 105
+  measure_id: 4
+eleven:
+  id: 11
+  site_id: 105
+  measure_id: 4
+twelve:
+  id: 12
+  site_id: 105
+  measure_id: 9
+thirteen:
+  id: 13
+  site_id: 105
+  measure_id: 9
+fourteen:
+  id: 14
+  site_id: 105
+  measure_id: 9

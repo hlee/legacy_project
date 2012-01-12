@@ -1,0 +1,329 @@
+* Fixed nightly summarization of min trace to use min traces in datalogs.
+2.03.1996
+* Added a validation about removing the profile while there is switch_port use it
+* Enhanced the title of each page to make uniform
+* Changed the layout of trace viewer
+* Enhanced realview live trace by reseting Peak Hold after a defined period
+* Added screen support and show current time on the screen
+* Added more color to describe and cover all status in Datalog viewer
+* Enhanced the Datalog viewer trace while there is no data.
+* Enhanced to change the FWD_ERR_LOCK and STREAM_LOCK to the correct value
+* Enhanced to make the color match at measurement/SLM summary
+* Ehnhanced with Web_Url_Api
+* Fixed one bugs about the constellation while the start time equal to the stop time.
+* Added Unit test and enhance to NoiseFloor Calculation
+* Fixed bug 7192 about the Value of Audio level measure will not display
+* Changed the master algorithm from each analyzer tried 5 times to each analyzer 5 seconds.
+* bug 7219: Fixed bug to work with average and min traces at Datalog viewer and Profile editor.
+* Fixed page layer overlapping about drop-down list
+* Enhance the profile manager by adding validation of the Link Loss input
+* Added alert when high level is lower than low level in Datalog viewer
+* Changed the color of the livetrace
+* Added validation to check whether the switch name or switch address is duplicated
+* Fixed bug about the daily truncate log
+* bug 7216: Added new alarm levels to sidebar search for alarms
+* bug 7220: Added better verification of frequencies to datalog profiles.
+* Cleaned up master.rb code with a ruby beautifier.
+* Enhanced the SNMP Trap function
+* Fixed bug 7229 to correct the limit of the BER
+* Fixed bug 6933 about DownAlarm status change and unit of noise floor
+* Fixed bug 7112 to pop alert when the profile name is wrong at Datalog viewer
+* Fixed bug about In IE7,The client list doesn't change when switched to other port.
+* Fixed the measurement clock not work problem
+* Fixed bug about Stop monitor does not stop auto connect status
+* Enhanced one of the permission problem
+* Replaced the port name to the site name in the dialog box of import system file data.
+* Fixed a bug for firefox about fullscreen 
+* Fixed another bug about exit fullscreen mode and the flash crash
+* Added a way inside the GUI to reset all profiles in the switch ports to 'use analyzer setting'
+* Fixed bug 7246 to validate the input values
+
+
+2.03.1906
+* Added the screen snapshot feature to certain company
+* Fixed tiny exception problem
+* Enhanced the constellation feature
+* Enhanced the alarm page to show "still active" to the top
+* Enhanced the GUI of the DashBoard
+* Fixed one bug about the warning still remain at the top of page
+
+2.03.1895
+* Found timezone issue in amf_services.
+
+2.03.1883
+* Completed code for Datalog Profile Functionality
+
+2.03.1783
+* Fixed sort alarm while make active in the front
+
+2.03.1768
+* fixed bug #7021, remove the busy cursor when loaded data
+
+2.03.1767
+* Updated Measurements, add the uom support
+
+2.03.1760
+* Added ability to do partial string searches on site.
+
+2.03.1756
+* Added feature to test MEASURED_AUDIO_FREQ & MEASURED_VIDEO_FREQ
+
+2.03.1752
+* Enhanced the get sites list while switch site at live trace
+
+2.03.1743
+* Updated user link to allowed user custom their Analyzer web api url
+
+2.03.1733
+* Gets rid of duplicate channels when importing channel plan
+
+2.03.1731
+* Corrected Most recent constellation.
+
+2.03.1729
+* Added recently Constellation shown at measurement tool
+
+2.03.1727
+* Fixed bug #6989
+to optimize the algorithm get site list while running ingress. 
+
+2.03.1711
+* Added a way to clear all channels and start over
+
+2.03.1707
+* Fixed bug 6959 and 6923 
+* In Plan editor tests on/off are not being imported from the system file.
+* Correct the symbol of ENM limit 
+
+2.03.1697
+* Added videotron clearpath functionality
+
+2.03.1693
+* Fixed snmp traps problem
+
+2.03.1691
+* Fix bug #6963 Improve the system file import dialog, so that there is enough room to select test plan and port name.
+
+2.03.1687
+* Should return a constellation now from the digital trigger.
+* Also should include some functionality to pull traces from realview.
+
+2.03.1675
+* fixed the bug about LineSeries
+
+2.03.1668
+* updated and fixed noise floor problem
+
+2.03.1664
+* Added changes to plan edtir to include polarity. Also fixed migration #82
+* modified qam channel to accept polarity.
+
+2.03.1662
+* Added column to cfg_channel_test table to support measure video frequencies and measure audio frequencies. also modified the model to support the algorithm
+
+2.03.1659
+* Fix bug #6932 Remove the useless files (inculding the license sample file which leads to this bug) from the rpm package. 
+
+2.03.1655
+* Added files for noise floor and 6737
+
+2.03.1648
+* Fix bug #6859 changed the datalog display way when the chart is out of ranges
+
+2.03.1641
+* Fix bug #6737 added more check to site while poll out the measure tool site list.
+
+2.03.1637
+* Noise Floor Algorithm part
+
+2.03.1636
+* Added database table fields to support Noise Floor and unit change from dBuV and dBmV
+
+2.03.1631
+* Added pagination to snapshots.
+
+2.03.1626 
+* fix bug #6736 to avoid Channel Plan Coping onto itself
+
+2.03.1623
+* add the permission function while fixing bug 6850
+* remove process bar, and use busy cursor instead
+* update the fonts and css of all the flex application
+* reconstruct measurements and livetrace flex application
+
+2.03.1622
+* finished bug #6850 dash board except the permission
+
+2.03.1617
+* Fix bug #6850 dashboard add link to analyzer web server
+
+2.03.1614 
+* Fix bug 6861 add active to sort as the second key word Use the active flag as the secondary key for all sorting on the sorting list.
+  also fix bug 6863 to remove the end date
+
+2.02.1609 BRANCH 2.02
+* Added Log to enhence auto connect 
+* Fixed bug about auto_connect running
+* Added a plugin to support showing canlendar.
+* Added a feature about SNMP. format SNMP trap. While alarm generate, send snmp trap at same time.
+* Replace date time dropdown list with calendar picker.
+* Added an enhencement to alarm page. filter on Alarm level
+* Refactor the livetrace flex, add y-axis for the chart
+* Livetrace can move the two markers at the same time keeping a fixed bandwidth.
+* Make the site changing in livetrace more quickly and stably
+
+2.02.1545
+* Switched while loop around multiple alarms to if statement. This forces a poll between each get_next_alarm.
+
+2.02.1536
+* change the switch type Avantron to Sunrise on setup page
+
+2.02.1531
+* fixed an auto connect problem. that's enhancement the auto mechenism.
+
+2.02.1525
+* fixed bug 6836. Now focus selected rows in tesplan stay selected. #6836
+
+2.02.1516
+* add a shell script to help kill mongrel daemon while update code.
+
+2.02.1511
+* fixed plan editor to include paste dialog.
+
+2.02.1492
+* fixed plan editor so it would not automatically open the channel selection item editor as soon as it got focus
+* Allow negatives for nominals now. Important for varatio and any level measurement.
+
+2.02.1489
+* Fixed an issue on monitor.rb where it would not check the command queue until all the channels had been measured. Now checks command queue after each channel is tested.
+* Added fixed column to TestPlanGrid in Plan Editor
+
+2.02.1481
+* Passing channel configuration now.
+
+2.02.1478
+* Fixed an issue on live trace to pull all sites down. These are filtered by the live trace.  Before it only pulled sites that have datalog data. The first 15 minutes of running ingress monitoring on a new analyzer there will be no datalogs.
+* Added more validation to plan editor #6808
+
+2.02.1465
+* Added more 5 then 10 then 10 seconds to attempts to lock to digital channels.
+
+2.02.1458
+* Got bottom graph updating when site changed.
+
+2.02.1455
+* Added tasks to wipe monitor and rails daemon logs
+
+2.02.1451
+* Checkbox being ingnored on plan editor. Fixed
+* Added Validation to verify minor < major when checkbox is selected.#6810
+
+2.02.1449
+* Dropdowns now select current value instead of first row in listing #6807
+* On last checkin accidently disabled Import menu. Now fixed.
+* Disabled Views when in channel list #6806
+* Fixed Averaging of Measure in measurement graph over time when you do a detailed channel report #6812
+
+2.02.1444
+* Fixed Add/Delete Step and channels are disabled/enabled based on the view#6803 
+* Channel number now sorted numerically.   #6804
+* Added horizontal scroll bar to channel view.   #6805
+* Added limits to channel information. #6808
+
+2.02.1435
+* Fixed several Unit Tests
+* Fixed bug to make plan editor display on PCs that are not developer's. #6795 
+* Change layout and some icon to prevent Ajax lead to the layout dislocated bug #6778 
+* Fixed "System Validation" calls "Deleting datalogs" method #6729
+* Rescued RuntimeError in NetworkController#analyzer_create #6730
+* Make port name visible throughout system at alarm summary,alarm,dashboard,and measurement. #6685
+* Added a validation for deleting Region #6755
+* Change AJAX to pervent AJAX update status cause mongrel servers overwhelmed #6742
+* Added Validation at Limit Editor for Line Extender Test Plan #6756
+* Fixed the error page when create a new analyzer. #6765
+* Add mysql database migration feature to change the config of mysql directory #6766
+* Added a Auto Connect feature to Analyzer set up page according to MRD R5410 and R5412 #6714
+* Added a Switch Verification feature to system validation according to MRD R2350 #6716
+* Added a refresh mechanism to refresh realVIEW to show live trace immediately when Ingress start #6790 
+* Rescued the inner sql error when creating or modifying Analyzer #6791
+* Enhanced The Flash Player detection capability   #6728
+* Fixed a livetrace in datalog bug #6754
+* Enhanced a logoff function when leaving the traceviewer page #6727
+* Fixed The Inconsistented of dialog box between Historical Ingress and Measurement View #6749
+* Fixed the "OK" button when enabled and can not be disabled #6769
+* Enhanced user name inputbox to get focus on the login page...#6770
+* Fixed a bug about LiveTrace can't display the live data #6772
+* Added a feature about creating a link to the livetrace by site according to MRD R3580 #6713
+* Enhanced a validation to Analyzer name #6747
+* Enhanced a validation to IP #6760
+* Format IE layout by icon #6725
+* Added a feature to send test SNMP message accoring to MRD R2380  #6717
+* Fixed a bug. when create or modify analyzer, show site name duplicate error #6759
+* Change zoomin and zoomout icons in dashboard are in low pixels #6788
+* New feature: Add Flex Test Plan Editor into realWORX #6789
+* Add new feature add AT2500 to support a webserver.  
+
+2.02 1405
+*Added Plan Editor flex app to replace configuration with system editor
+*Modified monitor to use these new limits.
+
+2.01.1253
+* Disable Peak Hold when you change ports or analyzers in the realview screen.
+
+ 2.01.1245
+* Clear Peak Hold automatically when changing nodes
+* Incorporate alarm storm prevention. 
+* Added a search function for site by analyzer/port or partial site name
+* Correct DCP measures 10dB higher that actual level
+* Modified  Frequency Per analyzer.
+* Display IP prominently (This was done in the setup rpm and not the realworx rpm)
+* Modified to make Site name allowed to be longer 
+* Show Most Recent trace at DatalogView(Histrical Ingress call now)
+* Added data deletion screen to setup screen also a special user role for access to this feature.
+* Fixed a Deactivat test (in system file) does not stop alarm's bug
+* Added ability to change frequency range per analyzer.
+* Modified mysql functions to use different library name and take a frequency range.
+* Modified datalogviewer to use these functions.
+* Fixed a bug that set MER tolerance cause problem
+* Remove the Max or Min limits to ENM
+* Synchronize Analyzers time with server
+* change alarm's float to double
+* Added an Email Validation to alarms
+* Modify the Validateion email addresses
+* Modify some screen in firefox
+
+1.01.1178
+*Extra Mode change.
+
+1.01.1177
+*Fixed bug in avantron protocol of live trace script
+*Set attenuation on dcp measurement.
+*Set upper limit of mer to 40. Need to change rpm to reload fixtures
+*measurement activation check was being ignoredfor digital.
+*Fixed cronjob that deletes old alarms to actually work.
+
+1.01.1155
+* Improved the livetrace script.  
+** Now includes a message queue to make sure things get done in the right order.
+** Turns off triggers while switching to different analyzer.
+** Reset function broke.  Now fixed.
+
+1.01.1037
+* Realview included in this version. 
+* Show/Hide icon on dashboard
+* # of ports with active alarm displayed where analyzer mode is shown.
+* Datalog viewer time graph has filtering option to select 'All',30 days, 7 days, 1 day.
+* On Datalog viewer when you move the time selection range it will fade the main data view until you hit the run report button again.
+* Able to upload firemware for intel and mips version of at2500.
+* Link from ingress alarms list to datalog view.  When you click on this link for a paticular alarm it displays the datalogview for that alarms site with the time window narrowed down as close as possible to the time range. If you click on the alarm too soon . (less than 20 minutes after it has occurred) it will warn you that it has not retrieved the data for this alarm yet.
+* Fixed disable anonymous login.  Now possible to disable anonymous login. This will require login for all screens.
+* Moved log files for the monitoring scripts to the realworx/log directory.
+* Measurement viewer screen enlarged and color changed to match datalog viewer.
+* 'Destroy' replaced with 'Delete'
+* Added config parameters to include summarization/archiving parameters.  These include: Downstream data summarization, upstream data summarizations. Ingress alarm deletion age, downstream alarm deletion age.
+* Added Licensing Functionality in setup screen
+* Added SMTP Settings for Email in the setup screen.
+* Added setup user.
+* To improve performance of measurements code now checks to see if only the DCP is being measured according to the test plan.  If so it will scan through chanels faster.
+* Found bad bug in performance monitoring. System was not changing to correct channel in dcp mode.  Always one channel off.
+

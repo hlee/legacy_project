@@ -1,0 +1,95 @@
+<% if @total == 0 %>
+  <p>No Alarms found</p>
+<% else %>
+  <p>Number of alarms found: <b><%= @total %></b></p>
+  <%= will_paginate @alarms %>
+  <table class="datatable">
+    <tr>
+      <th <%= sort_td_class_helper "site" %>>
+        <%= sort_link_helper "Site", "site" %>
+      </th>
+      <th>Analyzer
+      </th>
+      <th>Port Name
+      </th>
+      <th <%= sort_td_class_helper "al" %>>
+        <%= sort_link_helper "Alarm Level", "al" %>
+      </th>
+      <th <%= sort_td_class_helper "ad" %>>
+        <%= sort_link_helper "Alarm Date", "ad" %>
+      </th>
+      <th>
+        Trace
+      </th>
+      <th <%= sort_td_class_helper "as" %>>
+        <%= sort_link_helper "Alarm State", "as" %>
+      </th>
+    </tr>
+    <% @alarms.each do |alarm| %>
+      <tr class="<%= cycle("even","odd") %>">
+      <td>
+      <%= 
+        if alarm.site.nil?
+          'Unknown'
+        else
+          alarm.site.name
+        end
+      %>
+      </td>
+      <td>
+        <%=show_analyzer(alarm.site_id)%>
+      </td>
+      <td>
+        <%=show_port(alarm.site_id)%>
+      </td>
+      <% if alarm.is_major? %>
+        <td class=major>
+      <% elsif alarm.is_minor? %>
+        <td class=minor>
+      <% else %>
+      	<td class=loss>
+      <% end %>
+      <%= alarm.level_txt %></td>
+		
+	    <% if alarm.active %>
+            <td class="active"><%= link_to "STILL ACTIVE", {:action => "index",:controller=>"datalog", :site_id=> alarm.site_id,:target_date=> alarm.event_time.to_i}%></td>  
+        <% else %>
+            <td><%= link_to alarm.event_time(), {:action => "index",:controller=>"datalog", :site_id=> alarm.site_id,:target_date=> (alarm.event_time.to_i)}%></td>
+         <%end%>
+	  </td>
+
+      <td class="datatable">
+        <% if alarm.image.nil? %>
+           No Image
+        <% else %>
+          <%= link_to(
+            image_tag(
+              url_for({
+                :controller => 'g_reports', 
+                :action     => 'alarm_trace', 
+                :id         => alarm.id, 
+                :small      => 1}
+              ),{:border=>0}
+            ),{
+              :controller   => 'g_reports', 
+              :action       => 'alarm_trace_tag', 
+              :id           => alarm.id
+            }, 
+            :popup => ['new_window', 'height=500,width=820']
+          ) %>
+        <% end %>
+      </td>
+      <td>
+        <span id=<%="acknowledged_#{alarm.id}"%>><%=alarm.acknowledged ? "Ack" : "UnAck"%></span>
+        <% if current_user.has_static_permission?("alarm/set_alarms_acknowledged") %>
+          <%= in_place_collection_editor_field 'alarms', "acknowledged", [["UnAck",0],["Ack",1]], alarm.id %>
+        <% end %>
+      </td>
+   </tr>
+
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% end %>

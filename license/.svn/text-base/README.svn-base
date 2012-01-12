@@ -1,0 +1,28 @@
+
+This directory contains the public/private keys for the Realworx
+licensing application.
+
+To verify a key is signed, you will need the public key installed:
+
+  gpg --import 75AC881F-public-test.asc
+
+To generate your own licenses, you will need the private key installed:
+
+  gpg --import 75AC881F-secret-test.asc
+
+To generate a license, edit a text document (license.txt) and make it 
+with the following format:
+
+  Mac address: 00:0C:29:09:79:E5
+  License Expiration: 1209763742
+  Ingress: enabled
+  Performance: disabled
+
+Once you do this, you have to sign the license file:
+
+  gpg --clearsign license.txt
+
+This will generate a license.txt.asc file that you need to upload to your
+server via http://server.name/licenses.
+
+That is all.
